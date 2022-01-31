@@ -15,7 +15,7 @@ services:
     networks:
       atovennetwork:
 
-  vendor.api:
+  atoven.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     command: tail -f /dev/null
@@ -29,7 +29,7 @@ services:
       atovennetwork:
 
 
-  vendor.mvc:
+  atoven.mvc:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     command: tail -f /dev/null
@@ -38,7 +38,7 @@ services:
     ports:
       - "5000:80"
     depends_on:
-     - vendor.api
+     - atoven.api
     networks:
       atovennetwork:
 
