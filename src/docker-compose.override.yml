@@ -29,19 +29,6 @@ services:
       atovennetwork:
 
 
-  atoven.mvc:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    command: tail -f /dev/null
-    container_name: atovenui
-    tty: true
-    ports:
-      - "5000:80"
-    depends_on:
-     - atoven.api
-    networks:
-      atovennetwork:
-
 volumes:
     atovendatavol:
     

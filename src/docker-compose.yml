@@ -7,9 +7,5 @@ services:
       context: .
       dockerfile: MicroServices/VendorService/AtoVen.API/Dockerfile
 
-  atoven.mvc:
-    image: ${DOCKER_REGISTRY-}atovenmvc
-    build:
-      context: .
-      dockerfile: MicroServices/AtoVen.UI/WebApplication1/Dockerfile
+
 
