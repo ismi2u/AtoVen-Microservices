@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
-using EmailSender;
+//using EmailSender;
 
 namespace AtoVen.API.Controllers
 {
@@ -17,12 +17,13 @@ namespace AtoVen.API.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly AtoVenDbContext _context;
-        private readonly IEmailSender _emailSender;
+        //private readonly IEmailSender _emailSender;
 
-        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender)
+        //public CompaniesController(AtoVenDbContext context, IEmailSender emailSender)
+        public CompaniesController(AtoVenDbContext context)
         {
             _context = context;
-            _emailSender = emailSender;
+            //_emailSender = emailSender;
         }
 
         // GET: api/Companies
@@ -80,8 +81,9 @@ namespace AtoVen.API.Controllers
         // POST: api/Companies
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Company>> PostCompany(Company company)
+        public async Task<ActionResult<Company>> PostCompany(CompanyDTO company)
         {
+            int newCompId = 0;
 
             using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
             {
@@ -118,12 +120,12 @@ namespace AtoVen.API.Controllers
                 //Get the DB Generated Identity Column Value after save.
                 //////////////////////////////////////////////////
 
-                int newCompId = newCompany.Id;
+                newCompId = newCompany.Id;
 
                 //////////////////////////////////////////////////
 
 
-                foreach (Contact contact in company.ListOfCompanyContacts)
+                foreach (ContactDTO contact in company.ListOfCompanyContacts)
                 {
                     Contact newContact = new Contact() { };
 
@@ -143,7 +145,7 @@ namespace AtoVen.API.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                foreach (Bank bank in company.ListOfCompanyBanks)
+                foreach (BankDTO bank in company.ListOfCompanyBanks)
                 {
                     Bank newBank = new Bank() { };
 
@@ -165,7 +167,7 @@ namespace AtoVen.API.Controllers
             }
 
 
-            return CreatedAtAction("GetCompany", new { id = company.Id }, company);
+            return CreatedAtAction("GetCompany", new { id = newCompId }, company);
         }
 
         // DELETE: api/Companies/5
@@ -189,13 +191,13 @@ namespace AtoVen.API.Controllers
             return _context.Companies.Any(e => e.Id == id);
         }
 
-        private async Task SendEmailInHtml()
-        {
-            var approverMailAddress = "manager@gmail.com";
-            string subject = "New Vendor Approval Request";
-            string content = "Vendor Approval Request : Request Date " + DateTime.Now;
-            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-            await _emailSender.SendEmailAsync(messagemail);
-        }
+        //private async Task SendEmailInHtml()
+        //{
+        //    var approverMailAddress = "manager@gmail.com";
+        //    string subject = "New Vendor Approval Request";
+        //    string content = "Vendor Approval Request : Request Date " + DateTime.Now;
+        //    var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+        //    await _emailSender.SendEmailAsync(messagemail);
+        //}
     }
 }

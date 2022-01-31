@@ -207,7 +207,7 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FormofAdress")
+                    b.Property<string>("FormofAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

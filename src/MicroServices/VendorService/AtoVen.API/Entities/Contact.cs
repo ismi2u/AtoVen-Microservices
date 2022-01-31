@@ -31,4 +31,20 @@ namespace AtoVen.API.Entities
 
        
     }
+
+    public class ContactDTO
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string FormofAddress { get; set; }
+        public string Position { get; set; }
+        public string Department { get; set; }
+        public string PhoneNo { get; set; }
+        public string FaxNo { get; set; }
+        public string Email { get; set; }
+        public string Language { get; set; }
+        public string Country { get; set; }
+
+
+    }
 }

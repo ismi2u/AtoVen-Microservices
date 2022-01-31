@@ -25,4 +25,17 @@ namespace AtoVen.API.Entities
         public string IBAN { get; set; }
         public string Currency { get; set; }
     }
+
+
+    public class BankDTO
+    {
+         public string Country { get; set; }
+        public string BankKey { get; set; }
+        public string BankName { get; set; }
+        public string SwiftCode { get; set; }
+        public string BankAccount { get; set; }
+        public string AccountHolder { get; set; }
+        public string IBAN { get; set; }
+        public string Currency { get; set; }
+    }
 }

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtoVen.API.Migrations
 {
     [DbContext(typeof(AtoVenDbContext))]
-    [Migration("20220130221635_initial")]
+    [Migration("20220131133840_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -209,7 +209,7 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FormofAdress")
+                    b.Property<string>("FormofAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

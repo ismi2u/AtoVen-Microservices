@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
-    <ProjectGuid>eb48b3ae-e7b7-4ac2-a50e-406289fe9129</ProjectGuid>
+    <ProjectGuid>a94218e5-292e-4de8-88f6-881fb93ce2bb</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
     <DockerServiceName>atoven.api</DockerServiceName>
