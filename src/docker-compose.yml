@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  atoven.api:
+    image: ${DOCKER_REGISTRY-}atovenapi
+    build:
+      context: .
+      dockerfile: MicroServices/VendorService/AtoVen.API/Dockerfile
+
+  atoven.mvc:
+    image: ${DOCKER_REGISTRY-}atovenmvc
+    build:
+      context: .
+      dockerfile: MicroServices/AtoVen.UI/WebApplication1/Dockerfile
+
