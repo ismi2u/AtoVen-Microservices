@@ -93,7 +93,7 @@ namespace AtoVen.API.Controllers
                 newCompany.AccountGroup = company.AccountGroup;
                 newCompany.Building = company.Building;
                 newCompany.City = company.City;
-                newCompany.CommResidenceNo = company.CommResidenceNo;
+                newCompany.CommercialRegistrationNo = company.CommercialRegistrationNo;
                 newCompany.CompanyName = company.CompanyName;
                 newCompany.Country = company.Country;
                 newCompany.District = company.District;
@@ -136,9 +136,9 @@ namespace AtoVen.API.Controllers
                     newContact.PhoneNo = contact.PhoneNo;
                     newContact.Department = contact.Department;
                     newContact.FirstName = contact.FirstName;
-                    newContact.FormofAddress = contact.FormofAddress;
+                    newContact.Address = contact.Address;
                     newContact.LastName = contact.LastName;
-                    newContact.Position = contact.Position;
+                    newContact.Designation = contact.Designation;
                     newContact.Country = contact.Country;
 
                     _context.Contacts.Add(newContact);
@@ -150,7 +150,7 @@ namespace AtoVen.API.Controllers
                     Bank newBank = new Bank() { };
 
                     newBank.CompanyID = newCompId; //Db generated Identity column value
-                    newBank.AccountHolder = bank.AccountHolder;
+                    newBank.AccountHolderName = bank.AccountHolderName;
                     newBank.BankAccount = bank.BankAccount;
                     newBank.Country = bank.Country;
                     newBank.BankKey = bank.BankKey;

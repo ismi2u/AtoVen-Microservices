@@ -21,7 +21,7 @@ namespace AtoVen.API.Entities
         public string BankName { get; set; }
         public string SwiftCode { get; set; }
         public string BankAccount { get; set; }
-        public string AccountHolder { get; set; }
+        public string AccountHolderName { get; set; }
         public string IBAN { get; set; }
         public string Currency { get; set; }
     }
@@ -34,7 +34,7 @@ namespace AtoVen.API.Entities
         public string BankName { get; set; }
         public string SwiftCode { get; set; }
         public string BankAccount { get; set; }
-        public string AccountHolder { get; set; }
+        public string AccountHolderName { get; set; }
         public string IBAN { get; set; }
         public string Currency { get; set; }
     }

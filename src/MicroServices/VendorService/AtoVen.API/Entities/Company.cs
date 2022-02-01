@@ -17,7 +17,7 @@ namespace AtoVen.API.Entities
 
         public string CompanyName { get; set; }
 
-        public string CommResidenceNo { get; set; }
+        public string CommercialRegistrationNo { get; set; }
         public string Language { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
@@ -49,7 +49,7 @@ namespace AtoVen.API.Entities
 
         public string CompanyName { get; set; }
 
-        public string CommResidenceNo { get; set; }
+        public string CommercialRegistrationNo { get; set; }
         public string Language { get; set; }
         public string Country { get; set; }
         public string Region { get; set; }
