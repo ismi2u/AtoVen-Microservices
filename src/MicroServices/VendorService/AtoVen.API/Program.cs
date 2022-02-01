@@ -11,7 +11,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("LocalSQLServerConnectionString")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
