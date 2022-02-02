@@ -1,5 +1,6 @@
 using AtoVen.API.Data;
 using AtoVen.API.Repository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,12 +11,23 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
+builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AtoVenDbContext>();
+builder.Services.AddCors(options =>
+              options.AddPolicy("myCorsPolicy", builder => {
+                  builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+              }
+              ));
 
 var app = builder.Build();
 
@@ -25,9 +37,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseAuthentication(); //add before MVC
 app.UseAuthorization();
 
+
 app.MapControllers();
+app.UseCors("myCorsPolicy");
 
 app.Run();
