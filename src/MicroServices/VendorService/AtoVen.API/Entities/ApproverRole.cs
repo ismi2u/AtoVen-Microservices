@@ -9,10 +9,10 @@ namespace AtoVen.API.Entities
 {
     public class ApproverRole
     {
-        [Key]
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public string RoleName { get; set; }
+
+        public bool IsEnabled { get; set; }
     }
 }

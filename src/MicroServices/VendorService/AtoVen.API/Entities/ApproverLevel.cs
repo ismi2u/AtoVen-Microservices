@@ -10,10 +10,10 @@ namespace AtoVen.API.Entities
 {
     public class ApproverLevel
     {
-        [Key]
-        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public int Level { get; set; }
+
+        public bool IsEnabled{ get; set; }
     }
 }

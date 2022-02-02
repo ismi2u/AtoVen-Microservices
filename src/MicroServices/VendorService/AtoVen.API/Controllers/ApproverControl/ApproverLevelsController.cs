@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
 
-namespace AtoVen.API.Controllers
+namespace AtoVen.API.Controllers.ApproverControl
 {
     [Route("api/[controller]")]
     [ApiController]

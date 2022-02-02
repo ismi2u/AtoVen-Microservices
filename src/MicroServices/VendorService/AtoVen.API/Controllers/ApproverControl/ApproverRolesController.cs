@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
 
-namespace AtoVen.API.Controllers
+namespace AtoVen.API.Controllers.ApproverControl
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -24,16 +24,16 @@ namespace AtoVen.API.Controllers
 
         // GET: api/ApproverRoles
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApproverRole>>> GetApproverRoles()
+        public async Task<ActionResult<IEnumerable<ApproverRole>>> GetApproverRole()
         {
-            return await _context.ApproverRoles.ToListAsync();
+            return await _context.ApproverRole.ToListAsync();
         }
 
         // GET: api/ApproverRoles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApproverRole>> GetApproverRole(int id)
         {
-            var approverRole = await _context.ApproverRoles.FindAsync(id);
+            var approverRole = await _context.ApproverRole.FindAsync(id);
 
             if (approverRole == null)
             {
@@ -79,7 +79,7 @@ namespace AtoVen.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ApproverRole>> PostApproverRole(ApproverRole approverRole)
         {
-            _context.ApproverRoles.Add(approverRole);
+            _context.ApproverRole.Add(approverRole);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetApproverRole", new { id = approverRole.Id }, approverRole);
@@ -89,13 +89,13 @@ namespace AtoVen.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproverRole(int id)
         {
-            var approverRole = await _context.ApproverRoles.FindAsync(id);
+            var approverRole = await _context.ApproverRole.FindAsync(id);
             if (approverRole == null)
             {
                 return NotFound();
             }
 
-            _context.ApproverRoles.Remove(approverRole);
+            _context.ApproverRole.Remove(approverRole);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -103,7 +103,7 @@ namespace AtoVen.API.Controllers
 
         private bool ApproverRoleExists(int id)
         {
-            return _context.ApproverRoles.Any(e => e.Id == id);
+            return _context.ApproverRole.Any(e => e.Id == id);
         }
     }
 }

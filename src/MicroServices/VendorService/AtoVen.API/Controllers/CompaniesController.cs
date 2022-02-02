@@ -1,10 +1,10 @@
 ﻿#nullable disable
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
@@ -19,14 +19,12 @@ using System.Net;
 using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
 using EmailSendService;
-//using EmailSender;
+
 
 namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    //[Route("api/[controller]")]
-    //[Authorize(Roles = "AtominosAdmin, Admin, Manager, Finmgr, User")]
     public class CompaniesController : ControllerBase
     {
         private readonly AtoVenDbContext _context;
@@ -45,6 +43,7 @@ namespace AtoVen.API.Controllers
 
         // GET: api/Companies
         [HttpGet]
+        [ActionName("GetCompanies")]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
         {
             return await _context.Companies.ToListAsync();
@@ -52,6 +51,7 @@ namespace AtoVen.API.Controllers
 
         // GET: api/Companies/5
         [HttpGet("{id}")]
+        [ActionName("GetCompanyById")]
         public async Task<ActionResult<Company>> GetCompany(int id)
         {
             var company = await _context.Companies.FindAsync(id);
@@ -67,6 +67,7 @@ namespace AtoVen.API.Controllers
         // PUT: api/Companies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [ActionName("UpdateCompany")]
         public async Task<IActionResult> PutCompany(int id, Company company)
         {
             if (id != company.Id)
@@ -95,69 +96,6 @@ namespace AtoVen.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Companies
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        [ActionName("Login")]
-        [AllowAnonymous]
-        public async Task<ActionResult<Company>> AccountLogin(Login login)
-        {
-            var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe, false);
-
-            if (result.Succeeded)
-            {
-                var secretkey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MySecretKey12323232"));
-
-                var signingcredentials = new SigningCredentials(secretkey, SecurityAlgorithms.HmacSha256);
-
-                var modeluser = await _userManager.FindByEmailAsync(login.Email);
-                var userroles = await _userManager.GetRolesAsync(modeluser);
-
-
-                //add claims
-                var claims = new List<Claim> {
-                new Claim(ClaimTypes.Name, modeluser.UserName),
-                 new Claim(ClaimTypes.Email, login.Email)
-
-
-                };
-                //add all roles belonging to the user
-                foreach (var role in userroles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-
-                var tokenOptions = new JwtSecurityToken(
-
-                    issuer: "https://localhost:5001",
-                    audience: "https://localhost:5001",
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(5),
-                     signingCredentials: signingcredentials
-                    );
-
-
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-
-
-                return Ok(new { Token = tokenString, Role = userroles, Email = login.Email });
-
-            }
-            return Unauthorized(new { Status = "Failure", Message = "Incorrect User-Id/Password!" });
-        }
-
-        [HttpPost]
-        [ActionName("Logout")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-
-            return Ok(new { Status = "Success", Message = "Logged Out Successfully!" });
-        }
-
-        // POST: api/Companies/RegisterVendor
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [ActionName("RegisterVendor")]
         public async Task<ActionResult<Company>> PostCompany(CompanyDTO company)
@@ -307,26 +245,10 @@ namespace AtoVen.API.Controllers
             return CreatedAtAction("GetCompany", new { id = newCompId }, company);
         }
 
-        // DELETE: api/Companies/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCompany(int id)
-        {
-            var company = await _context.Companies.FindAsync(id);
-            if (company == null)
-            {
-                return NotFound();
-            }
 
-            _context.Companies.Remove(company);
-            await _context.SaveChangesAsync();
 
-            return NoContent();
-        }
 
-        private bool CompanyExists(int id)
-        {
-            return _context.Companies.Any(e => e.Id == id);
-        }
+
 
 
         /////// 2. Validate IBAN Number /////
@@ -336,7 +258,7 @@ namespace AtoVen.API.Controllers
         /// <param name="IBANAPIKey"></param>
         /// <param name="IBANNumber"></param>
         /// <returns></returns>
-        public object ValidateIBAN(string IBANAPIKey = "[YOUR_API_KEY]", string IBANNumber = "DE02100500000024290661")
+        private object ValidateIBAN(string IBANAPIKey = "[YOUR_API_KEY]", string IBANNumber = "DE02100500000024290661")
         {
 
             HttpClient IbanClient = new HttpClient();
@@ -378,7 +300,7 @@ namespace AtoVen.API.Controllers
         /// <param name="vCountryCode"></param>
         /// <param name="vLocale"></param>
         /// <returns></returns>
-        public object ValidateAddress(string AddressValidatorAPIKey, string vStreetAddress,
+        private object ValidateAddress(string AddressValidatorAPIKey, string vStreetAddress,
                                         string vCity, string vPostalCode,
                                         string vState, string vCountryCode,
                                         string vLocale)
@@ -430,7 +352,7 @@ namespace AtoVen.API.Controllers
         /// <param name="VATAPIValidatorKey"></param>
         /// <param name="VATNumber"></param>
         /// <returns>Oject</returns>
-        public object ValidateVAT(string VATAPIValidatorKey, string VATNumber)
+        private object ValidateVAT(string VATAPIValidatorKey, string VATNumber)
         {
             string APIURL = "http://www.apilayer.net/api/validate?access_key=" + VATAPIValidatorKey + "&vat_number=" + VATNumber;
             HttpClient client = new HttpClient();
@@ -446,7 +368,7 @@ namespace AtoVen.API.Controllers
         /// </summary>
         /// <param name="opts"></param>
         /// <returns></returns>
-        public static string GenerateRandomPassword(PasswordOptions opts = null)
+        private static string GenerateRandomPassword(PasswordOptions opts = null)
         {
             if (opts == null) opts = new PasswordOptions()
             {
@@ -512,5 +434,31 @@ namespace AtoVen.API.Controllers
             await _emailSender.SendEmailAsync(messagemail);
         }
 
+
+
+
+
+
+        // DELETE: api/Companies/5
+        [HttpDelete("{id}")]
+        [ActionName("DeleteCompany")]
+        public async Task<IActionResult> DeleteCompany(int id)
+        {
+            var company = await _context.Companies.FindAsync(id);
+            if (company == null)
+            {
+                return NotFound();
+            }
+
+            _context.Companies.Remove(company);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool CompanyExists(int id)
+        {
+            return _context.Companies.Any(e => e.Id == id);
+        }
     }
 }

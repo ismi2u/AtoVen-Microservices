@@ -22,6 +22,79 @@ namespace AtoVen.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("AtoVen.API.Entities.Approver", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("ApproverLevelID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApproverRoleID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApproverLevelID");
+
+                    b.HasIndex("ApproverRoleID");
+
+                    b.ToTable("Approvers");
+                });
+
+            modelBuilder.Entity("AtoVen.API.Entities.ApproverLevel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApproverLevel");
+                });
+
+            modelBuilder.Entity("AtoVen.API.Entities.ApproverRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApproverRole");
+                });
+
             modelBuilder.Entity("AtoVen.API.Entities.Bank", b =>
                 {
                     b.Property<int>("Id")
@@ -84,6 +157,15 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("ApprovedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ApproverID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ApproverRoleID")
+                        .HasColumnType("int");
+
                     b.Property<string>("Building")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -123,6 +205,9 @@ namespace AtoVen.API.Migrations
                     b.Property<string>("HouseNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsVendorInitiated")
                         .HasColumnType("bit");
@@ -183,6 +268,10 @@ namespace AtoVen.API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApproverID");
+
+                    b.HasIndex("ApproverRoleID");
 
                     b.ToTable("Companies");
                 });
@@ -447,6 +536,25 @@ namespace AtoVen.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("AtoVen.API.Entities.Approver", b =>
+                {
+                    b.HasOne("AtoVen.API.Entities.ApproverLevel", "ApproverLevel")
+                        .WithMany()
+                        .HasForeignKey("ApproverLevelID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AtoVen.API.Entities.ApproverRole", "ApproverRole")
+                        .WithMany()
+                        .HasForeignKey("ApproverRoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApproverLevel");
+
+                    b.Navigation("ApproverRole");
+                });
+
             modelBuilder.Entity("AtoVen.API.Entities.Bank", b =>
                 {
                     b.HasOne("AtoVen.API.Entities.Company", "Company")
@@ -456,6 +564,25 @@ namespace AtoVen.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("AtoVen.API.Entities.Company", b =>
+                {
+                    b.HasOne("AtoVen.API.Entities.Approver", "Approver")
+                        .WithMany()
+                        .HasForeignKey("ApproverID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AtoVen.API.Entities.ApproverRole", "ApproverRole")
+                        .WithMany()
+                        .HasForeignKey("ApproverRoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Approver");
+
+                    b.Navigation("ApproverRole");
                 });
 
             modelBuilder.Entity("AtoVen.API.Entities.Contact", b =>

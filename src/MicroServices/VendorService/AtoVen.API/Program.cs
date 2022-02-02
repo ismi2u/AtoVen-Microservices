@@ -14,9 +14,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
