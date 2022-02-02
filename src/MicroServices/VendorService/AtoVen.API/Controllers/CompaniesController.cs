@@ -18,6 +18,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
+using EmailSendService;
 //using EmailSender;
 
 namespace AtoVen.API.Controllers
@@ -31,16 +32,15 @@ namespace AtoVen.API.Controllers
         private readonly AtoVenDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        //private readonly IEmailSender _emailSender;
+        private readonly IEmailSender _emailSender;
 
-        //public CompaniesController(AtoVenDbContext context, IEmailSender emailSender)
-        public CompaniesController(AtoVenDbContext context, UserManager<IdentityUser> userManager,
-                              SignInManager<IdentityUser> signInManager)
+        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
+                                UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            //_emailSender = emailSender;
+            _emailSender = emailSender;
         }
 
         // GET: api/Companies
@@ -118,7 +118,7 @@ namespace AtoVen.API.Controllers
                 var claims = new List<Claim> {
                 new Claim(ClaimTypes.Name, modeluser.UserName),
                  new Claim(ClaimTypes.Email, login.Email)
-                
+
 
                 };
                 //add all roles belonging to the user
@@ -165,6 +165,12 @@ namespace AtoVen.API.Controllers
             int newCompId = 0;
             Company newCompany;
 
+            const string IBANAPIValidatorKey = "12343434455";
+            const string AddressAPIValidatorKey = "av-46947951bfd581f1e1d6c206b2a8f9e0";
+            const string VATAPIValidatorKey = "579db579789b253ddbc7708f84990f18";
+
+            string[] ArrBankIBAN = null;
+
             using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
             {
                 //assign values
@@ -193,7 +199,7 @@ namespace AtoVen.API.Controllers
                 newCompany.VatNo = company.VatNo;
                 newCompany.VendorType = company.VendorType;
                 newCompany.Website = company.Website;
-                
+
                 //Non DTO fields below here
                 newCompany.Password = GenerateRandomPassword(null);
                 newCompany.IsVendorInitiated = true;
@@ -237,6 +243,8 @@ namespace AtoVen.API.Controllers
                     await _context.SaveChangesAsync();
                 }
 
+                int intBankCount = 0;
+                ArrBankIBAN = new string[company.ListOfCompanyBanks.Count];
                 foreach (BankDTO bank in company.ListOfCompanyBanks)
                 {
                     Bank newBank = new Bank() { };
@@ -251,6 +259,9 @@ namespace AtoVen.API.Controllers
                     newBank.IBAN = bank.IBAN;
                     newBank.SwiftCode = bank.SwiftCode;
 
+                    ArrBankIBAN[intBankCount] = bank.IBAN;
+                    intBankCount += 1;
+
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
                 }
@@ -262,7 +273,10 @@ namespace AtoVen.API.Controllers
             var user = new IdentityUser
             {
                 UserName = newCompany.Email,
-                Email = newCompany.Email
+                Email = newCompany.Email,
+                PasswordHash = newCompany.Password,
+                NormalizedUserName = newCompany.CompanyName
+
             };
 
             var result = await _userManager.CreateAsync(user, newCompany.Password);
@@ -270,9 +284,25 @@ namespace AtoVen.API.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
-
-                return RedirectToAction("index", "Home");
             }
+
+
+            //IBAN Validation // address multiple IBAN validation is pending
+            IBANValidationResult iBANValidationResult = (IBANValidationResult)ValidateIBAN(IBANAPIValidatorKey, ArrBankIBAN[0]);
+
+            //ADDRESS Validation //
+            AddressValidationResult addressResult = (AddressValidationResult)ValidateAddress(
+                AddressAPIValidatorKey,
+                newCompany.Street,
+                newCompany.City,
+                newCompany.PostalCode,
+                 newCompany.Region,
+                 newCompany.Country,
+                 newCompany.Language);
+
+            //VAT Validation
+            APIValidationResult vatResult = (APIValidationResult)ValidateVAT(VATAPIValidatorKey, newCompany.VatNo);
+
 
             return CreatedAtAction("GetCompany", new { id = newCompId }, company);
         }
@@ -298,22 +328,25 @@ namespace AtoVen.API.Controllers
             return _context.Companies.Any(e => e.Id == id);
         }
 
-        public static void ValidateAndSendEmailForApproval()
+
+        /////// 2. Validate IBAN Number /////
+        /// <summary>
+        /// https://api.iban.com/clients/api/v4/iban/?api_key=[YOUR_API_KEY]&format=json&iban=DE02100500000024290661
+        /// </summary>
+        /// <param name="IBANAPIKey"></param>
+        /// <param name="IBANNumber"></param>
+        /// <returns></returns>
+        public object ValidateIBAN(string IBANAPIKey = "[YOUR_API_KEY]", string IBANNumber = "DE02100500000024290661")
         {
-           
-           ////1. Check for Duplicate Record in Both DataBases
-
-
-            ///// 2. Validate IBAN Number /////
-            //https://api.iban.com/clients/api/v4/iban/?api_key=[YOUR_API_KEY]&format=json&iban=DE02100500000024290661
 
             HttpClient IbanClient = new HttpClient();
-            
-            string uri = "https://api.iban.com/clients/api/v4/iban/?api_key=" + "[YOUR_API_KEY]" + "&format=json&iban=" + "DE02100500000024290661";
+
+            string uri = "https://api.iban.com/clients/api/v4/iban/?api_key=" + IBANAPIKey + "&format=json&iban=" + IBANNumber;
             var response = IbanClient.PostAsync(uri, null);
 
-            IBANResult ibanResult = new IBANResult() { Status = "Success", ResultData = response.ToString() };
+            IBANValidationResult ibanValidationResult = new IBANValidationResult() { Status = "Success", ResultData = response.ToString() };
 
+            return ibanValidationResult;
 
             /*var request = (HttpWebRequest)WebRequest.Create("https://api.iban.com/clients/api/v4/iban/");
             var postData = "api_key=[YOUR_API_KEY]";
@@ -330,21 +363,35 @@ namespace AtoVen.API.Controllers
             var response = (HttpWebResponse)request.GetResponse();
             var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();*/
 
+        }
 
-            //// 3. Address validator 
-            /// API key : av-46947951bfd581f1e1d6c206b2a8f9e0
-            /// https://www.address-validator.net/api.html
-            /// 
-
+        /// <summary>
+        ///         //// 3. Address validator 
+        /// API key : av-46947951bfd581f1e1d6c206b2a8f9e0
+        /// https://www.address-validator.net/api.html
+        /// /// </summary>
+        /// <param name="AddressValidatorAPIKey"></param>
+        /// <param name="vStreetAddress"></param>
+        /// <param name="vCity"></param>
+        /// <param name="vPostalCode"></param>
+        /// <param name="vState"></param>
+        /// <param name="vCountryCode"></param>
+        /// <param name="vLocale"></param>
+        /// <returns></returns>
+        public object ValidateAddress(string AddressValidatorAPIKey, string vStreetAddress,
+                                        string vCity, string vPostalCode,
+                                        string vState, string vCountryCode,
+                                        string vLocale)
+        {
             const String APIURL = "https://api.address-validator.net/api/verify";
             HttpClient client = new HttpClient();
-            String StreetAddress = "...";
-            String City = "...";
-            String PostalCode = "...";
-            String State = "...";
-            String CountryCode = "US";
+            String StreetAddress = vStreetAddress;
+            String City = vCity;
+            String PostalCode = vPostalCode;
+            String State = vState;
+            String CountryCode = vCountryCode;
             String Locale = "en";
-            String APIKey = "your API key";
+            String APIKey = AddressValidatorAPIKey;
 
             var postData = new List<KeyValuePair<string, string>>();
             postData.Add(new KeyValuePair<string, string>("StreetAddress", StreetAddress));
@@ -359,41 +406,46 @@ namespace AtoVen.API.Controllers
 
             HttpResponseMessage result = client.PostAsync(APIURL, content).Result;
             string resultContent = result.Content.ReadAsStringAsync().Result;
-            APIResult res =  JsonSerializer.Deserialize<APIResult>(resultContent);
+            APIValidationResult res = JsonSerializer.Deserialize<APIValidationResult>(resultContent);
+            string formattedaddress = "";
 
+            if (res.status.Equals("VALID"))
+            {
+                formattedaddress = res.formattedaddress;
+            }
 
-            //APIResult res = new System.Web.Script.Serialization.JavaScriptSerializer().
-            //                    Deserialize<APIResult>(resultContent);
+            AddressValidationResult addressValidationResult = new AddressValidationResult() { Status = res.status, ResultData = formattedaddress };
 
-            //if (res.status.Equals("VALID"))
-            //{
-            //    String formattedaddress = res.formattedaddress;
-            //}
-
-            AddressResult addressResult = new AddressResult() { Status = "Success", ResultData = res.formattedaddress };
-
-            /// 
-            ///4. Validate VAT
-            /// API Key : 579db579789b253ddbc7708f84990f18
-            /// http://www.apilayer.net/api/validate?access_key=579db579789b253ddbc7708f84990f18
-            /*http://apilayer.net/api/validate
-
-            ? access_key = YOUR_ACCESS_KEY
-            & vat_number = LU26375245
-            & format = 1*/
-
-
-
-
-
-
-
-
+            return addressValidationResult;
 
         }
 
 
+        /// <summary>
+        ///   ///4. Validate VAT
+        /// API Key : 579db579789b253ddbc7708f84990f18
+        /// http://www.apilayer.net/api/validate?access_key=579db579789b253ddbc7708f84990f18
+        // http://apilayer.net/api/validate/?access_key=YOUR_ACCESS_KEY&vat_number=LU26375245
+        /// </summary>
+        /// <param name="VATAPIValidatorKey"></param>
+        /// <param name="VATNumber"></param>
+        /// <returns>Oject</returns>
+        public object ValidateVAT(string VATAPIValidatorKey, string VATNumber)
+        {
+            string APIURL = "http://www.apilayer.net/api/validate?access_key=" + VATAPIValidatorKey + "&vat_number=" + VATNumber;
+            HttpClient client = new HttpClient();
+            HttpResponseMessage result = client.PostAsync(APIURL, null).Result;
+            string resultContent = result.Content.ReadAsStringAsync().Result;
+            APIValidationResult VATresult = JsonSerializer.Deserialize<APIValidationResult>(resultContent);
+            return VATresult;
+        }
 
+
+        /// <summary>
+        /// Generate Random Password satisfying all the Password Requirement chars
+        /// </summary>
+        /// <param name="opts"></param>
+        /// <returns></returns>
         public static string GenerateRandomPassword(PasswordOptions opts = null)
         {
             if (opts == null) opts = new PasswordOptions()
@@ -443,16 +495,22 @@ namespace AtoVen.API.Controllers
             return new string(chars.ToArray());
         }
 
-        //private async Task SendEmailInHtml()
-        //{
-        //    var approverMailAddress = "manager@gmail.com";
-        //    string subject = "New Vendor Approval Request";
-        //    string content = "Vendor Approval Request : Request Date " + DateTime.Now;
-        //    var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-        //    await _emailSender.SendEmailAsync(messagemail);
-        //}
 
-
+        /// <summary>
+        /// Send Email method
+        /// </summary>
+        /// <param name="sendToEmailAddress"></param>
+        /// <param name="emailSubject"></param>
+        /// <param name="bodyContent"></param>
+        /// <returns></returns>
+        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
+        {
+            var approverMailAddress = sendToEmailAddress;
+            string subject = emailSubject;
+            string content = bodyContent;
+            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+            await _emailSender.SendEmailAsync(messagemail);
+        }
 
     }
 }

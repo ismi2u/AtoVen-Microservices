@@ -1,5 +1,6 @@
 using AtoVen.API.Data;
 using AtoVen.API.Repository;
+using EmailSendService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,11 @@ builder.Services.AddCors(options =>
                            .AllowAnyMethod();
               }
               ));
+
+//email service
+var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+builder.Services.AddSingleton(emailConfig);
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
