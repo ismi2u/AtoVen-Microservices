@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtoVen.API.Migrations
 {
     [DbContext(typeof(AtoVenDbContext))]
-    [Migration("20220202222233_Initial")]
+    [Migration("20220203181708_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,7 +74,7 @@ namespace AtoVen.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApproverLevel");
+                    b.ToTable("ApproverLevels");
                 });
 
             modelBuilder.Entity("AtoVen.API.Entities.ApproverRole", b =>
@@ -94,7 +94,7 @@ namespace AtoVen.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApproverRole");
+                    b.ToTable("ApproverRoles");
                 });
 
             modelBuilder.Entity("AtoVen.API.Entities.Bank", b =>
@@ -159,15 +159,6 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("ApprovedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ApproverID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ApproverRoleID")
-                        .HasColumnType("int");
-
                     b.Property<string>("Building")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -208,12 +199,6 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVendorInitiated")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -230,10 +215,6 @@ namespace AtoVen.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("PhoneNo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -241,9 +222,6 @@ namespace AtoVen.API.Migrations
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("RecordDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Region")
                         .IsRequired()
@@ -270,10 +248,6 @@ namespace AtoVen.API.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApproverID");
-
-                    b.HasIndex("ApproverRoleID");
 
                     b.ToTable("Companies");
                 });
@@ -566,25 +540,6 @@ namespace AtoVen.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("AtoVen.API.Entities.Company", b =>
-                {
-                    b.HasOne("AtoVen.API.Entities.Approver", "Approver")
-                        .WithMany()
-                        .HasForeignKey("ApproverID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AtoVen.API.Entities.ApproverRole", "ApproverRole")
-                        .WithMany()
-                        .HasForeignKey("ApproverRoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Approver");
-
-                    b.Navigation("ApproverRole");
                 });
 
             modelBuilder.Entity("AtoVen.API.Entities.Contact", b =>

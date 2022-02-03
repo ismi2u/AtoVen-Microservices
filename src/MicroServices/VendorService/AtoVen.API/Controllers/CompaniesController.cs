@@ -44,24 +44,194 @@ namespace AtoVen.API.Controllers
         // GET: api/Companies
         [HttpGet]
         [ActionName("GetCompanies")]
-        public async Task<ActionResult<IEnumerable<Company>>> GetCompanies()
+        public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanies()
         {
-            return await _context.Companies.ToListAsync();
+            List<CompanyDTO> ListCompanyDTOs = new();
+
+            var ListCompanies = await _context.Companies.ToListAsync();
+
+            foreach (Company company in ListCompanies)
+            {
+                CompanyDTO companyDTO = new CompanyDTO();
+
+                companyDTO.Id = company.Id;
+                companyDTO.CompanyName = company.CompanyName;
+                companyDTO.CommercialRegistrationNo = company.CommercialRegistrationNo;
+                companyDTO.Language = company.Language;
+                companyDTO.Country = company.Country;
+                companyDTO.Region = company.Region;
+                companyDTO.District = company.District;
+                companyDTO.PostalCode = company.PostalCode;
+                companyDTO.City = company.City;
+                companyDTO.Street = company.Street;
+                companyDTO.HouseNo = company.HouseNo;
+                companyDTO.Building = company.Building;
+                companyDTO.Floor = company.Floor;
+                companyDTO.Room = company.Room;
+                companyDTO.POBox = company.POBox;
+                companyDTO.PhoneNo = company.PhoneNo;
+                companyDTO.FaxNumber = company.FaxNumber;
+                companyDTO.Email = company.Email;
+                companyDTO.MobileNo = company.MobileNo;
+                companyDTO.Website = company.Website;
+                companyDTO.VendorType = company.VendorType;
+                companyDTO.AccountGroup = company.AccountGroup;
+                companyDTO.VatNo = company.VatNo;
+                companyDTO.Notes = company.Notes;
+
+
+
+                List<BankDTO> ListBankDTOs = new();
+                var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
+
+                foreach (Bank bank in ListBanks)
+                {
+                    BankDTO bankDTO = new BankDTO();
+
+                    bankDTO.Id = bank.Id;
+                    bankDTO.CompanyID = bank.CompanyID;
+                    bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+                    bankDTO.Country = bank.Country;
+                    bankDTO.BankKey = bank.BankKey;
+                    bankDTO.BankName = bank.BankName;
+                    bankDTO.SwiftCode = bank.SwiftCode;
+                    bankDTO.BankAccount = bank.BankAccount;
+                    bankDTO.AccountHolderName = bank.AccountHolderName;
+                    bankDTO.IBAN = bank.IBAN;
+                    bankDTO.Currency = bank.Currency;
+
+                    ListBankDTOs.Add(bankDTO);
+                }
+
+
+                companyDTO.ListOfCompanyBanks = ListBankDTOs;
+
+
+
+                List<ContactDTO> ListContactDTOs = new();
+
+                var ListContacts = await _context.Contacts.ToListAsync();
+
+                foreach (Contact contact in ListContacts)
+                {
+                    ContactDTO contactDTO = new ContactDTO();
+
+                    contactDTO.Id = contact.Id;
+                    contactDTO.CompanyID = contact.CompanyID;
+                    contactDTO.CompanyName = _context.Companies.Find(contact.CompanyID).CompanyName;
+                    contactDTO.FirstName = contact.FirstName;
+                    contactDTO.LastName = contact.LastName;
+                    contactDTO.Address = contact.Address;
+                    contactDTO.Designation = contact.Designation;
+                    contactDTO.Department = contact.Department;
+                    contactDTO.MobileNo = contact.MobileNo;
+                    contactDTO.FaxNo = contact.FaxNo;
+                    contactDTO.Email = contact.Email;
+                    contactDTO.Language = contact.Language;
+                    contactDTO.Country = contact.Country;
+
+                    ListContactDTOs.Add(contactDTO);
+
+                }
+
+                ListCompanyDTOs.Add(companyDTO);
+            }
+
+            return ListCompanyDTOs;
         }
 
         // GET: api/Companies/5
         [HttpGet("{id}")]
         [ActionName("GetCompanyById")]
-        public async Task<ActionResult<Company>> GetCompany(int id)
+        public async Task<ActionResult<CompanyDTO>> GetCompany(int id)
         {
-            var company = await _context.Companies.FindAsync(id);
+            Company company = await _context.Companies.FindAsync(id);
 
-            if (company == null)
+            CompanyDTO companyDTO = new CompanyDTO();
+
+            companyDTO.Id = company.Id;
+            companyDTO.CompanyName = company.CompanyName;
+            companyDTO.CommercialRegistrationNo = company.CommercialRegistrationNo;
+            companyDTO.Language = company.Language;
+            companyDTO.Country = company.Country;
+            companyDTO.Region = company.Region;
+            companyDTO.District = company.District;
+            companyDTO.PostalCode = company.PostalCode;
+            companyDTO.City = company.City;
+            companyDTO.Street = company.Street;
+            companyDTO.HouseNo = company.HouseNo;
+            companyDTO.Building = company.Building;
+            companyDTO.Floor = company.Floor;
+            companyDTO.Room = company.Room;
+            companyDTO.POBox = company.POBox;
+            companyDTO.PhoneNo = company.PhoneNo;
+            companyDTO.FaxNumber = company.FaxNumber;
+            companyDTO.Email = company.Email;
+            companyDTO.MobileNo = company.MobileNo;
+            companyDTO.Website = company.Website;
+            companyDTO.VendorType = company.VendorType;
+            companyDTO.AccountGroup = company.AccountGroup;
+            companyDTO.VatNo = company.VatNo;
+            companyDTO.Notes = company.Notes;
+
+
+
+            List<BankDTO> ListBankDTOs = new();
+            var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
+
+            foreach (Bank bank in ListBanks)
             {
-                return NotFound();
+                BankDTO bankDTO = new BankDTO();
+
+                bankDTO.Id = bank.Id;
+                bankDTO.CompanyID = bank.CompanyID;
+                bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+                bankDTO.Country = bank.Country;
+                bankDTO.BankKey = bank.BankKey;
+                bankDTO.BankName = bank.BankName;
+                bankDTO.SwiftCode = bank.SwiftCode;
+                bankDTO.BankAccount = bank.BankAccount;
+                bankDTO.AccountHolderName = bank.AccountHolderName;
+                bankDTO.IBAN = bank.IBAN;
+                bankDTO.Currency = bank.Currency;
+
+                ListBankDTOs.Add(bankDTO);
             }
 
-            return company;
+
+            companyDTO.ListOfCompanyBanks = ListBankDTOs;
+
+
+            List<ContactDTO> ListContactDTOs = new();
+            var ListContacts = await _context.Contacts.ToListAsync();
+
+            foreach (Contact contact in ListContacts)
+            {
+                ContactDTO contactDTO = new ContactDTO();
+
+                contactDTO.Id = contact.Id;
+                contactDTO.CompanyID = contact.CompanyID;
+                contactDTO.CompanyName = _context.Companies.Find(contact.CompanyID).CompanyName;
+                contactDTO.FirstName = contact.FirstName;
+                contactDTO.LastName = contact.LastName;
+                contactDTO.Address = contact.Address;
+                contactDTO.Designation = contact.Designation;
+                contactDTO.Department = contact.Department;
+                contactDTO.MobileNo = contact.MobileNo;
+                contactDTO.FaxNo = contact.FaxNo;
+                contactDTO.Email = contact.Email;
+                contactDTO.Language = contact.Language;
+                contactDTO.Country = contact.Country;
+
+                ListContactDTOs.Add(contactDTO);
+
+            }
+
+            companyDTO.ListOfCompanyContacts = ListContactDTOs;
+
+
+            return companyDTO;
+
         }
 
         // PUT: api/Companies/5
@@ -97,7 +267,7 @@ namespace AtoVen.API.Controllers
         }
 
         [HttpPost]
-        [ActionName("RegisterVendor")]
+        [ActionName("RegisterCompany")]
         public async Task<ActionResult<Company>> PostCompany(CompanyDTO company)
         {
             int newCompId = 0;
@@ -139,14 +309,14 @@ namespace AtoVen.API.Controllers
                 newCompany.Website = company.Website;
 
                 //Non DTO fields below here
-                newCompany.Password = GenerateRandomPassword(null);
-                newCompany.IsVendorInitiated = true;
-                newCompany.RecordDate = DateTime.Now;
+                //newCompany.Password = GenerateRandomPassword(null);
+                //newCompany.IsVendorInitiated = true;
+                //newCompany.RecordDate = DateTime.Now;
 
-                newCompany.ApproverID = 1;
-                newCompany.ApproverRoleID = 1;
-                newCompany.IsApproved = false;
-                newCompany.ApprovedDate = null;
+                //newCompany.ApproverID = 1;
+                //newCompany.ApproverRoleID = 1;
+                //newCompany.IsApproved = false;
+                //newCompany.ApprovedDate = null;
 
 
                 _context.Companies.Add(newCompany);
@@ -212,16 +382,15 @@ namespace AtoVen.API.Controllers
             {
                 UserName = newCompany.Email,
                 Email = newCompany.Email,
-                PasswordHash = newCompany.Password,
                 NormalizedUserName = newCompany.CompanyName
 
             };
 
-            var result = await _userManager.CreateAsync(user, newCompany.Password);
+            var result = await _userManager.CreateAsync(user, GenerateRandomPassword(null));
 
             if (result.Succeeded)
             {
-                await _signInManager.SignInAsync(user, isPersistent: false);
+                //await _signInManager.SignInAsync(user, isPersistent: false);
             }
 
 

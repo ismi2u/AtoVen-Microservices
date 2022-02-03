@@ -26,14 +26,14 @@ namespace AtoVen.API.Controllers.ApproverControl
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApproverLevel>>> GetApproverLevel()
         {
-            return await _context.ApproverLevel.ToListAsync();
+            return await _context.ApproverLevels.ToListAsync();
         }
 
         // GET: api/ApproverLevels/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApproverLevel>> GetApproverLevel(int id)
         {
-            var approverLevel = await _context.ApproverLevel.FindAsync(id);
+            var approverLevel = await _context.ApproverLevels.FindAsync(id);
 
             if (approverLevel == null)
             {
@@ -57,6 +57,12 @@ namespace AtoVen.API.Controllers.ApproverControl
 
             try
             {
+
+                var updateApproverLevel = await _context.ApproverLevels.FindAsync(approverLevel.Id);
+                updateApproverLevel.Id = approverLevel.Id;
+                updateApproverLevel.IsEnabled = approverLevel.IsEnabled;
+
+                _context.ApproverLevels.Update(updateApproverLevel);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -77,25 +83,30 @@ namespace AtoVen.API.Controllers.ApproverControl
         // POST: api/ApproverLevels
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ApproverLevel>> PostApproverLevel(ApproverLevel approverLevel)
+        public async Task<ActionResult<ApproverLevel>> PostApproverLevel(ApproverLevelDTO approverLevel)
         {
-            _context.ApproverLevel.Add(approverLevel);
+
+            ApproverLevel newApproverLevel = new ApproverLevel();
+            newApproverLevel.Level = approverLevel.Level;
+            newApproverLevel.IsEnabled = approverLevel.IsEnabled;
+
+            _context.ApproverLevels.Add(newApproverLevel);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetApproverLevel", new { id = approverLevel.Id }, approverLevel);
+            return CreatedAtAction("GetApproverLevel", new { id = newApproverLevel.Id }, newApproverLevel);
         }
 
         // DELETE: api/ApproverLevels/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproverLevel(int id)
         {
-            var approverLevel = await _context.ApproverLevel.FindAsync(id);
+            var approverLevel = await _context.ApproverLevels.FindAsync(id);
             if (approverLevel == null)
             {
                 return NotFound();
             }
 
-            _context.ApproverLevel.Remove(approverLevel);
+            _context.ApproverLevels.Remove(approverLevel);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -103,7 +114,7 @@ namespace AtoVen.API.Controllers.ApproverControl
 
         private bool ApproverLevelExists(int id)
         {
-            return _context.ApproverLevel.Any(e => e.Id == id);
+            return _context.ApproverLevels.Any(e => e.Id == id);
         }
     }
 }

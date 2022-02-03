@@ -26,14 +26,14 @@ namespace AtoVen.API.Controllers.ApproverControl
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ApproverRole>>> GetApproverRole()
         {
-            return await _context.ApproverRole.ToListAsync();
+            return await _context.ApproverRoles.ToListAsync();
         }
 
         // GET: api/ApproverRoles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApproverRole>> GetApproverRole(int id)
         {
-            var approverRole = await _context.ApproverRole.FindAsync(id);
+            var approverRole = await _context.ApproverRoles.FindAsync(id);
 
             if (approverRole == null)
             {
@@ -57,6 +57,13 @@ namespace AtoVen.API.Controllers.ApproverControl
 
             try
             {
+                var updateApproverRole = await _context.ApproverRoles.FindAsync(approverRole.Id);
+
+                updateApproverRole.Id = approverRole.Id;
+                updateApproverRole.RoleName = approverRole.RoleName;
+                updateApproverRole.IsEnabled = approverRole.IsEnabled;
+
+                _context.ApproverRoles.Update(updateApproverRole);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -77,25 +84,29 @@ namespace AtoVen.API.Controllers.ApproverControl
         // POST: api/ApproverRoles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ApproverRole>> PostApproverRole(ApproverRole approverRole)
+        public async Task<ActionResult<ApproverRole>> PostApproverRole(ApproverRoleDTO approverRole)
         {
-            _context.ApproverRole.Add(approverRole);
+            ApproverRole newApproverRole = new ApproverRole();
+            newApproverRole.RoleName = approverRole.RoleName;
+            newApproverRole.IsEnabled = approverRole.IsEnabled;
+
+            _context.ApproverRoles.Add(newApproverRole);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetApproverRole", new { id = approverRole.Id }, approverRole);
+            return CreatedAtAction("GetApproverRole", new { id = newApproverRole.Id }, newApproverRole);
         }
 
         // DELETE: api/ApproverRoles/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteApproverRole(int id)
         {
-            var approverRole = await _context.ApproverRole.FindAsync(id);
+            var approverRole = await _context.ApproverRoles.FindAsync(id);
             if (approverRole == null)
             {
                 return NotFound();
             }
 
-            _context.ApproverRole.Remove(approverRole);
+            _context.ApproverRoles.Remove(approverRole);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -103,7 +114,7 @@ namespace AtoVen.API.Controllers.ApproverControl
 
         private bool ApproverRoleExists(int id)
         {
-            return _context.ApproverRole.Any(e => e.Id == id);
+            return _context.ApproverRoles.Any(e => e.Id == id);
         }
     }
 }

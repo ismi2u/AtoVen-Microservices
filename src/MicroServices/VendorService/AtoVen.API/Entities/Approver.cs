@@ -22,4 +22,18 @@ namespace AtoVen.API.Entities
         public bool IsEnabled { get; set; }
 
     }
+
+    public class ApproverDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public int ApproverRoleID { get; set; }
+        public string ApproverRole { get; set; }
+        public int ApproverLevelID { get; set; }
+
+        public int ApproverLevel { get; set; }
+        public bool IsEnabled { get; set; }
+
+    }
 }

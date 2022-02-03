@@ -23,8 +23,8 @@ namespace AtoVen.API.Data
         public DbSet<Company> Companies { get; set; }
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<Approver> Approvers { get; set; }
-        public DbSet<AtoVen.API.Entities.ApproverLevel> ApproverLevel { get; set; }
-        public DbSet<AtoVen.API.Entities.ApproverRole> ApproverRole { get; set; }
+        public DbSet<ApproverLevel> ApproverLevels { get; set; }
+        public DbSet<ApproverRole> ApproverRoles { get; set; }
 
     }
 }

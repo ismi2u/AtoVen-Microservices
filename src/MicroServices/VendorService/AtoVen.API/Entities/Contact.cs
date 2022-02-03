@@ -35,6 +35,9 @@ namespace AtoVen.API.Entities
 
     public class ContactDTO
     {
+        public int Id { get; set; }
+        public int CompanyID { get; set; }
+        public string CompanyName { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Address { get; set; }

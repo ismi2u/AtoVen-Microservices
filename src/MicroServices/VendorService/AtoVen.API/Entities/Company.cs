@@ -39,16 +39,15 @@ namespace AtoVen.API.Entities
         public string AccountGroup { get; set; }
         public string Notes { get; set; }
         public string VatNo { get; set; }
-        public string Password { get; set; }
-        public bool IsVendorInitiated { get; set; }
-        public DateTime RecordDate { get; set; }
-        public virtual Approver Approver { get; set; }
-        public int ApproverID { get; set; }
-        public virtual ApproverRole ApproverRole { get; set; }
-        public int ApproverRoleID { get; set; }
-        public bool IsApproved { get; set; }
-
-        public DateTime? ApprovedDate { get; set; }
+        //public string Password { get; set; }
+        //public bool IsVendorInitiated { get; set; }
+        //public DateTime RecordDate { get; set; }
+        //public virtual Approver Approver { get; set; }
+        //public int ApproverID { get; set; }
+        //public virtual ApproverRole ApproverRole { get; set; }
+        //public int ApproverRoleID { get; set; }
+        //public bool IsApproved { get; set; }
+        //public DateTime? ApprovedDate { get; set; }
 
 
         public List<Contact> ListOfCompanyContacts { get; set; }
@@ -58,7 +57,7 @@ namespace AtoVen.API.Entities
 
     public class CompanyDTO
     {
-
+        public int Id { get; set; }
         public string CompanyName { get; set; }
 
         public string CommercialRegistrationNo { get; set; }

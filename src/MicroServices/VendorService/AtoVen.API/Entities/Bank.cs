@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AtoVen.API.Entities
 {
-    public class Bank 
+    public class Bank
     {
         [Key]
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
@@ -29,7 +29,10 @@ namespace AtoVen.API.Entities
 
     public class BankDTO
     {
-         public string Country { get; set; }
+        public int Id { get; set; }
+        public string Country { get; set; }
+        public int CompanyID { get; set; }
+        public string CompanyName { get; set; }
         public string BankKey { get; set; }
         public string BankName { get; set; }
         public string SwiftCode { get; set; }

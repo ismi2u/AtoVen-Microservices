@@ -10,7 +10,7 @@ namespace AtoVen.API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ApproverLevel",
+                name: "ApproverLevels",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -20,11 +20,11 @@ namespace AtoVen.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApproverLevel", x => x.Id);
+                    table.PrimaryKey("PK_ApproverLevels", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApproverRole",
+                name: "ApproverRoles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -34,7 +34,7 @@ namespace AtoVen.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApproverRole", x => x.Id);
+                    table.PrimaryKey("PK_ApproverRoles", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,6 +77,41 @@ namespace AtoVen.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Companies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommercialRegistrationNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Language = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    District = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HouseNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Building = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Floor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Room = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    POBox = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FaxNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MobileNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Website = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VendorType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountGroup = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VatNo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Companies", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Approvers",
                 columns: table => new
                 {
@@ -92,15 +127,15 @@ namespace AtoVen.API.Migrations
                 {
                     table.PrimaryKey("PK_Approvers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Approvers_ApproverLevel_ApproverLevelID",
+                        name: "FK_Approvers_ApproverLevels_ApproverLevelID",
                         column: x => x.ApproverLevelID,
-                        principalTable: "ApproverLevel",
+                        principalTable: "ApproverLevels",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
-                        name: "FK_Approvers_ApproverRole_ApproverRoleID",
+                        name: "FK_Approvers_ApproverRoles_ApproverRoleID",
                         column: x => x.ApproverRoleID,
-                        principalTable: "ApproverRole",
+                        principalTable: "ApproverRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                 });
@@ -207,60 +242,6 @@ namespace AtoVen.API.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Companies",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CompanyName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CommercialRegistrationNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Language = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Region = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    District = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PostalCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HouseNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Building = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Floor = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Room = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    POBox = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FaxNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MobileNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Website = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VendorType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountGroup = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VatNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsVendorInitiated = table.Column<bool>(type: "bit", nullable: false),
-                    RecordDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ApproverID = table.Column<int>(type: "int", nullable: false),
-                    ApproverRoleID = table.Column<int>(type: "int", nullable: false),
-                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Companies", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Companies_ApproverRole_ApproverRoleID",
-                        column: x => x.ApproverRoleID,
-                        principalTable: "ApproverRole",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
-                    table.ForeignKey(
-                        name: "FK_Companies_Approvers_ApproverID",
-                        column: x => x.ApproverID,
-                        principalTable: "Approvers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
                 });
@@ -377,16 +358,6 @@ namespace AtoVen.API.Migrations
                 column: "CompanyID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Companies_ApproverID",
-                table: "Companies",
-                column: "ApproverID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Companies_ApproverRoleID",
-                table: "Companies",
-                column: "ApproverRoleID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Contacts_CompanyID",
                 table: "Contacts",
                 column: "CompanyID");
@@ -394,6 +365,9 @@ namespace AtoVen.API.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Approvers");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -416,6 +390,12 @@ namespace AtoVen.API.Migrations
                 name: "Contacts");
 
             migrationBuilder.DropTable(
+                name: "ApproverLevels");
+
+            migrationBuilder.DropTable(
+                name: "ApproverRoles");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
@@ -423,15 +403,6 @@ namespace AtoVen.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Companies");
-
-            migrationBuilder.DropTable(
-                name: "Approvers");
-
-            migrationBuilder.DropTable(
-                name: "ApproverLevel");
-
-            migrationBuilder.DropTable(
-                name: "ApproverRole");
         }
     }
 }

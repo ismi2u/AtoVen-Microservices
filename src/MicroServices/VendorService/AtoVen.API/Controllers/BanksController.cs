@@ -24,15 +24,39 @@ namespace AtoVen.API.Controllers
 
         // GET: api/Banks
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bank>>> GetBanks()
+        public async Task<ActionResult<IEnumerable<BankDTO>>> GetBanks()
         {
-            return await _context.Banks.ToListAsync();
+            List<BankDTO> ListBankDTOs = new();
+
+            var ListBanks = await _context.Banks.ToListAsync();
+
+            foreach (Bank bank in ListBanks)
+            {
+                BankDTO bankDTO = new BankDTO();
+
+                bankDTO.Id = bank.Id;
+                bankDTO.CompanyID = bank.CompanyID;
+                bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+                bankDTO.Country = bank.Country;
+                bankDTO.BankKey = bank.BankKey;
+                bankDTO.BankName = bank.BankName;
+                bankDTO.SwiftCode = bank.SwiftCode;
+                bankDTO.BankAccount = bank.BankAccount;
+                bankDTO.AccountHolderName = bank.AccountHolderName;
+                bankDTO.IBAN = bank.IBAN;
+                bankDTO.Currency = bank.Currency;
+
+                ListBankDTOs.Add(bankDTO);
+            }
+
+            return ListBankDTOs;
         }
 
         // GET: api/Banks/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Bank>> GetBank(int id)
+        public async Task<ActionResult<BankDTO>> GetBank(int id)
         {
+
             var bank = await _context.Banks.FindAsync(id);
 
             if (bank == null)
@@ -40,13 +64,28 @@ namespace AtoVen.API.Controllers
                 return NotFound();
             }
 
-            return bank;
+            BankDTO bankDTO = new BankDTO();
+
+            bankDTO.Id = bank.Id;
+            bankDTO.CompanyID = bank.CompanyID;
+            bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+            bankDTO.Country = bank.Country;
+            bankDTO.BankKey = bank.BankKey;
+            bankDTO.BankName = bank.BankName;
+            bankDTO.SwiftCode = bank.SwiftCode;
+            bankDTO.BankAccount = bank.BankAccount;
+            bankDTO.AccountHolderName = bank.AccountHolderName;
+            bankDTO.IBAN = bank.IBAN;
+            bankDTO.Currency = bank.Currency;
+
+            return bankDTO;
+
         }
 
         // PUT: api/Banks/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBank(int id, Bank bank)
+        public async Task<IActionResult> PutBank(int id, BankDTO bank)
         {
             if (id != bank.Id)
             {
@@ -57,6 +96,20 @@ namespace AtoVen.API.Controllers
 
             try
             {
+                var updatebank = await _context.Banks.FindAsync(bank.Id);
+
+                updatebank.Id = bank.Id;
+                updatebank.Country = bank.Country;
+                updatebank.CompanyID = bank.CompanyID;
+                updatebank.BankKey = bank.BankKey;
+                updatebank.BankName = bank.BankName;
+                updatebank.SwiftCode = bank.SwiftCode;
+                updatebank.BankAccount = bank.BankAccount;
+                updatebank.AccountHolderName = bank.AccountHolderName;
+                updatebank.IBAN = bank.IBAN;
+                updatebank.Currency = bank.Currency;
+
+                _context.Banks.Update(updatebank);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
@@ -77,12 +130,24 @@ namespace AtoVen.API.Controllers
         // POST: api/Banks
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Bank>> PostBank(Bank bank)
+        public async Task<ActionResult<Bank>> PostBank(BankDTO bank)
         {
-            _context.Banks.Add(bank);
+            Bank newBank = new Bank();
+
+            newBank.Country = bank.Country;
+            newBank.CompanyID = bank.CompanyID;
+            newBank.BankKey = bank.BankKey;
+            newBank.BankName = bank.BankName;
+            newBank.SwiftCode = bank.SwiftCode;
+            newBank.BankAccount = bank.BankAccount;
+            newBank.AccountHolderName = bank.AccountHolderName;
+            newBank.IBAN = bank.IBAN;
+            newBank.Currency = bank.Currency;
+
+            _context.Banks.Add(newBank);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBank", new { id = bank.Id }, bank);
+            return CreatedAtAction("GetBank", new { id = bank.Id }, newBank);
         }
 
         // DELETE: api/Banks/5
