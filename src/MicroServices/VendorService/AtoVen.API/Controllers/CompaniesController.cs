@@ -19,7 +19,7 @@ using System.Net;
 using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
 using EmailSendService;
-
+using ValidationLibrary;
 
 namespace AtoVen.API.Controllers
 {
@@ -27,14 +27,20 @@ namespace AtoVen.API.Controllers
     [ApiController]
     public class CompaniesController : ControllerBase
     {
-        private readonly AtoVenDbContext _context;
+        private readonly AtovenDbContext _context;
+        private readonly SchwarzDbContext _SchwarzContext;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
-                                UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public StringBuilder emailBodyStrBuilder= new StringBuilder();
+
+        public CompaniesController(AtovenDbContext context, IEmailSender emailSender,
+                                UserManager<IdentityUser> userManager, 
+                                SignInManager<IdentityUser> signInManager,
+                                SchwarzDbContext schwarzContext)
         {
+            _SchwarzContext = schwarzContext;
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -174,8 +180,6 @@ namespace AtoVen.API.Controllers
             companyDTO.VatNo = company.VatNo;
             companyDTO.Notes = company.Notes;
 
-
-
             List<BankDTO> ListBankDTOs = new();
             var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
 
@@ -196,6 +200,8 @@ namespace AtoVen.API.Controllers
                 bankDTO.Currency = bank.Currency;
 
                 ListBankDTOs.Add(bankDTO);
+
+               
             }
 
 
@@ -270,14 +276,54 @@ namespace AtoVen.API.Controllers
         [ActionName("RegisterCompany")]
         public async Task<ActionResult<Company>> PostCompany(CompanyDTO company)
         {
+
+
+            ////////////////////////////////////////////////////////////////////
+            //// ***************   VAT Validation   *********************///////
+            ////////////////////////////////////////////////////////////////////
+
+            VATValidation vatvalidation = new VATValidation();
+            if(vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
+            {
+                return Ok("Invalid VAT Number");
+            }
+
+            emailBodyStrBuilder.AppendLine("VAT Number: Validated");
+
+            ////////////////////////////////////////////////////////////////////
+            //// *************** Address Validation *********************///////
+            ////////////////////////////////////////////////////////////////////
+            AddressValidation addValidation = new AddressValidation();
+            AddressValidationInputs addressValidationInputs = new AddressValidationInputs();
+            addressValidationInputs.HouseNo = company.HouseNo;
+            addressValidationInputs.Street = company.Street;
+            addressValidationInputs.City = company.City;
+            addressValidationInputs.Region = company.Region;
+            addressValidationInputs.Country = company.Country;
+            addressValidationInputs.Language = company.Language;
+            addressValidationInputs.PostalCode = company.PostalCode;
+            
+
+            if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
+            {
+                return Ok("Invalid Street Address");
+            }
+            //
+            emailBodyStrBuilder.AppendLine("Street Address: Validated");
+
+
             int newCompId = 0;
+            int[] arrBankIds;
+            int[] arrContactIds;
+
+            int totalBankCount = company.ListOfCompanyBanks.Count;
+            int totalContactCount = company.ListOfCompanyContacts.Count;
+
+            int intBankCount = 0;
+            int intContactCount = 0;
             Company newCompany;
 
-            const string IBANAPIValidatorKey = "12343434455";
-            const string AddressAPIValidatorKey = "av-46947951bfd581f1e1d6c206b2a8f9e0";
-            const string VATAPIValidatorKey = "579db579789b253ddbc7708f84990f18";
 
-            string[] ArrBankIBAN = null;
 
             using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
             {
@@ -322,14 +368,15 @@ namespace AtoVen.API.Controllers
                 _context.Companies.Add(newCompany);
                 await _context.SaveChangesAsync();
 
+                emailBodyStrBuilder.AppendLine("================================================================");
+                emailBodyStrBuilder.AppendLine("Vendor Company Details: " + newCompany.ToString());
+
                 //Get the DB Generated Identity Column Value after save.
-                //////////////////////////////////////////////////
-
+                //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 newCompId = newCompany.Id;
+                ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                //////////////////////////////////////////////////
-
-
+                arrContactIds = new int[totalContactCount]; //Initialize the array with count
                 foreach (ContactDTO contact in company.ListOfCompanyContacts)
                 {
                     Contact newContact = new Contact() { };
@@ -349,12 +396,30 @@ namespace AtoVen.API.Controllers
 
                     _context.Contacts.Add(newContact);
                     await _context.SaveChangesAsync();
+
+
+                    emailBodyStrBuilder.AppendLine("================================================================");
+                    emailBodyStrBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                    emailBodyStrBuilder.AppendLine(newContact.ToString());
+                    arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
+                    intContactCount += 1;
                 }
 
-                int intBankCount = 0;
-                ArrBankIBAN = new string[company.ListOfCompanyBanks.Count];
+               
+
+                arrBankIds = new int[totalBankCount]; // Initialize the array with count
+
                 foreach (BankDTO bank in company.ListOfCompanyBanks)
                 {
+                    ////////////////////////////////////////////////////////////////////
+                    //// *************** IBAN Number Validation *****************///////
+                    ////////////////////////////////////////////////////////////////////
+                    IBANValidation ibanvalidation = new IBANValidation();
+                    if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
+                    {
+                        return Ok("Invalid IBAN Number");
+                    }
+
                     Bank newBank = new Bank() { };
 
                     newBank.CompanyID = newCompId; //Db generated Identity column value
@@ -367,15 +432,34 @@ namespace AtoVen.API.Controllers
                     newBank.IBAN = bank.IBAN;
                     newBank.SwiftCode = bank.SwiftCode;
 
-                    ArrBankIBAN[intBankCount] = bank.IBAN;
-                    intBankCount += 1;
+                 
 
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
+                    emailBodyStrBuilder.AppendLine("================================================================");
+                    emailBodyStrBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
+                    emailBodyStrBuilder.AppendLine(newBank.ToString());
+
+                    arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
+                    intBankCount += 1;
                 }
 
                 await AtoVenDbContextTransaction.CommitAsync();
             }
+
+            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ////////////////////////////////////////////////////////////////////
+            //// *************** Send Email to Approver *****************///////
+            ////////////////////////////////////////////////////////////////////
+            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+
+            await SendEmailInHtml("atocash@atominosconsulting.com",
+                             "New Vendor " + company.CompanyName +
+                             " approval request", emailBodyStrBuilder.ToString()) ;
+
+
+
+
             ///Register a userId for the Vendor
             ///
             var user = new IdentityUser
@@ -453,27 +537,6 @@ namespace AtoVen.API.Controllers
         }
 
 
-        /// <summary>
-        /// Send Email method
-        /// </summary>
-        /// <param name="sendToEmailAddress"></param>
-        /// <param name="emailSubject"></param>
-        /// <param name="bodyContent"></param>
-        /// <returns></returns>
-        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
-        {
-            var approverMailAddress = sendToEmailAddress;
-            string subject = emailSubject;
-            string content = bodyContent;
-            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-            await _emailSender.SendEmailAsync(messagemail);
-        }
-
-
-
-
-
-
         // DELETE: api/Companies/5
         [HttpDelete("{id}")]
         [ActionName("DeleteCompany")]
@@ -495,5 +558,25 @@ namespace AtoVen.API.Controllers
         {
             return _context.Companies.Any(e => e.Id == id);
         }
+
+
+        /// <summary>
+        /// Send Email method
+        /// </summary>
+        /// <param name="sendToEmailAddress"></param>
+        /// <param name="emailSubject"></param>
+        /// <param name="bodyContent"></param>
+        /// <returns></returns>
+        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
+        {
+            var approverMailAddress = sendToEmailAddress;
+            string subject = emailSubject;
+            string content = bodyContent;
+            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+            await _emailSender.SendEmailAsync(messagemail);
+        }
+
+
+
     }
 }

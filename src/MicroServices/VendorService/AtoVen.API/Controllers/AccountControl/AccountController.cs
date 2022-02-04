@@ -30,12 +30,12 @@ namespace AtoVen.API.Controllers.AccountControl
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AtoVenDbContext _context;
+        private readonly AtovenDbContext _context;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public AccountController(AtoVenDbContext context, IEmailSender emailSender,
+        public AccountController(AtovenDbContext context, IEmailSender emailSender,
                                 UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _context = context;

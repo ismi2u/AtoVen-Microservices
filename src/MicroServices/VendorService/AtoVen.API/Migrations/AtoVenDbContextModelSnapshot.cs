@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AtoVen.API.Migrations
 {
-    [DbContext(typeof(AtoVenDbContext))]
-    partial class AtoVenDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AtovenDbContext))]
+    partial class AtovenDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

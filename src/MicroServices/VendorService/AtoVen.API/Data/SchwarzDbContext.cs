@@ -10,21 +10,19 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace AtoVen.API.Data
 {
-    public class AtovenDbContext: IdentityDbContext
-    { 
+    public class SchwarzDbContext : DbContext
+    {
 
-        public AtovenDbContext(DbContextOptions<AtovenDbContext> options) : base(options)
+        public SchwarzDbContext(DbContextOptions<SchwarzDbContext> options) : base(options)
         {
 
         }
-     
+
 
         public DbSet<Bank> Banks { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Contact> Contacts { get; set; }
-        public DbSet<Approver> Approvers { get; set; }
-        public DbSet<ApproverLevel> ApproverLevels { get; set; }
-        public DbSet<ApproverRole> ApproverRoles { get; set; }
+      
 
     }
 }

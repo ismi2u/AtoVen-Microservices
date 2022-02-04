@@ -15,9 +15,9 @@ namespace AtoVen.API.Controllers.ApproverControl
     [ApiController]
     public class ApproverRolesController : ControllerBase
     {
-        private readonly AtoVenDbContext _context;
+        private readonly AtovenDbContext _context;
 
-        public ApproverRolesController(AtoVenDbContext context)
+        public ApproverRolesController(AtovenDbContext context)
         {
             _context = context;
         }

@@ -12,8 +12,8 @@ namespace AtoVen.API.Repository
     public class CompanyRepository : ICompanyRepository
     {
 
-        private readonly AtoVenDbContext _context;
-        public CompanyRepository(AtoVenDbContext context)
+        private readonly AtovenDbContext _context;
+        public CompanyRepository(AtovenDbContext context)
         {
             _context = context;
         }

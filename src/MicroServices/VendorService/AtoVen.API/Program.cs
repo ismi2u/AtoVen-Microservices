@@ -13,14 +13,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
+builder.Services.AddDbContextPool<AtovenDbContext>(options => 
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
+builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SchwarzSQLServerRunningAsContainer")));
 
 
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AtoVenDbContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AtovenDbContext>();
 builder.Services.AddCors(options =>
               options.AddPolicy("myCorsPolicy", builder => {
                   builder.AllowAnyOrigin()

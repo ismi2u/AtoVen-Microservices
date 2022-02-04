@@ -15,9 +15,9 @@ namespace AtoVen.API.Controllers
     [ApiController]
     public class BanksController : ControllerBase
     {
-        private readonly AtoVenDbContext _context;
+        private readonly AtovenDbContext _context;
 
-        public BanksController(AtoVenDbContext context)
+        public BanksController(AtovenDbContext context)
         {
             _context = context;
         }
