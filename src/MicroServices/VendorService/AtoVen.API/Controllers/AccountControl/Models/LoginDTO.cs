@@ -1,6 +1,6 @@
-﻿namespace AtoVen.API.Entities.UserLoginEntities
-{
-    public class Login
+﻿namespace AtoVen.API.Controllers.AccountControl.Models
+{ 
+    public class LoginDTO
     {
         public string Email { get; set; }
         public string Password { get; set; }

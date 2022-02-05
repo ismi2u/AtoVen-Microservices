@@ -10,34 +10,6 @@ namespace AtoVen.API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ApproverLevels",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Level = table.Column<int>(type: "int", nullable: false),
-                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApproverLevels", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ApproverRoles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApproverRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -56,6 +28,7 @@ namespace AtoVen.API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ApproverLevel = table.Column<int>(type: "int", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -104,40 +77,15 @@ namespace AtoVen.API.Migrations
                     VendorType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AccountGroup = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    VatNo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    VatNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsVendorInitiated = table.Column<bool>(type: "bit", nullable: true),
+                    RecordDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
+                    ApprovedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Companies", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Approvers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ApproverRoleID = table.Column<int>(type: "int", nullable: false),
-                    ApproverLevelID = table.Column<int>(type: "int", nullable: false),
-                    IsEnabled = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Approvers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Approvers_ApproverLevels_ApproverLevelID",
-                        column: x => x.ApproverLevelID,
-                        principalTable: "ApproverLevels",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Approvers_ApproverRoles_ApproverRoleID",
-                        column: x => x.ApproverRoleID,
-                        principalTable: "ApproverRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -247,6 +195,29 @@ namespace AtoVen.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ApprovalFlows",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CompanyID = table.Column<int>(type: "int", nullable: false),
+                    RecordDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ApproverEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApproverLevel = table.Column<int>(type: "int", nullable: false),
+                    LevelApprovedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApprovalFlows", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ApprovalFlows_Companies_CompanyID",
+                        column: x => x.CompanyID,
+                        principalTable: "Companies",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Banks",
                 columns: table => new
                 {
@@ -304,14 +275,9 @@ namespace AtoVen.API.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Approvers_ApproverLevelID",
-                table: "Approvers",
-                column: "ApproverLevelID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Approvers_ApproverRoleID",
-                table: "Approvers",
-                column: "ApproverRoleID");
+                name: "IX_ApprovalFlows_CompanyID",
+                table: "ApprovalFlows",
+                column: "CompanyID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -366,7 +332,7 @@ namespace AtoVen.API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Approvers");
+                name: "ApprovalFlows");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -388,12 +354,6 @@ namespace AtoVen.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Contacts");
-
-            migrationBuilder.DropTable(
-                name: "ApproverLevels");
-
-            migrationBuilder.DropTable(
-                name: "ApproverRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

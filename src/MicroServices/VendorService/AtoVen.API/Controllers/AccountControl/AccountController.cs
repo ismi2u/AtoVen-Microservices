@@ -1,25 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity;
-using AtoVen.API.Entities.UserLoginEntities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
 using EmailSendService;
 using AtoVen.API.Controllers.AccountControl.Models;
@@ -31,13 +25,13 @@ namespace AtoVen.API.Controllers.AccountControl
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly AtovenDbContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly AtoVenDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public AccountController(AtovenDbContext context, IEmailSender emailSender,
-                                UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+        public AccountController(AtoVenDbContext context, IEmailSender emailSender,
+                                UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
@@ -49,7 +43,7 @@ namespace AtoVen.API.Controllers.AccountControl
         [HttpPost]
         [ActionName("Login")]
         [AllowAnonymous]
-        public async Task<ActionResult<Company>> AccountLogin(Login login)
+        public async Task<ActionResult<Company>> AccountLogin(LoginDTO login)
         {
             var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe, false);
 

@@ -7,13 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using AtoVen.API.Controllers.AccountControl.Models;
 
 namespace AtoVen.API.Data
 {
-    public class AtovenDbContext: IdentityDbContext
+    public class AtoVenDbContext: IdentityDbContext<ApplicationUser>
     { 
 
-        public AtovenDbContext(DbContextOptions<AtovenDbContext> options) : base(options)
+        public AtoVenDbContext(DbContextOptions<AtoVenDbContext> options) : base(options)
         {
 
         }
@@ -22,9 +23,9 @@ namespace AtoVen.API.Data
         public DbSet<Bank> Banks { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Contact> Contacts { get; set; }
-        public DbSet<Approver> Approvers { get; set; }
-        public DbSet<ApproverLevel> ApproverLevels { get; set; }
-        public DbSet<ApproverRole> ApproverRoles { get; set; }
+
+        public DbSet<ApprovalFlow> ApprovalFlows { get; set; }
+
 
     }
 }

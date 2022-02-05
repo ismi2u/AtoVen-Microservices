@@ -15,9 +15,9 @@ namespace AtoVen.API.Controllers
     [ApiController]
     public class ContactsController : ControllerBase
     {
-        private readonly AtovenDbContext _context;
+        private readonly AtoVenDbContext _context;
 
-        public ContactsController(AtovenDbContext context)
+        public ContactsController(AtoVenDbContext context)
         {
             _context = context;
         }

@@ -9,17 +9,16 @@ using Microsoft.EntityFrameworkCore;
 using AtoVen.API.Data;
 using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity;
-using AtoVen.API.Entities.UserLoginEntities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
 using EmailSendService;
 using ValidationLibrary;
+using AtoVen.API.Controllers.AccountControl.Models;
 
 namespace AtoVen.API.Controllers
 {
@@ -27,20 +26,23 @@ namespace AtoVen.API.Controllers
     [ApiController]
     public class CompaniesController : ControllerBase
     {
-        private readonly AtovenDbContext _context;
+        private readonly AtoVenDbContext _context;
         private readonly SchwarzDbContext _SchwarzContext;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly ILogger<CompaniesController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public StringBuilder emailBodyStrBuilder= new StringBuilder();
 
-        public CompaniesController(AtovenDbContext context, IEmailSender emailSender,
-                                UserManager<IdentityUser> userManager, 
-                                SignInManager<IdentityUser> signInManager,
-                                SchwarzDbContext schwarzContext)
+        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
+                                UserManager<ApplicationUser> userManager, 
+                                SignInManager<ApplicationUser> signInManager,
+                                SchwarzDbContext schwarzContext,
+                                ILogger<CompaniesController> logger)
         {
             _SchwarzContext = schwarzContext;
+            _logger = logger;
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -84,6 +86,12 @@ namespace AtoVen.API.Controllers
                 companyDTO.AccountGroup = company.AccountGroup;
                 companyDTO.VatNo = company.VatNo;
                 companyDTO.Notes = company.Notes;
+
+
+                companyDTO.IsVendorInitiated = company.IsVendorInitiated;
+                companyDTO.RecordDate = company.RecordDate;
+                companyDTO.IsApproved = company.IsApproved; 
+                companyDTO.ApprovedDate = company.ApprovedDate ?? null;
 
 
 
@@ -145,6 +153,7 @@ namespace AtoVen.API.Controllers
                 ListCompanyDTOs.Add(companyDTO);
             }
 
+            _logger.LogInformation("Company Added: " + DateTime.Now );
             return ListCompanyDTOs;
         }
 
@@ -181,6 +190,12 @@ namespace AtoVen.API.Controllers
             companyDTO.AccountGroup = company.AccountGroup;
             companyDTO.VatNo = company.VatNo;
             companyDTO.Notes = company.Notes;
+
+
+            companyDTO.IsVendorInitiated = company.IsVendorInitiated;
+            companyDTO.RecordDate = company.RecordDate;
+            companyDTO.IsApproved = company.IsApproved;
+            companyDTO.ApprovedDate = company.ApprovedDate ?? null;
 
             List<BankDTO> ListBankDTOs = new();
             var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
@@ -346,16 +361,10 @@ namespace AtoVen.API.Controllers
                     updateCompany.VendorType = companyDTO.VendorType;
                     updateCompany.Website = companyDTO.Website;
 
-                    //Non DTO fields below here
-                    //newCompany.Password = GenerateRandomPassword(null);
-                    //newCompany.IsVendorInitiated = true;
-                    //newCompany.RecordDate = DateTime.Now;
-
-                    //newCompany.ApproverID = 1;
-                    //newCompany.ApproverRoleID = 1;
-                    //newCompany.IsApproved = false;
-                    //newCompany.ApprovedDate = null;
-
+                    updateCompany.IsVendorInitiated = companyDTO.IsVendorInitiated ?? false;
+                    updateCompany.RecordDate = DateTime.Now;
+                    updateCompany.IsApproved = false;
+                    updateCompany.ApprovedDate = null;
 
                     _context.Companies.Update(updateCompany);
                     await _context.SaveChangesAsync();
@@ -547,16 +556,10 @@ namespace AtoVen.API.Controllers
                 newCompany.VendorType = company.VendorType;
                 newCompany.Website = company.Website;
 
-                //Non DTO fields below here
-                //newCompany.Password = GenerateRandomPassword(null);
-                //newCompany.IsVendorInitiated = true;
-                //newCompany.RecordDate = DateTime.Now;
-
-                //newCompany.ApproverID = 1;
-                //newCompany.ApproverRoleID = 1;
-                //newCompany.IsApproved = false;
-                //newCompany.ApprovedDate = null;
-
+                newCompany.IsVendorInitiated = company.IsVendorInitiated ?? false;
+                newCompany.RecordDate =DateTime.Now;
+                newCompany.IsApproved = false;
+                newCompany.ApprovedDate = null;
 
                 _context.Companies.Add(newCompany);
                 await _context.SaveChangesAsync();
@@ -655,11 +658,13 @@ namespace AtoVen.API.Controllers
 
             ///Register a userId for the Vendor
             ///
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = newCompany.Email,
                 Email = newCompany.Email,
-                NormalizedUserName = newCompany.CompanyName
+                NormalizedUserName = newCompany.CompanyName,
+                ApproverLevel = 0
+                
 
             };
 
@@ -736,13 +741,22 @@ namespace AtoVen.API.Controllers
         public async Task<IActionResult> DeleteCompany(int id)
         {
             var company = await _context.Companies.FindAsync(id);
+
             if (company == null)
             {
                 return NotFound();
             }
 
-            _context.Companies.Remove(company);
-            await _context.SaveChangesAsync();
+            using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
+            {
+
+                _context.Companies.Remove(company);
+                _context.Contacts.RemoveRange(_context.Contacts.Where(c => c.CompanyID == company.Id));
+                _context.Banks.RemoveRange(_context.Banks.Where(b => b.CompanyID == company.Id));
+                await _context.SaveChangesAsync();
+
+                await AtoVenDbContextTransaction.CommitAsync();
+            }
 
             return NoContent();
         }

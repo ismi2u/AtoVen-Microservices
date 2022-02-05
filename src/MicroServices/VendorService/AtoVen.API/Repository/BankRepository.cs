@@ -12,8 +12,8 @@ namespace AtoVen.API.Repository
 {
     public class BankRepository : IBankRepository
     {
-        private readonly AtovenDbContext _context;
-        public BankRepository(AtovenDbContext context)
+        private readonly AtoVenDbContext _context;
+        public BankRepository(AtoVenDbContext context)
         {
              _context = context;
         }

@@ -1,3 +1,4 @@
+using AtoVen.API.Controllers.AccountControl.Models;
 using AtoVen.API.Data;
 using AtoVen.API.Repository;
 using EmailSendService;
@@ -13,7 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContextPool<AtovenDbContext>(options => 
+builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchwarzSQLServerRunningAsContainer")));
@@ -22,7 +23,12 @@ builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IBankRepository, BankRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AtovenDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<AtoVenDbContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>(TokenOptions.DefaultProvider);    // to provide default token for password reset
+
+
+
 builder.Services.AddCors(options =>
               options.AddPolicy("myCorsPolicy", builder => {
                   builder.AllowAnyOrigin()

@@ -11,8 +11,8 @@ namespace AtoVen.API.Repository
 {
     public class ContactRepository : IContactRepository
     {
-        private readonly AtovenDbContext _context;
-        public ContactRepository(AtovenDbContext context)
+        private readonly AtoVenDbContext _context;
+        public ContactRepository(AtoVenDbContext context)
         {
             _context = context;
         }
