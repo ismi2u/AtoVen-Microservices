@@ -22,6 +22,7 @@ using System.Net;
 using AtoVen.API.Entities.ValiationResultEntities;
 using System.Text.Json;
 using EmailSendService;
+using AtoVen.API.Controllers.AccountControl.Models;
 
 namespace AtoVen.API.Controllers.AccountControl
 {
@@ -101,6 +102,90 @@ namespace AtoVen.API.Controllers.AccountControl
             await _signInManager.SignOutAsync();
 
             return Ok(new { Status = "Success", Message = "Logged Out Successfully!" });
+        }
+
+
+        [HttpPost]
+        [ActionName("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
+        {
+            //check if employee-id is already registered
+
+
+
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.email);
+
+                //bool isUserConfirmed = await userManager.IsEmailConfirmedAsync(user);
+                //if (user != null && isUserConfirmed)
+
+                if (user != null)
+                {
+                    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    //var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //var passwordResetlink= Url.Action("ResetPassword", "Account", new { email = model.email, token = token, Request.Scheme });
+
+                    //return Ok(passwordResetLink);
+                    token = token.Replace("+", "^^^");
+                    var receiverEmail = model.email;
+                    string subject = "Password Reset Link";
+                    string content = "Please click the below Password Reset Link to reset your password:" + Environment.NewLine +
+                                        "https://atoven.com/change-password?token=" + token + "&email=" + model.email;
+
+                    //"<a href=\"https://atoven.com/change-password?token=" + token + "&email=" + model.email + "\">";
+                    var messagemail = new Message(new string[] { receiverEmail }, subject, content);
+
+                    await _emailSender.SendEmailAsync(messagemail);
+
+                }
+
+                return  Ok(new { Status = "Success", Message = "Password Reset Email Sent Successfully!" });
+            }
+            return Conflict(new { Status = "Failure", Message = "UserId is Invalid!" });
+        }
+
+
+
+
+        [HttpPost]
+        [ActionName("ResetPassword")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(model.email);
+
+                if (user != null)
+                {
+
+                    model.Token = model.Token.Replace("^^^", "+");
+                    var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+                    if (result.Succeeded)
+                    {
+                        var receiverEmail = model.email;
+                        string subject = "Password Changed";
+                        string content = "Your new Password is:" + model.Password;
+                        var messagemail = new Message(new string[] { receiverEmail }, subject, content);
+
+                        await _emailSender.SendEmailAsync(messagemail);
+                        return Ok(new { Status = "Success", Message = "Your Password has been reset!" });
+                    }
+
+                    List<object> errResp = new();
+                    foreach (var error in result.Errors)
+                    {
+                        errResp.Add(error.Description);
+                    }
+                    return Ok(errResp);
+                }
+
+                return Conflict(new { Status = "Failure", Message = "User Not Found!" });
+
+            }
+
+            return Conflict(new { Status = "Failure", Message = "Model state is invalid" });
+
         }
     }
 }

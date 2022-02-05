@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtoVen.API.Migrations
 {
     [DbContext(typeof(AtovenDbContext))]
-    [Migration("20220204194837_initial")]
+    [Migration("20220205110555_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

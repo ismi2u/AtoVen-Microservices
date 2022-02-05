@@ -140,6 +140,8 @@ namespace AtoVen.API.Controllers
 
                 }
 
+                companyDTO.ListOfCompanyContacts = ListContactDTOs;
+
                 ListCompanyDTOs.Add(companyDTO);
             }
 
@@ -244,18 +246,198 @@ namespace AtoVen.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [ActionName("UpdateCompany")]
-        public async Task<IActionResult> PutCompany(int id, Company company)
+        public async Task<IActionResult> PutCompany(int id, CompanyDTO companyDTO)
         {
-            if (id != company.Id)
+
+
+            if (id != companyDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(company).State = EntityState.Modified;
+            _context.Entry(companyDTO).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+
+                ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
+                ////////////////////////////////////////////////////////////////////
+                //// *********** Company Duplicates Validation **************///////
+                ////////////////////////////////////////////////////////////////////
+
+
+
+
+                ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
+                ////////////////////////////////////////////////////////////////////
+                //// ***************   VAT Validation   *********************///////
+                ////////////////////////////////////////////////////////////////////
+
+                VATValidation vatvalidation = new VATValidation();
+                if (vatvalidation.ValidateVAT(companyDTO.VatNo) != "Valid VAT Number")
+                {
+                    return Ok("Invalid VAT Number: " + companyDTO.VatNo);
+                }
+
+                emailBodyStrBuilder.AppendLine("VAT Number: Validated");
+
+                ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
+                ////////////////////////////////////////////////////////////////////
+                //// *************** Address Validation *********************///////
+                ////////////////////////////////////////////////////////////////////
+                AddressValidation addValidation = new AddressValidation();
+                AddressValidationInputs addressValidationInputs = new AddressValidationInputs();
+                addressValidationInputs.HouseNo = companyDTO.HouseNo;
+                addressValidationInputs.Street = companyDTO.Street;
+                addressValidationInputs.City = companyDTO.City;
+                addressValidationInputs.Region = companyDTO.Region;
+                addressValidationInputs.Country = companyDTO.Country;
+                addressValidationInputs.Language = companyDTO.Language;
+                addressValidationInputs.PostalCode = companyDTO.PostalCode;
+
+
+                if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
+                {
+                    return Ok("Invalid Street Address");
+                }
+                //
+                emailBodyStrBuilder.AppendLine("Street Address: Validated");
+
+
+                int updateCompId = 0;
+                int[] arrBankIds;
+                int[] arrContactIds;
+
+                int totalBankCount = companyDTO.ListOfCompanyBanks.Count;
+                int totalContactCount = companyDTO.ListOfCompanyContacts.Count;
+
+                int intBankCount = 0;
+                int intContactCount = 0;
+                Company updateCompany;
+
+
+
+                using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
+                {
+                    //assign values
+                    updateCompany = await _context.Companies.FindAsync(companyDTO.Id);
+
+                    updateCompany.AccountGroup = companyDTO.AccountGroup;
+                    updateCompany.Building = companyDTO.Building;
+                    updateCompany.City = companyDTO.City;
+                    updateCompany.CommercialRegistrationNo = companyDTO.CommercialRegistrationNo;
+                    updateCompany.CompanyName = companyDTO.CompanyName;
+                    updateCompany.Country = companyDTO.Country;
+                    updateCompany.District = companyDTO.District;
+                    updateCompany.Email = companyDTO.Email;
+                    updateCompany.FaxNumber = companyDTO.FaxNumber;
+                    updateCompany.Floor = companyDTO.Floor;
+                    updateCompany.HouseNo = companyDTO.HouseNo;
+                    updateCompany.Language = companyDTO.Language;
+                    updateCompany.MobileNo = companyDTO.MobileNo;
+                    updateCompany.Notes = companyDTO.Notes;
+                    updateCompany.PhoneNo = companyDTO.PhoneNo;
+                    updateCompany.POBox = companyDTO.POBox;
+                    updateCompany.PostalCode = companyDTO.PostalCode;
+                    updateCompany.Region = companyDTO.Region;
+                    updateCompany.Room = companyDTO.Room;
+                    updateCompany.Street = companyDTO.Street;
+                    updateCompany.VatNo = companyDTO.VatNo;
+                    updateCompany.VendorType = companyDTO.VendorType;
+                    updateCompany.Website = companyDTO.Website;
+
+                    //Non DTO fields below here
+                    //newCompany.Password = GenerateRandomPassword(null);
+                    //newCompany.IsVendorInitiated = true;
+                    //newCompany.RecordDate = DateTime.Now;
+
+                    //newCompany.ApproverID = 1;
+                    //newCompany.ApproverRoleID = 1;
+                    //newCompany.IsApproved = false;
+                    //newCompany.ApprovedDate = null;
+
+
+                    _context.Companies.Update(updateCompany);
+                    await _context.SaveChangesAsync();
+
+                    emailBodyStrBuilder.AppendLine("================================================================");
+                    emailBodyStrBuilder.AppendLine("Vendor Company Details: " + updateCompany.ToString());
+
+                    //Get the DB Generated Identity Column Value after save.
+                    //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                    updateCompId = updateCompany.Id;
+                    ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+                    arrContactIds = new int[totalContactCount]; //Initialize the array with count
+                    foreach (ContactDTO contact in companyDTO.ListOfCompanyContacts)
+                    {
+                        Contact updateContact = await _context.Contacts.FindAsync(contact.Id);
+
+                        updateContact.CompanyID = updateCompId; //Db generated Identity column value
+                        updateContact.Email = contact.Email;
+                        updateContact.FaxNo = contact.FaxNo;
+                        updateContact.Language = contact.Language;
+                        updateContact.PhoneNo = contact.PhoneNo;
+                        updateContact.MobileNo = contact.MobileNo;
+                        updateContact.Department = contact.Department;
+                        updateContact.FirstName = contact.FirstName;
+                        updateContact.Address = contact.Address;
+                        updateContact.LastName = contact.LastName;
+                        updateContact.Designation = contact.Designation;
+                        updateContact.Country = contact.Country;
+
+                        _context.Contacts.Update(updateContact);
+                        await _context.SaveChangesAsync();
+
+
+                        emailBodyStrBuilder.AppendLine("================================================================");
+                        emailBodyStrBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                        emailBodyStrBuilder.AppendLine(updateContact.ToString());
+                        arrContactIds[intContactCount] = updateContact.Id; //Assign new Contact ID to array
+                        intContactCount += 1;
+                    }
+
+
+                    arrBankIds = new int[totalBankCount]; // Initialize the array with count
+
+                    foreach (BankDTO bank in companyDTO.ListOfCompanyBanks)
+                    {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
+                        ////////////////////////////////////////////////////////////////////
+                        //// *************** IBAN Number Validation *****************///////
+                        ////////////////////////////////////////////////////////////////////
+                        IBANValidation ibanvalidation = new IBANValidation();
+                        if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
+                        {
+                            return Ok("Invalid IBAN Number: " + bank.IBAN);
+                        }
+
+                        Bank updateBank = await _context.Banks.FindAsync(bank.Id);
+
+                        updateBank.CompanyID = updateCompId; //Db generated Identity column value
+                        updateBank.AccountHolderName = bank.AccountHolderName;
+                        updateBank.BankAccount = bank.BankAccount;
+                        updateBank.Country = bank.Country;
+                        updateBank.BankKey = bank.BankKey;
+                        updateBank.BankName = bank.BankName;
+                        updateBank.Currency = bank.Currency;
+                        updateBank.IBAN = bank.IBAN;
+                        updateBank.SwiftCode = bank.SwiftCode;
+
+
+                        _context.Banks.Update(updateBank);
+                        await _context.SaveChangesAsync();
+                        emailBodyStrBuilder.AppendLine("================================================================");
+                        emailBodyStrBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
+                        emailBodyStrBuilder.AppendLine(updateBank.ToString());
+
+                        arrBankIds[intBankCount] = updateBank.Id; //Assign new bank ID to array
+                        intBankCount += 1;
+                    }
+
+                    await AtoVenDbContextTransaction.CommitAsync();
+                }
+
+
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -272,10 +454,21 @@ namespace AtoVen.API.Controllers
             return NoContent();
         }
 
+
+
+
+
+
         [HttpPost]
         [ActionName("RegisterCompany")]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
+            ////////////////////////////////////////////////////////////////////
+            //// *********** Company Duplicates Validation **************///////
+            ////////////////////////////////////////////////////////////////////
+
+
+
 
 
             ////////////////////////////////////////////////////////////////////
@@ -478,7 +671,7 @@ namespace AtoVen.API.Controllers
             }
 
 
-            return CreatedAtAction("GetCompany", new { id = newCompId }, company);
+            return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
         }
 
 
