@@ -274,7 +274,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("RegisterCompany")]
-        public async Task<ActionResult<Company>> PostCompany(CompanyDTO company)
+        public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
 
 
@@ -285,7 +285,7 @@ namespace AtoVen.API.Controllers
             VATValidation vatvalidation = new VATValidation();
             if(vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
             {
-                return Ok("Invalid VAT Number");
+                return Ok("Invalid VAT Number: " + company.VatNo);
             }
 
             emailBodyStrBuilder.AppendLine("VAT Number: Validated");
@@ -377,7 +377,7 @@ namespace AtoVen.API.Controllers
                 ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                 arrContactIds = new int[totalContactCount]; //Initialize the array with count
-                foreach (ContactDTO contact in company.ListOfCompanyContacts)
+                foreach (ContactPostDTO contact in company.ListOfCompanyContacts)
                 {
                     Contact newContact = new Contact() { };
 
@@ -409,7 +409,7 @@ namespace AtoVen.API.Controllers
 
                 arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
-                foreach (BankDTO bank in company.ListOfCompanyBanks)
+                foreach (BankPostDTO bank in company.ListOfCompanyBanks)
                 {
                     ////////////////////////////////////////////////////////////////////
                     //// *************** IBAN Number Validation *****************///////
@@ -417,7 +417,7 @@ namespace AtoVen.API.Controllers
                     IBANValidation ibanvalidation = new IBANValidation();
                     if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
                     {
-                        return Ok("Invalid IBAN Number");
+                        return Ok("Invalid IBAN Number: " + bank.IBAN);
                     }
 
                     Bank newBank = new Bank() { };
