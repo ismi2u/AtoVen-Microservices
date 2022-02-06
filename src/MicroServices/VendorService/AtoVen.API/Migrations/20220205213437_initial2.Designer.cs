@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtoVen.API.Migrations
 {
     [DbContext(typeof(AtoVenDbContext))]
-    [Migration("20220205210633_initial")]
-    partial class initial
+    [Migration("20220205213437_initial2")]
+    partial class initial2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -110,6 +110,9 @@ namespace AtoVen.API.Migrations
                     b.Property<int>("CompanyID")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsLevelApproved")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LevelApprovedDate")
                         .HasColumnType("datetime2");
 
@@ -121,6 +124,22 @@ namespace AtoVen.API.Migrations
                     b.HasIndex("CompanyID");
 
                     b.ToTable("ApprovalFlows");
+                });
+
+            modelBuilder.Entity("AtoVen.API.Entities.ApprovalLevel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApprovalLevels");
                 });
 
             modelBuilder.Entity("AtoVen.API.Entities.Bank", b =>

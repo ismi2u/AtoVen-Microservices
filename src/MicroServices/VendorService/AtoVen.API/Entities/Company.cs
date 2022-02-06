@@ -55,7 +55,6 @@ namespace AtoVen.API.Entities
     {
         public int Id { get; set; }
         public string CompanyName { get; set; }
-
         public string CommercialRegistrationNo { get; set; }
         public string Language { get; set; }
         public string Country { get; set; }

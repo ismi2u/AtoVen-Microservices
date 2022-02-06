@@ -16,7 +16,25 @@ namespace AtoVen.API.Entities
         public DateTime RecordDate { get; set; }
         public string ApproverEmail { get; set; }
         public int ApproverLevel{ get; set; }
+        public int ApprovalStatus { get; set; }
         public DateTime? LevelApprovedDate { get; set; }
 
+    }
+
+
+    public class ApprovalFlowDTO
+    {
+        public int Id { get; set; }
+        public int CompanyID { get; set; }
+        public int ApprovalStatus { get; set; }
+
+    }
+
+    public enum ApprovalStatusType
+    {
+        Pending =1,
+        Approved,
+        Rejected
+ 
     }
 }

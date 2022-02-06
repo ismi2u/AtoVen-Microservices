@@ -10,6 +10,19 @@ namespace AtoVen.API.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ApprovalLevels",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Level = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApprovalLevels", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -204,6 +217,7 @@ namespace AtoVen.API.Migrations
                     RecordDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ApproverEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApproverLevel = table.Column<int>(type: "int", nullable: false),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
                     LevelApprovedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -333,6 +347,9 @@ namespace AtoVen.API.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ApprovalFlows");
+
+            migrationBuilder.DropTable(
+                name: "ApprovalLevels");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");

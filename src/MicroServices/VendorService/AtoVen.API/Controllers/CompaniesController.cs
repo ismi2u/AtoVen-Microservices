@@ -33,7 +33,7 @@ namespace AtoVen.API.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
-        public StringBuilder emailBodyStrBuilder= new StringBuilder();
+        public StringBuilder emailBodyBuilder = new StringBuilder();
 
         public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
                                 UserManager<ApplicationUser> userManager, 
@@ -294,7 +294,7 @@ namespace AtoVen.API.Controllers
                     return Ok("Invalid VAT Number: " + companyDTO.VatNo);
                 }
 
-                emailBodyStrBuilder.AppendLine("VAT Number: Validated");
+                emailBodyBuilder.AppendLine("VAT Number: Validated");
 
                 ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
                 ////////////////////////////////////////////////////////////////////
@@ -316,7 +316,7 @@ namespace AtoVen.API.Controllers
                     return Ok("Invalid Street Address");
                 }
                 //
-                emailBodyStrBuilder.AppendLine("Street Address: Validated");
+                emailBodyBuilder.AppendLine("Street Address: Validated");
 
 
                 int updateCompId = 0;
@@ -369,8 +369,8 @@ namespace AtoVen.API.Controllers
                     _context.Companies.Update(updateCompany);
                     await _context.SaveChangesAsync();
 
-                    emailBodyStrBuilder.AppendLine("================================================================");
-                    emailBodyStrBuilder.AppendLine("Vendor Company Details: " + updateCompany.ToString());
+                    emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.AppendLine("Vendor Company Details: " + updateCompany.ToString());
 
                     //Get the DB Generated Identity Column Value after save.
                     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -399,9 +399,9 @@ namespace AtoVen.API.Controllers
                         await _context.SaveChangesAsync();
 
 
-                        emailBodyStrBuilder.AppendLine("================================================================");
-                        emailBodyStrBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                        emailBodyStrBuilder.AppendLine(updateContact.ToString());
+                        emailBodyBuilder.AppendLine("================================================================");
+                        emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                        emailBodyBuilder.AppendLine(updateContact.ToString());
                         arrContactIds[intContactCount] = updateContact.Id; //Assign new Contact ID to array
                         intContactCount += 1;
                     }
@@ -435,9 +435,9 @@ namespace AtoVen.API.Controllers
 
                         _context.Banks.Update(updateBank);
                         await _context.SaveChangesAsync();
-                        emailBodyStrBuilder.AppendLine("================================================================");
-                        emailBodyStrBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                        emailBodyStrBuilder.AppendLine(updateBank.ToString());
+                        emailBodyBuilder.AppendLine("================================================================");
+                        emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
+                        emailBodyBuilder.AppendLine(updateBank.ToString());
 
                         arrBankIds[intBankCount] = updateBank.Id; //Assign new bank ID to array
                         intBankCount += 1;
@@ -490,7 +490,7 @@ namespace AtoVen.API.Controllers
                 return Ok("Invalid VAT Number: " + company.VatNo);
             }
 
-            emailBodyStrBuilder.AppendLine("VAT Number: Validated");
+            emailBodyBuilder.AppendLine("VAT Number: Validated");
 
             ////////////////////////////////////////////////////////////////////
             //// *************** Address Validation *********************///////
@@ -511,7 +511,7 @@ namespace AtoVen.API.Controllers
                 return Ok("Invalid Street Address");
             }
             //
-            emailBodyStrBuilder.AppendLine("Street Address: Validated");
+            emailBodyBuilder.AppendLine("Street Address: Validated");
 
 
             int newCompId = 0;
@@ -564,8 +564,8 @@ namespace AtoVen.API.Controllers
                 _context.Companies.Add(newCompany);
                 await _context.SaveChangesAsync();
 
-                emailBodyStrBuilder.AppendLine("================================================================");
-                emailBodyStrBuilder.AppendLine("Vendor Company Details: " + newCompany.ToString());
+                emailBodyBuilder.AppendLine("================================================================");
+                emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.ToString());
 
                 //Get the DB Generated Identity Column Value after save.
                 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -594,9 +594,9 @@ namespace AtoVen.API.Controllers
                     await _context.SaveChangesAsync();
 
 
-                    emailBodyStrBuilder.AppendLine("================================================================");
-                    emailBodyStrBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                    emailBodyStrBuilder.AppendLine(newContact.ToString());
+                    emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                    emailBodyBuilder.AppendLine(newContact.ToString());
                     arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
                     intContactCount += 1;
                 }
@@ -632,9 +632,9 @@ namespace AtoVen.API.Controllers
 
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
-                    emailBodyStrBuilder.AppendLine("================================================================");
-                    emailBodyStrBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    emailBodyStrBuilder.AppendLine(newBank.ToString());
+                    emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
+                    emailBodyBuilder.AppendLine(newBank.ToString());
 
                     arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                     intBankCount += 1;
@@ -642,6 +642,29 @@ namespace AtoVen.API.Controllers
 
                 await AtoVenDbContextTransaction.CommitAsync();
             }
+
+
+            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ////////////////////////////////////////////////////////////////////
+            //// ***************    Add Approval FLOW   *****************///////
+            ////////////////////////////////////////////////////////////////////
+            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ///
+           // _context.
+           //List<ApplicationUser> _userManager.Users.Where(u => u.ApproverLevel > 0).ToList();
+           // ApplicationUser user = _userManager.FindByEmailAsync(approvalFlow.ApproverEmail);
+
+           // ApprovalFlow approvalFlow = new ApprovalFlow();
+           // approvalFlow.CompanyID = newCompId;
+           // approvalFlow.ApproverEmail = "test@gmail.com"; //  find the approver email
+           // approvalFlow.ApproverLevel = user.ApproverLevel;
+           // approvalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
+           // approvalFlow.LevelApprovedDate = null;
+
+
+
+
+
 
             //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
             ////////////////////////////////////////////////////////////////////
@@ -651,7 +674,7 @@ namespace AtoVen.API.Controllers
 
             await SendEmailInHtml("atocash@atominosconsulting.com",
                              "New Vendor " + company.CompanyName +
-                             " approval request", emailBodyStrBuilder.ToString()) ;
+                             " approval request", emailBodyBuilder.ToString()) ;
 
 
 
