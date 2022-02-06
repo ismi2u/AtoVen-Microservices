@@ -16,7 +16,9 @@ namespace AtoVen.API.Entities
         public DateTime RecordDate { get; set; }
         public string ApproverEmail { get; set; }
         public int ApproverLevel{ get; set; }
-        public int ApprovalStatus { get; set; }
+        public int ApprovalStatus { get; set; } 
+
+        public bool IsDuplicateEntry{ get; set; }
         public DateTime? LevelApprovedDate { get; set; }
 
     }
@@ -37,4 +39,6 @@ namespace AtoVen.API.Entities
         Rejected
  
     }
+
+
 }

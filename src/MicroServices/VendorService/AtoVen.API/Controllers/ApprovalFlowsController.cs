@@ -15,7 +15,8 @@ using AtoVen.API.Controllers.AccountControl.Models;
 
 namespace AtoVen.API.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class ApprovalFlowsController : ControllerBase
     {
@@ -46,6 +47,31 @@ namespace AtoVen.API.Controllers
             return await _context.ApprovalFlows.ToListAsync();
         }
 
+
+        // GET: api/ApprovalFlows
+        [HttpGet]
+        [ActionName("GetApprovalFlowByEmailId")]
+        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailId(string email)
+        {
+            return await _context.ApprovalFlows.Where(a=> a.ApproverEmail== email).ToListAsync();
+        }
+
+
+        [HttpGet]
+        [ActionName("GetApprovalFlowByEmailIdInPending")]
+        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailByPending(string email)
+        {
+            return await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus==(int)ApprovalStatusType.Pending ).ToListAsync();
+        }
+
+        [HttpGet]
+        [ActionName("GetApprovalFlowByEmailIdInApproved")]
+        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailByApproved(string email)
+        {
+            return await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus == (int)ApprovalStatusType.Approved).ToListAsync();
+        }
+
+    
         // GET: api/ApprovalFlows/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApprovalFlow>> GetApprovalFlow(int id)
