@@ -29,6 +29,8 @@ namespace AtoVen.API.Entities
         public int Id { get; set; }
         public int CompanyID { get; set; }
         public int ApprovalStatus { get; set; }
+        public bool IsDuplicateEntry { get; set; }
+
 
     }
 

@@ -42,36 +42,93 @@ namespace AtoVen.API.Controllers
 
         // GET: api/ApprovalFlows
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlows()
+        public async Task<ActionResult<IEnumerable<ApprovalFlowDTO>>> GetApprovalFlows()
         {
-            return await _context.ApprovalFlows.ToListAsync();
+
+            List<ApprovalFlowDTO> ListApprovalFlowDTOs = new();
+
+            var ListApprovalFlows = await _context.ApprovalFlows.ToListAsync();
+
+            foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
+            {
+                ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
+
+                approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
+                approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
+
+                ListApprovalFlowDTOs.Add(approvalFlowDTO);
+            }
+            return ListApprovalFlowDTOs;
         }
 
 
         // GET: api/ApprovalFlows
         [HttpGet]
         [ActionName("GetApprovalFlowByEmailId")]
-        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailId(string email)
+        public async Task<ActionResult<IEnumerable<ApprovalFlowDTO>>> GetApprovalFlowByEmailId(string email)
         {
-            return await _context.ApprovalFlows.Where(a=> a.ApproverEmail== email).ToListAsync();
+            List<ApprovalFlowDTO> ListApprovalFlowDTOs = new();
+
+            var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email).ToListAsync();
+
+            foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
+            {
+                ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
+
+                approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
+                approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
+
+                ListApprovalFlowDTOs.Add(approvalFlowDTO);
+            }
+            return ListApprovalFlowDTOs;
         }
 
 
         [HttpGet]
         [ActionName("GetApprovalFlowByEmailIdInPending")]
-        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailByPending(string email)
+        public async Task<ActionResult<IEnumerable<ApprovalFlowDTO>>> GetApprovalFlowByEmailByPending(string email)
         {
-            return await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus==(int)ApprovalStatusType.Pending ).ToListAsync();
+            List<ApprovalFlowDTO> ListApprovalFlowDTOs = new();
+
+            var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus == (int)ApprovalStatusType.Pending).ToListAsync();
+
+            foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
+            {
+                ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
+
+                approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
+                approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
+
+                ListApprovalFlowDTOs.Add(approvalFlowDTO);
+            }
+            return ListApprovalFlowDTOs;
         }
 
         [HttpGet]
         [ActionName("GetApprovalFlowByEmailIdInApproved")]
-        public async Task<ActionResult<IEnumerable<ApprovalFlow>>> GetApprovalFlowByEmailByApproved(string email)
+        public async Task<ActionResult<IEnumerable<ApprovalFlowDTO>>> GetApprovalFlowByEmailByApproved(string email)
         {
-            return await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus == (int)ApprovalStatusType.Approved).ToListAsync();
+            List<ApprovalFlowDTO> ListApprovalFlowDTOs = new();
+
+            var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus == (int)ApprovalStatusType.Approved).ToListAsync();
+
+            foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
+            {
+                ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
+
+                approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
+                approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
+
+                ListApprovalFlowDTOs.Add(approvalFlowDTO);
+            }
+            return ListApprovalFlowDTOs;
         }
 
-    
+
         // GET: api/ApprovalFlows/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApprovalFlow>> GetApprovalFlow(int id)
@@ -82,6 +139,12 @@ namespace AtoVen.API.Controllers
             {
                 return NotFound();
             }
+
+            ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
+
+            approvalFlowDTO.Id = approvalFlow.Id;
+            approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
+            approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
             return approvalFlow;
         }
