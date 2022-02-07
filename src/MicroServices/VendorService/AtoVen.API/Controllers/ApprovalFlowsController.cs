@@ -155,6 +155,22 @@ namespace AtoVen.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutApprovalFlow(int id, ApprovalFlowDTO approvalFlow)
         {
+
+           // ApprovalFlow updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlow.Id);
+
+           // updateApprovalFlow.RecordDate = DateTime.Now;
+           // updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
+           // _context.ApprovalFlows.Update(updateApprovalFlow);
+           // await _context.SaveChangesAsync();
+           
+           //ApprovalFlow NextApprovalFlow =  _context.ApprovalFlows.Where(a => a.CompanyID == updateApprovalFlow.CompanyID && a.ApproverLevel == updateApprovalFlow.ApproverLevel + 1).FirstOrDefault();
+            
+
+           // await SendEmailInHtml(NextApprovalFlow.ApproverEmail,
+           //                                    "New Vendor " + _context.Companies.Find(updateApprovalFlow.CompanyID).CompanyName + " Approval request",
+           //                                    emailBodyBuilder.ToString());
+
+
             if (id != approvalFlow.Id)
             {
                 return BadRequest();
@@ -181,9 +197,6 @@ namespace AtoVen.API.Controllers
                     Company company = await _context.Companies.FindAsync(compId);
                     List<Contact> contacts = await _context.Contacts.Where(c => c.CompanyID == compId).ToListAsync();
                     List<Bank> banks = await _context.Banks.Where(b => b.CompanyID == compId).ToListAsync();
-
-
-
 
                     ApprovalFlow nextApproval = _context.ApprovalFlows.Where(a => a.CompanyID == compId && a.ApproverLevel == nxtApprLevel).FirstOrDefault();
 
@@ -458,13 +471,20 @@ namespace AtoVen.API.Controllers
             return new string(chars.ToArray());
         }
 
-        
+        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
+        {
+            var approverMailAddress = sendToEmailAddress;
+            string subject = emailSubject;
+            string content = bodyContent;
+            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+            await _emailSender.SendEmailAsync(messagemail);
+        }
 
     }
 
 
 
-  
+   
 
 
 }

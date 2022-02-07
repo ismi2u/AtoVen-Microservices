@@ -19,6 +19,7 @@ using ValidationLibrary;
 using DataService.Entities;
 using DataService.DataContext;
 using DataService.AccountControl.Models;
+using Newtonsoft.Json;
 
 namespace AtoVen.API.Controllers
 {
@@ -36,7 +37,7 @@ namespace AtoVen.API.Controllers
         public StringBuilder emailBodyBuilder = new StringBuilder();
 
         public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
-                                UserManager<ApplicationUser> userManager, 
+                                UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
                                 ILogger<CompaniesController> logger)
@@ -90,7 +91,7 @@ namespace AtoVen.API.Controllers
 
                 companyDTO.IsVendorInitiated = company.IsVendorInitiated;
                 companyDTO.RecordDate = company.RecordDate;
-                companyDTO.IsApproved = company.IsApproved; 
+                companyDTO.IsApproved = company.IsApproved;
                 companyDTO.ApprovedDate = company.ApprovedDate ?? null;
 
 
@@ -153,7 +154,7 @@ namespace AtoVen.API.Controllers
                 ListCompanyDTOs.Add(companyDTO);
             }
 
-            _logger.LogInformation("Company Added: " + DateTime.Now );
+            _logger.LogInformation("Company Added: " + DateTime.Now);
             return ListCompanyDTOs;
         }
 
@@ -218,7 +219,7 @@ namespace AtoVen.API.Controllers
 
                 ListBankDTOs.Add(bankDTO);
 
-               
+
             }
 
 
@@ -264,7 +265,9 @@ namespace AtoVen.API.Controllers
         public async Task<IActionResult> PutCompany(int id, CompanyDTO companyDTO)
         {
 
-
+            emailBodyBuilder.AppendLine("===========================================================");
+            emailBodyBuilder.AppendLine("Update Existing Vendor " + companyDTO.CompanyName + " Approval request");
+            emailBodyBuilder.AppendLine("===========================================================");
             if (id != companyDTO.Id)
             {
                 return BadRequest();
@@ -274,15 +277,6 @@ namespace AtoVen.API.Controllers
 
             try
             {
-
-                ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
-                ////////////////////////////////////////////////////////////////////
-                //// *********** Company Duplicates Validation **************///////
-                ////////////////////////////////////////////////////////////////////
-
-
-
-
                 ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
                 ////////////////////////////////////////////////////////////////////
                 //// ***************   VAT Validation   *********************///////
@@ -369,8 +363,12 @@ namespace AtoVen.API.Controllers
                     _context.Companies.Update(updateCompany);
                     await _context.SaveChangesAsync();
 
-                    emailBodyBuilder.AppendLine("================================================================");
-                    emailBodyBuilder.AppendLine("Vendor Company Details: " + updateCompany.ToString());
+                    emailBodyBuilder.AppendLine("==================================================================================================");
+                    emailBodyBuilder.AppendLine("Vendor Company Details: " + updateCompany.CompanyName);
+                    emailBodyBuilder.AppendLine("                        " + updateCompany.City + ", " + updateCompany.Country + ", " + updateCompany.PostalCode);
+                    emailBodyBuilder.AppendLine("                        " + updateCompany.MobileNo + ", " + updateCompany.PhoneNo);
+                    emailBodyBuilder.AppendLine("Registration No: " + updateCompany.CommercialRegistrationNo);
+                    emailBodyBuilder.AppendLine("==================================================================================================");
 
                     //Get the DB Generated Identity Column Value after save.
                     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -401,7 +399,7 @@ namespace AtoVen.API.Controllers
 
                         emailBodyBuilder.AppendLine("================================================================");
                         emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                        emailBodyBuilder.AppendLine(updateContact.ToString());
+                        emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(updateContact));
                         arrContactIds[intContactCount] = updateContact.Id; //Assign new Contact ID to array
                         intContactCount += 1;
                     }
@@ -437,7 +435,7 @@ namespace AtoVen.API.Controllers
                         await _context.SaveChangesAsync();
                         emailBodyBuilder.AppendLine("================================================================");
                         emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                        emailBodyBuilder.AppendLine(updateBank.ToString());
+                        emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(updateBank));
 
                         arrBankIds[intBankCount] = updateBank.Id; //Assign new bank ID to array
                         intBankCount += 1;
@@ -445,9 +443,58 @@ namespace AtoVen.API.Controllers
 
                     await AtoVenDbContextTransaction.CommitAsync();
                 }
+                //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                ////////////////////////////////////////////////////////////////////
+                //// ***************    Add Approval FLOW   *****************///////
+                ////////////////////////////////////////////////////////////////////
+                /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
 
 
+                //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                ////////////////////////////////////////////////////////////////////
+                //// ***************   All Duplications Check FLOW   ********///////
+                ////////////////////////////////////////////////////////////////////
+                /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+
+                DuplicatesValidation duplicate = new DuplicatesValidation(_context, _SchwarzContext);
+                bool areDuplicatesFound = duplicate.CheckDuplicates(updateCompany).Count() > 0 ? true : false;
+
+                emailBodyBuilder.AppendLine("///////////////////////////////////////////");
+
+                var listofApprovalFlows = _context.ApprovalFlows.Where(a => a.CompanyID == updateCompany.Id).ToList();
+                int i = 1;
+                foreach (ApprovalFlow approvalFlowItem in listofApprovalFlows)
+                {
+                    ApprovalFlow updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlowItem.Id);
+
+                    updateApprovalFlow.RecordDate = DateTime.Now;
+                    updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
+                    updateApprovalFlow.IsDuplicateEntry = areDuplicatesFound;
+
+                    _context.ApprovalFlows.Update(updateApprovalFlow);
+
+                    //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                    ////////////////////////////////////////////////////////////////////
+                    //// *************** Send Email to Approver *****************///////
+                    ////////////////////////////////////////////////////////////////////
+                    /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                    ///
+                    if (i == 1) //only first approver will receive email
+                    {
+                        await SendEmailInHtml(updateApprovalFlow.ApproverEmail,
+                                                "New Vendor " + updateCompany.CompanyName + " Approval request",
+                                                emailBodyBuilder.ToString());
+                    }
+                    ////////////////////////////////////////////////////////////////////
+                    /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                }
+
+                await _context.SaveChangesAsync();
             }
+
+
+
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!CompanyExists(id))
@@ -472,20 +519,16 @@ namespace AtoVen.API.Controllers
         [ActionName("RegisterCompany")]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
-            ////////////////////////////////////////////////////////////////////
-            //// *********** Company Duplicates Validation **************///////
-            ////////////////////////////////////////////////////////////////////
-
-
-
-
+            emailBodyBuilder.AppendLine("===========================================================");
+            emailBodyBuilder.AppendLine("New Vendor " + company.CompanyName + " Approval request");
+            emailBodyBuilder.AppendLine("===========================================================");
 
             ////////////////////////////////////////////////////////////////////
             //// ***************   VAT Validation   *********************///////
             ////////////////////////////////////////////////////////////////////
 
             VATValidation vatvalidation = new VATValidation();
-            if(vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
+            if (vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
             {
                 return Ok("Invalid VAT Number: " + company.VatNo);
             }
@@ -504,7 +547,7 @@ namespace AtoVen.API.Controllers
             addressValidationInputs.Country = company.Country;
             addressValidationInputs.Language = company.Language;
             addressValidationInputs.PostalCode = company.PostalCode;
-            
+
 
             if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
             {
@@ -557,15 +600,21 @@ namespace AtoVen.API.Controllers
                 newCompany.Website = company.Website;
 
                 newCompany.IsVendorInitiated = company.IsVendorInitiated ?? false;
-                newCompany.RecordDate =DateTime.Now;
+                newCompany.RecordDate = DateTime.Now;
                 newCompany.IsApproved = false;
                 newCompany.ApprovedDate = null;
 
                 _context.Companies.Add(newCompany);
                 await _context.SaveChangesAsync();
 
-                emailBodyBuilder.AppendLine("================================================================");
-                emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.ToString());
+                emailBodyBuilder.AppendLine("==================================================================================================");
+                emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
+                emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
+                emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
+                emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
+                emailBodyBuilder.AppendLine("==================================================================================================");
+
+
 
                 //Get the DB Generated Identity Column Value after save.
                 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -596,12 +645,12 @@ namespace AtoVen.API.Controllers
 
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                    emailBodyBuilder.AppendLine(newContact.ToString());
+                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
                     arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
                     intContactCount += 1;
                 }
 
-               
+
 
                 arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
@@ -633,7 +682,7 @@ namespace AtoVen.API.Controllers
                     await _context.SaveChangesAsync();
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    emailBodyBuilder.AppendLine(newBank.ToString());
+                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                     intBankCount += 1;
@@ -648,17 +697,29 @@ namespace AtoVen.API.Controllers
             //// ***************    Add Approval FLOW   *****************///////
             ////////////////////////////////////////////////////////////////////
             /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-            
+
 
             //find out the no of levels of approvals max = 2
 
             int maxApprovalLevel = _context.Users.Max(u => u.ApproverLevel);
 
-            for(int i=1; i < maxApprovalLevel+1; i++)
-            {
-              List<ApplicationUser> listApprovers = _context.Users.Where(u => u.ApproverLevel == i).ToList();
 
-                foreach(ApplicationUser approver in listApprovers)
+
+            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ////////////////////////////////////////////////////////////////////
+            //// ***************   All Duplications Check FLOW   ********///////
+            ////////////////////////////////////////////////////////////////////
+            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+
+            DuplicatesValidation duplicate = new DuplicatesValidation(_context, _SchwarzContext);
+            bool areDuplicatesFound = duplicate.CheckDuplicates(newCompany).Count() > 0 ? true : false;
+
+
+            for (int i = 1; i < maxApprovalLevel + 1; i++)
+            {
+                List<ApplicationUser> listApprovers = _context.Users.Where(u => u.ApproverLevel == i).ToList();
+
+                foreach (ApplicationUser approver in listApprovers)
                 {
                     ApprovalFlow newApprovalFlow = new ApprovalFlow();
 
@@ -667,74 +728,56 @@ namespace AtoVen.API.Controllers
                     newApprovalFlow.ApproverEmail = approver.Email;
                     newApprovalFlow.ApproverLevel = approver.ApproverLevel;
                     newApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
-
-                    /// work start from here
-
-                    //////////DuplicatesValidation validation = new DuplicatesValidation();
-                    //////////validation.CheckDuplicates();
-                    //////////newApprovalFlow.IsDuplicateEntry = false;
+                    newApprovalFlow.IsDuplicateEntry = areDuplicatesFound;
 
                     _context.ApprovalFlows.Add(newApprovalFlow);
+
+                    //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                    ////////////////////////////////////////////////////////////////////
+                    //// *************** Send Email to Approver *****************///////
+                    ////////////////////////////////////////////////////////////////////
+                    /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                    ///
+                    if (i == 1) //only first approver will receive email
+                    {
+                        await SendEmailInHtml(approver.Email,
+                                                "New Vendor " + newCompany.CompanyName + " Approval request",
+                                                emailBodyBuilder.ToString());
+                    }
+                    ////////////////////////////////////////////////////////////////////
+                    /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
                 }
 
                 await _context.SaveChangesAsync();
 
             }
-           
-
-
-           
-
-
-           // _context.
-           //List<ApplicationUser> _userManager.Users.Where(u => u.ApproverLevel > 0).ToList();
-           // ApplicationUser user = _userManager.FindByEmailAsync(approvalFlow.ApproverEmail);
-
-           // ApprovalFlow approvalFlow = new ApprovalFlow();
-           // approvalFlow.CompanyID = newCompId;
-           // approvalFlow.ApproverEmail = "test@gmail.com"; //  find the approver email
-           // approvalFlow.ApproverLevel = user.ApproverLevel;
-           // approvalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
-           // approvalFlow.LevelApprovedDate = null;
-
-
-
-
-
 
             //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
             ////////////////////////////////////////////////////////////////////
-            //// *************** Send Email to Approver *****************///////
+            //// *************** Register a userId for the Vendor *******///////
             ////////////////////////////////////////////////////////////////////
             /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
 
-            await SendEmailInHtml("atocash@atominosconsulting.com",
-                             "New Vendor " + company.CompanyName +
-                             " approval request", emailBodyBuilder.ToString()) ;
 
-
-
-
-            ///Register a userId for the Vendor
-            ///
+            string rndPassword = GenerateRandomPassword(null);
             var user = new ApplicationUser
             {
                 UserName = newCompany.Email,
                 Email = newCompany.Email,
                 NormalizedUserName = newCompany.CompanyName,
-                ApproverLevel = 0
-
+                ApproverLevel = 0,
+                PasswordHash = rndPassword
             };
 
-            var result = await _userManager.CreateAsync(user, GenerateRandomPassword(null));
+            var result = await _userManager.CreateAsync(user);
 
             if (result.Succeeded)
             {
-                //await _signInManager.SignInAsync(user, isPersistent: false);
+                return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
             }
 
 
-            return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
+            return NoContent();
         }
 
 
