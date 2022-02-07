@@ -5,11 +5,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using AtoVen.API.Controllers.AccountControl.Models;
+using DataService.AccountControl.Models;
+using DataService.Entities;
 
-namespace AtoVen.API.Data
+
+namespace DataService.DataContext
 {
     public class AtoVenDbContext: IdentityDbContext<ApplicationUser>
     { 

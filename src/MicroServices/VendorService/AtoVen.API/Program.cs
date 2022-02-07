@@ -1,6 +1,5 @@
-using AtoVen.API.Controllers.AccountControl.Models;
-using AtoVen.API.Data;
-using AtoVen.API.Repository;
+using DataService.AccountControl.Models;
+using DataService.DataContext;
 using EmailSendService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +19,9 @@ builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchwarzSQLServerRunningAsContainer")));
 
 
-builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
-builder.Services.AddScoped<IBankRepository, BankRepository>();
-builder.Services.AddScoped<IContactRepository, ContactRepository>();
+//builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+//builder.Services.AddScoped<IBankRepository, BankRepository>();
+//builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<AtoVenDbContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>(TokenOptions.DefaultProvider);    // to provide default token for password reset

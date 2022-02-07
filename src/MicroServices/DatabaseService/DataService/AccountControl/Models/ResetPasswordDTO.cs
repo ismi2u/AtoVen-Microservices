@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace AtoVen.API.Controllers.AccountControl.Models
+namespace DataService.AccountControl.Models
 {
     public class ResetPasswordDTO
     {

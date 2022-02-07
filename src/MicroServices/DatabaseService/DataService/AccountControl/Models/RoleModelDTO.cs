@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AtoVen.API.Controllers.AccountControl.Models
+namespace DataService.AccountControl.Models
 {
     public class RoleModelDTO
     {

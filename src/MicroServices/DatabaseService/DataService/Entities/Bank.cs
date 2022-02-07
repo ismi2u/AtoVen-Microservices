@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace AtoVen.API.Entities
+namespace DataService.Entities
 {
     public class Bank
     {

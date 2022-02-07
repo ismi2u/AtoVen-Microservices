@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using DataService.Entities;
 
-namespace AtoVen.API.Data
+namespace DataService.DataContext
 {
     public class SchwarzDbContext : DbContext
     {

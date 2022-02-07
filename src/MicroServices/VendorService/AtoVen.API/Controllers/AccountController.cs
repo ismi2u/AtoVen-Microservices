@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using AtoVen.API.Data;
-using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -16,9 +14,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text.Json;
 using EmailSendService;
-using AtoVen.API.Controllers.AccountControl.Models;
+using DataService;
+using DataService.AccountControl.Models;
+using DataService.DataContext;
+using DataService.Entities;
 
-namespace AtoVen.API.Controllers.AccountControl
+namespace AtoVen.API.Controllers
 {
 
     [Route("api/[controller]/[action]")]

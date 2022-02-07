@@ -11,11 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AtoVen.API", "MicroServices
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailService", "EmailService", "{64081A08-FF6C-4B09-A5CD-B7A751769583}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailSendService", "MicroServices\EmailSender\EmailSendService.csproj", "{156E33B1-5D06-4A66-AE44-1AFD4BFF59DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailSendService", "MicroServices\EmailSender\EmailSendService.csproj", "{156E33B1-5D06-4A66-AE44-1AFD4BFF59DB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ValidationService", "ValidationService", "{22B118B2-04AD-42D5-AF89-BDC59BAFFB91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValidationLibrary", "MicroServices\ValidationService\ValidationLibrary\ValidationLibrary.csproj", "{61BC1F95-5D2A-400C-8814-DA406E5D3098}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValidationLibrary", "MicroServices\ValidationService\ValidationLibrary\ValidationLibrary.csproj", "{61BC1F95-5D2A-400C-8814-DA406E5D3098}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseService", "DatabaseService", "{6003882F-1D48-4216-A0BC-75BC3C02A1D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataService", "MicroServices\DatabaseService\DataService\DataService.csproj", "{0FFA655C-5718-45D6-AD18-A30C9D42FF76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,10 @@ Global
 		{61BC1F95-5D2A-400C-8814-DA406E5D3098}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61BC1F95-5D2A-400C-8814-DA406E5D3098}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61BC1F95-5D2A-400C-8814-DA406E5D3098}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +54,8 @@ Global
 		{156E33B1-5D06-4A66-AE44-1AFD4BFF59DB} = {64081A08-FF6C-4B09-A5CD-B7A751769583}
 		{22B118B2-04AD-42D5-AF89-BDC59BAFFB91} = {17A5DE4D-8FB6-4C38-8EAB-ABF3FB1A506C}
 		{61BC1F95-5D2A-400C-8814-DA406E5D3098} = {22B118B2-04AD-42D5-AF89-BDC59BAFFB91}
+		{6003882F-1D48-4216-A0BC-75BC3C02A1D0} = {17A5DE4D-8FB6-4C38-8EAB-ABF3FB1A506C}
+		{0FFA655C-5718-45D6-AD18-A30C9D42FF76} = {6003882F-1D48-4216-A0BC-75BC3C02A1D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3872FEC4-E575-4D21-BA4E-89599AB4EDBD}

@@ -9,17 +9,30 @@
     <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Data\**" />
+    <Compile Remove="Entities\**" />
+    <Compile Remove="Repository\**" />
+    <Content Remove="Data\**" />
+    <Content Remove="Entities\**" />
+    <Content Remove="Repository\**" />
+    <EmbeddedResource Remove="Data\**" />
+    <EmbeddedResource Remove="Entities\**" />
+    <EmbeddedResource Remove="Repository\**" />
+    <EntityDeploy Remove="Data\**" />
+    <EntityDeploy Remove="Entities\**" />
+    <EntityDeploy Remove="Repository\**" />
+    <None Remove="Data\**" />
+    <None Remove="Entities\**" />
+    <None Remove="Repository\**" />
+  </ItemGroup>
+
 	<ItemGroup>
+		<PackageReference Include="LinqKit" Version="1.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.1" />
-		<PackageReference Include="Microsoft.Identity.Web" Version="1.16.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.1" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.22.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -31,6 +44,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\DatabaseService\DataService\DataService.csproj" />
 	  <ProjectReference Include="..\..\EmailSender\EmailSendService.csproj" />
 	  <ProjectReference Include="..\..\ValidationService\ValidationLibrary\ValidationLibrary.csproj" />
 	</ItemGroup>

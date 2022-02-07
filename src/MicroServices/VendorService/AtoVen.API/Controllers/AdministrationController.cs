@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
-using AtoVen.API.Data;
-using AtoVen.API.Controllers.AccountControl.Models;
+using DataService.Entities;
+using DataService.DataContext;
+using DataService.AccountControl.Models;
 
-namespace AtoVen.API.Controllers.AccountControl
+namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]

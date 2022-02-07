@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-namespace AtoVen.API.Entities
+namespace DataService.Entities
 {
     public class ApprovalFlow
     {
@@ -34,6 +34,7 @@ namespace AtoVen.API.Entities
 
     }
 
+  
     public enum ApprovalStatusType
     {
         Pending =1,

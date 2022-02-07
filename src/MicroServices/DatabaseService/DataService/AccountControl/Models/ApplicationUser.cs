@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-namespace AtoVen.API.Controllers.AccountControl.Models
+namespace DataService.AccountControl.Models
 {
     public class ApplicationUser : IdentityUser
     {

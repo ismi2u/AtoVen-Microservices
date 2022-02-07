@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using AtoVen.API.Data;
-using AtoVen.API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +16,9 @@ using System.Net;
 using System.Text.Json;
 using EmailSendService;
 using ValidationLibrary;
-using AtoVen.API.Controllers.AccountControl.Models;
+using DataService.Entities;
+using DataService.DataContext;
+using DataService.AccountControl.Models;
 
 namespace AtoVen.API.Controllers
 {
@@ -628,7 +628,6 @@ namespace AtoVen.API.Controllers
                     newBank.IBAN = bank.IBAN;
                     newBank.SwiftCode = bank.SwiftCode;
 
-                 
 
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
@@ -649,7 +648,44 @@ namespace AtoVen.API.Controllers
             //// ***************    Add Approval FLOW   *****************///////
             ////////////////////////////////////////////////////////////////////
             /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-            ///
+            
+
+            //find out the no of levels of approvals max = 2
+
+            int maxApprovalLevel = _context.Users.Max(u => u.ApproverLevel);
+
+            for(int i=1; i < maxApprovalLevel+1; i++)
+            {
+              List<ApplicationUser> listApprovers = _context.Users.Where(u => u.ApproverLevel == i).ToList();
+
+                foreach(ApplicationUser approver in listApprovers)
+                {
+                    ApprovalFlow newApprovalFlow = new ApprovalFlow();
+
+                    newApprovalFlow.CompanyID = newCompany.Id;
+                    newApprovalFlow.RecordDate = newCompany.RecordDate;
+                    newApprovalFlow.ApproverEmail = approver.Email;
+                    newApprovalFlow.ApproverLevel = approver.ApproverLevel;
+                    newApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
+
+                    /// work start from here
+
+                    //////////DuplicatesValidation validation = new DuplicatesValidation();
+                    //////////validation.CheckDuplicates();
+                    //////////newApprovalFlow.IsDuplicateEntry = false;
+
+                    _context.ApprovalFlows.Add(newApprovalFlow);
+                }
+
+                await _context.SaveChangesAsync();
+
+            }
+           
+
+
+           
+
+
            // _context.
            //List<ApplicationUser> _userManager.Users.Where(u => u.ApproverLevel > 0).ToList();
            // ApplicationUser user = _userManager.FindByEmailAsync(approvalFlow.ApproverEmail);
@@ -687,7 +723,6 @@ namespace AtoVen.API.Controllers
                 Email = newCompany.Email,
                 NormalizedUserName = newCompany.CompanyName,
                 ApproverLevel = 0
-                
 
             };
 

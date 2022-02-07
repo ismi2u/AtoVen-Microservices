@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AtoVen.API.Data;
-using AtoVen.API.Entities;
+using DataService.Entities;
+using DataService.DataContext;
+using DataService.AccountControl.Models;
 
 namespace AtoVen.API.Controllers
 {
