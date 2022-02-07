@@ -28,6 +28,7 @@ namespace DataService.DataContext
 
         public IEnumerable<Company> CheckDuplicates(Company company)
         {
+            //Checks both Local DB and Schwarz Database
 
             List<Company> ListOfCompanies = new();
 
@@ -82,6 +83,54 @@ namespace DataService.DataContext
 
             ListOfCompanies.AddRange(_context.Companies.Where(c => c.CommercialRegistrationNo.Contains(company.CommercialRegistrationNo)).ToList());
 
+
+            ////////////////////////////
+            /// Search from Schwarz Database ///
+            /// 
+
+            foreach (string word in words)
+            {
+                ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(word)).ToList());
+            }
+            //-- First 5 letters search count
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(company.CompanyName.Substring(0, 5))).ToList());
+
+
+
+            ///////////////////////////////////////
+            /// Mobile number Duplicate Search ////
+            ///////////////////////////////////////
+
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.Contains(company.MobileNo)).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.StartsWith(company.MobileNo.Substring(0, 5))).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.EndsWith(company.MobileNo.Substring(company.MobileNo.Length, -5))).ToList());
+
+
+            ///////////////////////////////////////
+            /// Phone number Duplicate Search ////
+            ///////////////////////////////////////
+
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.Contains(company.PhoneNo)).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.StartsWith(company.PhoneNo.Substring(0, 5))).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.EndsWith(company.PhoneNo.Substring(company.MobileNo.Length, -5))).ToList());
+
+            ///////////////////////////////////////
+            ///     Website Duplicate Search   ////
+            ///////////////////////////////////////
+
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
+
+            ///////////////////////////////////////
+            ///     Email Duplicate Search   ////
+            ///////////////////////////////////////
+
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Email.Contains(company.Email)).ToList());
+
+            ///////////////////////////////////////
+            /// Registration No Duplicate Search //
+            ///////////////////////////////////////
+
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CommercialRegistrationNo.Contains(company.CommercialRegistrationNo)).ToList());
 
             ListOfCompanies = ListOfCompanies.Distinct().ToList();
 
