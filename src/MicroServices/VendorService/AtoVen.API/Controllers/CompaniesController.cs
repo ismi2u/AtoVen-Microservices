@@ -860,7 +860,7 @@ namespace AtoVen.API.Controllers
         [HttpGet("{id}")]
         [ActionName("GetDocumentsByCompanyId")]
         //<List<FileContentResult>
-        public async Task<ActionResult> GetDocumentsBySubClaimsId(int id)
+        public async Task<ActionResult> GetDocumentsByCompanyId(int id)
         {
             List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
             string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
