@@ -49,4 +49,8 @@
 	  <ProjectReference Include="..\..\ValidationService\ValidationLibrary\ValidationLibrary.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="documents\" />
+	</ItemGroup>
+
 </Project>

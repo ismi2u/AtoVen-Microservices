@@ -39,6 +39,8 @@ namespace DataService.Entities
         public string AccountGroup { get; set; }
         public string Notes { get; set; }
         public string VatNo { get; set; }
+        public string DocumentIDs { get; set; }
+
 
         public bool? IsVendorInitiated { get; set; }
         public DateTime RecordDate { get; set; }
@@ -78,6 +80,8 @@ namespace DataService.Entities
         public string Notes { get; set; }
         public string VatNo { get; set; }
 
+        public string DocumentIDs { get; set; }
+
         public bool? IsVendorInitiated { get; set; }
         public DateTime RecordDate { get; set; }
         public bool IsApproved { get; set; }
@@ -115,6 +119,8 @@ namespace DataService.Entities
         public string AccountGroup { get; set; }
         public string Notes { get; set; }
         public string VatNo { get; set; }
+
+        public string DocumentIDs { get; set; }
 
         public bool? IsVendorInitiated { get; set; }
 

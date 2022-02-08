@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Hosting;
+
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,6 +22,8 @@ using DataService.Entities;
 using DataService.DataContext;
 using DataService.AccountControl.Models;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting.Internal;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace AtoVen.API.Controllers
 {
@@ -33,6 +37,7 @@ namespace AtoVen.API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IWebHostEnvironment hostingEnvironment;
 
         public StringBuilder emailBodyBuilder = new StringBuilder();
 
@@ -40,11 +45,13 @@ namespace AtoVen.API.Controllers
                                 UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
+                                IWebHostEnvironment hostEnv,
                                 ILogger<CompaniesController> logger)
         {
             _SchwarzContext = schwarzContext;
             _logger = logger;
             _context = context;
+            hostingEnvironment = hostEnv;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
@@ -791,6 +798,119 @@ namespace AtoVen.API.Controllers
 
 
             return NoContent();
+        }
+
+
+        [HttpPost]
+        [ActionName("PostDocuments")]
+        public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
+        {
+            //StringBuilder StrBuilderUploadedDocuments = new();
+
+            List<FileDocumentDTO> fileDocumentDTOs = new();
+
+            foreach (IFormFile document in Documents)
+            {
+                //Store the file to the contentrootpath/images =>
+                //for docker it is /app/Images configured with volume mount in docker-compose
+
+                string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+
+                try
+                {
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await document.CopyToAsync(stream);
+                    stream.Flush();
+
+
+                    // Save it to the acutal FileDocuments table
+                    FileDocument fileDocument = new();
+                    fileDocument.ActualFileName = document.FileName;
+                    fileDocument.UniqueFileName = uniqueFileName;
+                    _context.FileDocuments.Add(fileDocument);
+                    await _context.SaveChangesAsync();
+                    //
+
+                    // Populating the List of Document Id for FrontEnd consumption
+                    FileDocumentDTO fileDocumentDTO = new();
+                    fileDocumentDTO.Id = fileDocument.Id;
+                    fileDocumentDTO.ActualFileName = document.FileName;
+                    fileDocumentDTOs.Add(fileDocumentDTO);
+
+                    //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
+                    //
+                }
+                catch (Exception ex)
+                {
+                    return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
+
+                }
+
+
+
+
+            }
+
+            return Ok(fileDocumentDTOs);
+        }
+
+        [HttpGet("{id}")]
+        [ActionName("GetDocumentsByCompanyId")]
+        //<List<FileContentResult>
+        public async Task<ActionResult> GetDocumentsBySubClaimsId(int id)
+        {
+            List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
+            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+
+            List<string> docUrls = new();
+
+            var provider = new FileExtensionContentTypeProvider();
+            await Task.Run(() =>
+            {
+                foreach (int docid in documentIds)
+                {
+                    var fd = _context.FileDocuments.Find(docid);
+                    string uniqueFileName = fd.UniqueFileName;
+                    string actualFileName = fd.ActualFileName;
+
+                    string filePath = Path.Combine(documentsFolder, uniqueFileName);
+
+                    string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
+                    docUrls.Add(docUrl);
+
+
+                }
+            });
+            return Ok(docUrls);
+        }
+
+
+        [HttpGet("{id}")]
+        [ActionName("GetDocumentByDocId")]
+        public async Task<ActionResult> GetDocumentByDocId(int id)
+        {
+            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+            //var content = new MultipartContent();
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            var fd = _context.FileDocuments.Find(id);
+            string uniqueFileName = fd.UniqueFileName;
+            //string actualFileName = fd.ActualFileName;
+
+            string filePath = Path.Combine(documentsFolder, uniqueFileName);
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
+
+            return File(bytes, contentType, Path.GetFileName(filePath));
         }
 
 

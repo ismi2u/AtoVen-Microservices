@@ -3,6 +3,8 @@ using DataService.DataContext;
 using EmailSendService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,8 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
+IWebHostEnvironment env = app.Environment;
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -51,7 +55,11 @@ if (app.Environment.IsDevelopment())
 }
 app.UseAuthentication(); //add before MVC
 app.UseAuthorization();
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, @"documents")),
+    RequestPath = "/app/documents"
+});
 
 app.MapControllers();
 app.UseCors("myCorsPolicy");
