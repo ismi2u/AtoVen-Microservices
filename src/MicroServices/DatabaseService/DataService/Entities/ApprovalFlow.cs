@@ -32,6 +32,8 @@ namespace DataService.Entities
 
         public string CompanyRegisterNo { get; set; }
 
+        public DateTime RecordDate { get; set; }
+
         public int ApprovalStatus { get; set; }
         public bool IsDuplicateEntry { get; set; }
 

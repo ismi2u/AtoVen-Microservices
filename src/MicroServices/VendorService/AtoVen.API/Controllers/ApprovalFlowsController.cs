@@ -58,6 +58,7 @@ namespace AtoVen.API.Controllers
                 approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
                 approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
                 approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
+                approvalFlowDTO.RecordDate = approvalFlow.RecordDate;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -84,6 +85,7 @@ namespace AtoVen.API.Controllers
                 approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
                 approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
                 approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
+                approvalFlowDTO.RecordDate = approvalFlow.RecordDate;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -109,6 +111,7 @@ namespace AtoVen.API.Controllers
                 approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
                 approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
                 approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
+                approvalFlowDTO.RecordDate = approvalFlow.RecordDate;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -133,6 +136,7 @@ namespace AtoVen.API.Controllers
                 approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
                 approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
                 approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
+                approvalFlowDTO.RecordDate = approvalFlow.RecordDate;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -159,6 +163,7 @@ namespace AtoVen.API.Controllers
             approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
             approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
             approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
+            approvalFlowDTO.RecordDate = approvalFlow.RecordDate;
             approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
             approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
