@@ -252,6 +252,11 @@ namespace AtoVen.API.Controllers
 
             user.UserName = model.Username;
 
+            user.Email = model.Email;
+
+            user.ApproverLevel = model.ApproverLevel;
+            
+
             IdentityResult result = await _userManager.UpdateAsync(user);
 
             if (result.Succeeded)
