@@ -54,7 +54,7 @@ namespace DataService.DataContext
             
             ListOfCompanies.AddRange(_context.Companies.Where(c => c.MobileNo.Contains(company.MobileNo)).ToList());
             ListOfCompanies.AddRange(_context.Companies.Where(c => c.MobileNo.StartsWith(company.MobileNo.Substring(0, 5))).ToList());
-            ListOfCompanies.AddRange(_context.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length, -5))).ToList());
+            ListOfCompanies.AddRange(_context.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length -5))).ToList());
 
 
             ///////////////////////////////////////
@@ -63,7 +63,7 @@ namespace DataService.DataContext
 
             ListOfCompanies.AddRange(_context.Companies.Where(c => c.PhoneNo.Contains(company.PhoneNo)).ToList());
             ListOfCompanies.AddRange(_context.Companies.Where(c => c.PhoneNo.StartsWith(company.PhoneNo.Substring(0, 5))).ToList());
-            ListOfCompanies.AddRange(_context.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length, -5))).ToList());
+            ListOfCompanies.AddRange(_context.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length -5))).ToList());
 
             ///////////////////////////////////////
             ///     Website Duplicate Search   ////
@@ -103,7 +103,7 @@ namespace DataService.DataContext
 
             ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.Contains(company.MobileNo)).ToList());
             ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.StartsWith(company.MobileNo.Substring(0, 5))).ToList());
-            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length, -5))).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length -5))).ToList());
 
 
             ///////////////////////////////////////
@@ -112,7 +112,7 @@ namespace DataService.DataContext
 
             ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.Contains(company.PhoneNo)).ToList());
             ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.StartsWith(company.PhoneNo.Substring(0, 5))).ToList());
-            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length, -5))).ToList());
+            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length -5))).ToList());
 
             ///////////////////////////////////////
             ///     Website Duplicate Search   ////

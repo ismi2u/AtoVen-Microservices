@@ -734,7 +734,7 @@ namespace AtoVen.API.Controllers
             bool areDuplicatesFound = duplicate.CheckDuplicates(newCompany).Count() > 0 ? true : false;
 
 
-            for (int i = 1; i < maxApprovalLevel + 1; i++)
+            for (int i = 1; i <= maxApprovalLevel; i++)
             {
                 List<ApplicationUser> listApprovers = _context.Users.Where(u => u.ApproverLevel == i).ToList();
 
