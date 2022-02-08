@@ -28,6 +28,10 @@ namespace DataService.Entities
     {
         public int Id { get; set; }
         public int CompanyID { get; set; }
+        public string CompanyName { get; set; }
+
+        public string CompanyRegisterNo { get; set; }
+
         public int ApprovalStatus { get; set; }
         public bool IsDuplicateEntry { get; set; }
 

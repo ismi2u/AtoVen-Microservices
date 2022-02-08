@@ -55,6 +55,9 @@ namespace AtoVen.API.Controllers
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
                 approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
+                approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
+                approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -78,6 +81,9 @@ namespace AtoVen.API.Controllers
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
                 approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
+                approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
+                approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -100,6 +106,9 @@ namespace AtoVen.API.Controllers
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
                 approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
+                approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
+                approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -121,6 +130,9 @@ namespace AtoVen.API.Controllers
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
                 approvalFlowDTO.Id = approvalFlow.Id;
+                approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
+                approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
+                approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
                 approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
                 approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -144,6 +156,9 @@ namespace AtoVen.API.Controllers
             ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
             approvalFlowDTO.Id = approvalFlow.Id;
+            approvalFlowDTO.CompanyID = approvalFlow.CompanyID;
+            approvalFlowDTO.CompanyName = _context.Companies.Find(approvalFlow.CompanyID).CompanyName;
+            approvalFlowDTO.CompanyRegisterNo = _context.Companies.Find(approvalFlow.CompanyID).CommercialRegistrationNo;
             approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
             approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
@@ -352,6 +367,7 @@ namespace AtoVen.API.Controllers
                             await AtoVenDbContextTransaction.CommitAsync();
                         }
                     }
+
 
                     // 4: Send Email with User-Id and Password to Vendor
                     //If next approver is available Send email 

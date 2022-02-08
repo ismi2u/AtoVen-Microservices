@@ -258,6 +258,19 @@ namespace AtoVen.API.Controllers
 
         }
 
+
+        [HttpGet("{id}")]
+        [ActionName("GetCompanyDuplicatesByCompId")]
+        public async Task<ActionResult<IEnumerable<Company>>> GetCompanyDuplicatesByCompId(int id)
+        {
+            Company company = await _context.Companies.FindAsync(id);
+            DuplicatesValidation duplicate = new DuplicatesValidation(_context, _SchwarzContext);
+            List<Company> ListDuplicateCompanies = duplicate.CheckDuplicates(company).ToList();
+
+            return ListDuplicateCompanies;
+
+        }
+
         // PUT: api/Companies/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
