@@ -282,18 +282,18 @@ namespace AtoVen.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [ActionName("UpdateCompany")]
-        public async Task<IActionResult> PutCompany(int id, CompanyDTO companyDTO)
+        public async Task<IActionResult> PutCompany(int id, CompanyPutDTO companyPutDTO)
         {
 
             emailBodyBuilder.AppendLine("===========================================================");
-            emailBodyBuilder.AppendLine("Update Existing Vendor " + companyDTO.CompanyName + " Approval request");
+            emailBodyBuilder.AppendLine("Update Existing Vendor " + companyPutDTO.CompanyName + " Approval request");
             emailBodyBuilder.AppendLine("===========================================================");
-            if (id != companyDTO.Id)
+            if (id != companyPutDTO.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(companyDTO).State = EntityState.Modified;
+            _context.Entry(companyPutDTO).State = EntityState.Modified;
 
             try
             {
@@ -303,9 +303,9 @@ namespace AtoVen.API.Controllers
                 ////////////////////////////////////////////////////////////////////
 
                 VATValidation vatvalidation = new VATValidation();
-                if (vatvalidation.ValidateVAT(companyDTO.VatNo) != "Valid VAT Number")
+                if (vatvalidation.ValidateVAT(companyPutDTO.VatNo) != "Valid VAT Number")
                 {
-                    return Ok("Invalid VAT Number: " + companyDTO.VatNo);
+                    return Ok("Invalid VAT Number: " + companyPutDTO.VatNo);
                 }
 
                 emailBodyBuilder.AppendLine("VAT Number: Validated");
@@ -316,13 +316,13 @@ namespace AtoVen.API.Controllers
                 ////////////////////////////////////////////////////////////////////
                 AddressValidation addValidation = new AddressValidation();
                 AddressValidationInputs addressValidationInputs = new AddressValidationInputs();
-                addressValidationInputs.HouseNo = companyDTO.HouseNo;
-                addressValidationInputs.Street = companyDTO.Street;
-                addressValidationInputs.City = companyDTO.City;
-                addressValidationInputs.Region = companyDTO.Region;
-                addressValidationInputs.Country = companyDTO.Country;
-                addressValidationInputs.Language = companyDTO.Language;
-                addressValidationInputs.PostalCode = companyDTO.PostalCode;
+                addressValidationInputs.HouseNo = companyPutDTO.HouseNo;
+                addressValidationInputs.Street = companyPutDTO.Street;
+                addressValidationInputs.City = companyPutDTO.City;
+                addressValidationInputs.Region = companyPutDTO.Region;
+                addressValidationInputs.Country = companyPutDTO.Country;
+                addressValidationInputs.Language = companyPutDTO.Language;
+                addressValidationInputs.PostalCode = companyPutDTO.PostalCode;
 
 
                 if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
@@ -337,8 +337,8 @@ namespace AtoVen.API.Controllers
                 int[] arrBankIds;
                 int[] arrContactIds;
 
-                int totalBankCount = companyDTO.ListOfCompanyBanks.Count;
-                int totalContactCount = companyDTO.ListOfCompanyContacts.Count;
+                int totalBankCount = companyPutDTO.ListOfCompanyBanks.Count;
+                int totalContactCount = companyPutDTO.ListOfCompanyContacts.Count;
 
                 int intBankCount = 0;
                 int intContactCount = 0;
@@ -349,33 +349,32 @@ namespace AtoVen.API.Controllers
                 using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
                 {
                     //assign values
-                    updateCompany = await _context.Companies.FindAsync(companyDTO.Id);
+                    updateCompany = await _context.Companies.FindAsync(companyPutDTO.Id);
 
-                    updateCompany.AccountGroup = companyDTO.AccountGroup;
-                    updateCompany.Building = companyDTO.Building;
-                    updateCompany.City = companyDTO.City;
-                    updateCompany.CommercialRegistrationNo = companyDTO.CommercialRegistrationNo;
-                    updateCompany.CompanyName = companyDTO.CompanyName;
-                    updateCompany.Country = companyDTO.Country;
-                    updateCompany.District = companyDTO.District;
-                    updateCompany.Email = companyDTO.Email;
-                    updateCompany.FaxNumber = companyDTO.FaxNumber;
-                    updateCompany.Floor = companyDTO.Floor;
-                    updateCompany.HouseNo = companyDTO.HouseNo;
-                    updateCompany.Language = companyDTO.Language;
-                    updateCompany.MobileNo = companyDTO.MobileNo;
-                    updateCompany.Notes = companyDTO.Notes;
-                    updateCompany.PhoneNo = companyDTO.PhoneNo;
-                    updateCompany.POBox = companyDTO.POBox;
-                    updateCompany.PostalCode = companyDTO.PostalCode;
-                    updateCompany.Region = companyDTO.Region;
-                    updateCompany.Room = companyDTO.Room;
-                    updateCompany.Street = companyDTO.Street;
-                    updateCompany.VatNo = companyDTO.VatNo;
-                    updateCompany.VendorType = companyDTO.VendorType;
-                    updateCompany.Website = companyDTO.Website;
+                    updateCompany.AccountGroup = companyPutDTO.AccountGroup;
+                    updateCompany.Building = companyPutDTO.Building;
+                    updateCompany.City = companyPutDTO.City;
+                    updateCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
+                    updateCompany.CompanyName = companyPutDTO.CompanyName;
+                    updateCompany.Country = companyPutDTO.Country;
+                    updateCompany.District = companyPutDTO.District;
+                    updateCompany.FaxNumber = companyPutDTO.FaxNumber;
+                    updateCompany.Floor = companyPutDTO.Floor;
+                    updateCompany.HouseNo = companyPutDTO.HouseNo;
+                    updateCompany.Language = companyPutDTO.Language;
+                    updateCompany.MobileNo = companyPutDTO.MobileNo;
+                    updateCompany.Notes = companyPutDTO.Notes;
+                    updateCompany.PhoneNo = companyPutDTO.PhoneNo;
+                    updateCompany.POBox = companyPutDTO.POBox;
+                    updateCompany.PostalCode = companyPutDTO.PostalCode;
+                    updateCompany.Region = companyPutDTO.Region;
+                    updateCompany.Room = companyPutDTO.Room;
+                    updateCompany.Street = companyPutDTO.Street;
+                    updateCompany.VatNo = companyPutDTO.VatNo;
+                    updateCompany.VendorType = companyPutDTO.VendorType;
+                    updateCompany.Website = companyPutDTO.Website;
 
-                    updateCompany.IsVendorInitiated = companyDTO.IsVendorInitiated ?? false;
+                    updateCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
                     updateCompany.RecordDate = DateTime.Now;
                     updateCompany.IsApproved = false;
                     updateCompany.ApprovedDate = null;
@@ -396,7 +395,7 @@ namespace AtoVen.API.Controllers
                     ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                     arrContactIds = new int[totalContactCount]; //Initialize the array with count
-                    foreach (ContactDTO contact in companyDTO.ListOfCompanyContacts)
+                    foreach (ContactDTO contact in companyPutDTO.ListOfCompanyContacts)
                     {
                         Contact updateContact = await _context.Contacts.FindAsync(contact.Id);
 
@@ -427,7 +426,7 @@ namespace AtoVen.API.Controllers
 
                     arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
-                    foreach (BankDTO bank in companyDTO.ListOfCompanyBanks)
+                    foreach (BankDTO bank in companyPutDTO.ListOfCompanyBanks)
                     {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
                         ////////////////////////////////////////////////////////////////////
                         //// *************** IBAN Number Validation *****************///////
@@ -801,117 +800,117 @@ namespace AtoVen.API.Controllers
         }
 
 
-        [HttpPost]
-        [ActionName("PostDocuments")]
-        public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
-        {
-            //StringBuilder StrBuilderUploadedDocuments = new();
+        //////////[HttpPost]
+        //////////[ActionName("PostDocuments")]
+        //////////public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
+        //////////{
+        //////////    //StringBuilder StrBuilderUploadedDocuments = new();
 
-            List<FileDocumentDTO> fileDocumentDTOs = new();
+        //////////    List<FileDocumentDTO> fileDocumentDTOs = new();
 
-            foreach (IFormFile document in Documents)
-            {
-                //Store the file to the contentrootpath/images =>
-                //for docker it is /app/Images configured with volume mount in docker-compose
+        //////////    foreach (IFormFile document in Documents)
+        //////////    {
+        //////////        //Store the file to the contentrootpath/images =>
+        //////////        //for docker it is /app/Images configured with volume mount in docker-compose
 
-                string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-
-                try
-                {
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await document.CopyToAsync(stream);
-                    stream.Flush();
+        //////////        string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+        //////////        string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
+        //////////        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
 
-                    // Save it to the acutal FileDocuments table
-                    FileDocument fileDocument = new();
-                    fileDocument.ActualFileName = document.FileName;
-                    fileDocument.UniqueFileName = uniqueFileName;
-                    _context.FileDocuments.Add(fileDocument);
-                    await _context.SaveChangesAsync();
-                    //
-
-                    // Populating the List of Document Id for FrontEnd consumption
-                    FileDocumentDTO fileDocumentDTO = new();
-                    fileDocumentDTO.Id = fileDocument.Id;
-                    fileDocumentDTO.ActualFileName = document.FileName;
-                    fileDocumentDTOs.Add(fileDocumentDTO);
-
-                    //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
-                    //
-                }
-                catch (Exception ex)
-                {
-                    return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
-
-                }
+        //////////        try
+        //////////        {
+        //////////            using var stream = new FileStream(filePath, FileMode.Create);
+        //////////            await document.CopyToAsync(stream);
+        //////////            stream.Flush();
 
 
+        //////////            // Save it to the acutal FileDocuments table
+        //////////            FileDocument fileDocument = new();
+        //////////            fileDocument.ActualFileName = document.FileName;
+        //////////            fileDocument.UniqueFileName = uniqueFileName;
+        //////////            _context.FileDocuments.Add(fileDocument);
+        //////////            await _context.SaveChangesAsync();
+        //////////            //
+
+        //////////            // Populating the List of Document Id for FrontEnd consumption
+        //////////            FileDocumentDTO fileDocumentDTO = new();
+        //////////            fileDocumentDTO.Id = fileDocument.Id;
+        //////////            fileDocumentDTO.ActualFileName = document.FileName;
+        //////////            fileDocumentDTOs.Add(fileDocumentDTO);
+
+        //////////            //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
+        //////////            //
+        //////////        }
+        //////////        catch (Exception ex)
+        //////////        {
+        //////////            return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
+
+        //////////        }
 
 
-            }
-
-            return Ok(fileDocumentDTOs);
-        }
-
-        [HttpGet("{id}")]
-        [ActionName("GetDocumentsByCompanyId")]
-        //<List<FileContentResult>
-        public async Task<ActionResult> GetDocumentsByCompanyId(int id)
-        {
-            List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
-            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-
-            List<string> docUrls = new();
-
-            var provider = new FileExtensionContentTypeProvider();
-            await Task.Run(() =>
-            {
-                foreach (int docid in documentIds)
-                {
-                    var fd = _context.FileDocuments.Find(docid);
-                    string uniqueFileName = fd.UniqueFileName;
-                    string actualFileName = fd.ActualFileName;
-
-                    string filePath = Path.Combine(documentsFolder, uniqueFileName);
-
-                    string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
-                    docUrls.Add(docUrl);
 
 
-                }
-            });
-            return Ok(docUrls);
-        }
+        //////////    }
+
+        //////////    return Ok(fileDocumentDTOs);
+        //////////}
+
+        //////////[HttpGet("{id}")]
+        //////////[ActionName("GetDocumentsByCompanyId")]
+        ////////////<List<FileContentResult>
+        //////////public async Task<ActionResult> GetDocumentsByCompanyId(int id)
+        //////////{
+        //////////    List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
+        //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+
+        //////////    List<string> docUrls = new();
+
+        //////////    var provider = new FileExtensionContentTypeProvider();
+        //////////    await Task.Run(() =>
+        //////////    {
+        //////////        foreach (int docid in documentIds)
+        //////////        {
+        //////////            var fd = _context.FileDocuments.Find(docid);
+        //////////            string uniqueFileName = fd.UniqueFileName;
+        //////////            string actualFileName = fd.ActualFileName;
+
+        //////////            string filePath = Path.Combine(documentsFolder, uniqueFileName);
+
+        //////////            string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
+        //////////            docUrls.Add(docUrl);
 
 
-        [HttpGet("{id}")]
-        [ActionName("GetDocumentByDocId")]
-        public async Task<ActionResult> GetDocumentByDocId(int id)
-        {
-            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-            //var content = new MultipartContent();
+        //////////        }
+        //////////    });
+        //////////    return Ok(docUrls);
+        //////////}
 
-            var provider = new FileExtensionContentTypeProvider();
 
-            var fd = _context.FileDocuments.Find(id);
-            string uniqueFileName = fd.UniqueFileName;
-            //string actualFileName = fd.ActualFileName;
+        //////////[HttpGet("{id}")]
+        //////////[ActionName("GetDocumentByDocId")]
+        //////////public async Task<ActionResult> GetDocumentByDocId(int id)
+        //////////{
+        //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+        //////////    //var content = new MultipartContent();
 
-            string filePath = Path.Combine(documentsFolder, uniqueFileName);
-            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-            if (!provider.TryGetContentType(filePath, out var contentType))
-            {
-                contentType = "application/octet-stream";
-            }
+        //////////    var provider = new FileExtensionContentTypeProvider();
 
-            //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
+        //////////    var fd = _context.FileDocuments.Find(id);
+        //////////    string uniqueFileName = fd.UniqueFileName;
+        //////////    //string actualFileName = fd.ActualFileName;
 
-            return File(bytes, contentType, Path.GetFileName(filePath));
-        }
+        //////////    string filePath = Path.Combine(documentsFolder, uniqueFileName);
+        //////////    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+        //////////    if (!provider.TryGetContentType(filePath, out var contentType))
+        //////////    {
+        //////////        contentType = "application/octet-stream";
+        //////////    }
+
+        //////////    //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
+
+        //////////    return File(bytes, contentType, Path.GetFileName(filePath));
+        //////////}
 
 
         /// <summary>

@@ -55,11 +55,11 @@ if (app.Environment.IsDevelopment())
 }
 app.UseAuthentication(); //add before MVC
 app.UseAuthorization();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, @"documents")),
-    RequestPath = "/app/documents"
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, @"documents")),
+//    RequestPath = "/app/documents"
+//});
 
 app.MapControllers();
 app.UseCors("myCorsPolicy");

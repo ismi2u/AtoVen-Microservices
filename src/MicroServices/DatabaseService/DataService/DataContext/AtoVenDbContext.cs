@@ -27,6 +27,6 @@ namespace DataService.DataContext
         public DbSet<ApprovalFlow> ApprovalFlows { get; set; }
         public DbSet<ApprovalLevel> ApprovalLevels { get; set; }
 
-        public DbSet<FileDocument> FileDocuments { get; set; }
+        //public DbSet<FileDocument> FileDocuments { get; set; }
     }
 }
