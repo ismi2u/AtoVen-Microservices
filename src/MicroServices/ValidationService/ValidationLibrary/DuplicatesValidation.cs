@@ -69,7 +69,7 @@ namespace DataService.DataContext
             ///     Website Duplicate Search   ////
             ///////////////////////////////////////
 
-            ListOfCompanies.AddRange(_context.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
+            //ListOfCompanies.AddRange(_context.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
 
             ///////////////////////////////////////
             ///     Email Duplicate Search   ////
@@ -118,7 +118,7 @@ namespace DataService.DataContext
             ///     Website Duplicate Search   ////
             ///////////////////////////////////////
 
-            ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
+            //ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
 
             ///////////////////////////////////////
             ///     Email Duplicate Search   ////

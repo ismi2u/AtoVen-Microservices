@@ -538,9 +538,17 @@ namespace AtoVen.API.Controllers
         [ActionName("RegisterCompany")]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
+            if (_context.Users.Max(u => u.ApproverLevel) < 1)
+            {
+                return BadRequest();
+            }
+
             emailBodyBuilder.AppendLine("===========================================================");
+            emailBodyBuilder.Append(Environment.NewLine);
             emailBodyBuilder.AppendLine("New Vendor " + company.CompanyName + " Approval request");
+            emailBodyBuilder.Append(Environment.NewLine);
             emailBodyBuilder.AppendLine("===========================================================");
+            emailBodyBuilder.Append(Environment.NewLine);
 
             ////////////////////////////////////////////////////////////////////
             //// ***************   VAT Validation   *********************///////
@@ -550,9 +558,11 @@ namespace AtoVen.API.Controllers
             if (vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
             {
                 return Ok("Invalid VAT Number: " + company.VatNo);
+
             }
 
             emailBodyBuilder.AppendLine("VAT Number: Validated");
+            emailBodyBuilder.Append(Environment.NewLine);
 
             ////////////////////////////////////////////////////////////////////
             //// *************** Address Validation *********************///////
@@ -574,6 +584,7 @@ namespace AtoVen.API.Controllers
             }
             //
             emailBodyBuilder.AppendLine("Street Address: Validated");
+            emailBodyBuilder.Append(Environment.NewLine);
 
 
             int newCompId = 0;
@@ -627,11 +638,15 @@ namespace AtoVen.API.Controllers
                 await _context.SaveChangesAsync();
 
                 emailBodyBuilder.AppendLine("==================================================================================================");
+                emailBodyBuilder.Append(Environment.NewLine);
                 emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
                 emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
                 emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
+                emailBodyBuilder.Append(Environment.NewLine);
                 emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
+                emailBodyBuilder.Append(Environment.NewLine);
                 emailBodyBuilder.AppendLine("==================================================================================================");
+                emailBodyBuilder.Append(Environment.NewLine);
 
 
 
@@ -663,8 +678,10 @@ namespace AtoVen.API.Controllers
 
 
                     emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.Append(Environment.NewLine);
                     emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
+                    emailBodyBuilder.Append(Environment.NewLine);
+                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
                     arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
                     intContactCount += 1;
                 }
@@ -700,8 +717,9 @@ namespace AtoVen.API.Controllers
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
                     emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.Append(Environment.NewLine);
                     emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
+                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                     intBankCount += 1;
@@ -771,32 +789,32 @@ namespace AtoVen.API.Controllers
 
             }
 
-            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-            ////////////////////////////////////////////////////////////////////
-            //// *************** Register a userId for the Vendor *******///////
-            ////////////////////////////////////////////////////////////////////
-            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            //////////////////////////////////////////////////////////////////////
+            ////// *************** Register a userId for the Vendor *******///////
+            //////////////////////////////////////////////////////////////////////
+            ///////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
 
 
-            string rndPassword = GenerateRandomPassword(null);
-            var user = new ApplicationUser
-            {
-                UserName = newCompany.Email,
-                Email = newCompany.Email,
-                NormalizedUserName = newCompany.CompanyName,
-                ApproverLevel = 0,
-                PasswordHash = rndPassword
-            };
+            //string rndPassword = GenerateRandomPassword(null);
+            //var user = new ApplicationUser
+            //{
+            //    UserName = newCompany.Email,
+            //    Email = newCompany.Email,
+            //    NormalizedUserName = newCompany.CompanyName,
+            //    ApproverLevel = 0,
+            //    PasswordHash = rndPassword
+            //};
 
-            var result = await _userManager.CreateAsync(user);
+            //var result = await _userManager.CreateAsync(user);
 
-            if (result.Succeeded)
-            {
-                return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
-            }
+            //if (result.Succeeded)
+            //{
+            //    return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
+            //}
 
 
-            return NoContent();
+            return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
         }
 
 
