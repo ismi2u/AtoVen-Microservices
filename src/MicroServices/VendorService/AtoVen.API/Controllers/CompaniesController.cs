@@ -167,7 +167,9 @@ namespace AtoVen.API.Controllers
             }
 
             _logger.LogInformation("Company Added: " + DateTime.Now);
-            return ListCompanyDTOs;
+
+            return Ok(ListCompanyDTOs);
+
         }
 
         // GET: api/Companies/5
@@ -266,9 +268,7 @@ namespace AtoVen.API.Controllers
 
             companyDTO.ListOfCompanyContacts = ListContactDTOs;
 
-
-            return companyDTO;
-
+            return Ok(companyDTO);
         }
 
 
@@ -280,8 +280,7 @@ namespace AtoVen.API.Controllers
             DuplicatesValidation duplicate = new DuplicatesValidation(_context, _SchwarzContext);
             List<Company> ListDuplicateCompanies = duplicate.CheckDuplicates(company).ToList();
 
-            return ListDuplicateCompanies;
-
+            return Ok(ListDuplicateCompanies);
         }
 
         // PUT: api/Companies/5
@@ -297,7 +296,7 @@ namespace AtoVen.API.Controllers
             emailBodyBuilder.AppendLine("===========================================================");
             if (id != companyPutDTO.Id)
             {
-                return BadRequest();
+                return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
             }
 
             //_context.Entry(companyPutDTO).State = EntityState.Modified;
@@ -312,7 +311,8 @@ namespace AtoVen.API.Controllers
                 VATValidation vatvalidation = new VATValidation();
                 if (vatvalidation.ValidateVAT(companyPutDTO.VatNo) != "Valid VAT Number")
                 {
-                    return Ok("Invalid VAT Number: " + companyPutDTO.VatNo);
+
+                    return Ok(new { Status = "Failure", Message = "Invalid VAT Number: " + companyPutDTO.VatNo });
                 }
 
                 emailBodyBuilder.AppendLine("VAT Number: Validated");
@@ -334,7 +334,7 @@ namespace AtoVen.API.Controllers
 
                 if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
                 {
-                    return Ok("Invalid Street Address");
+                    return Ok(new { Status = "Failure", Message = "Invalid Street Address"});
                 }
                 //
                 emailBodyBuilder.AppendLine("Street Address: Validated");
@@ -474,11 +474,7 @@ namespace AtoVen.API.Controllers
 
                     await AtoVenDbContextTransaction.CommitAsync();
                 }
-                //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-                ////////////////////////////////////////////////////////////////////
-                //// ***************    Add Approval FLOW   *****************///////
-                ////////////////////////////////////////////////////////////////////
-                /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+               
 
 
                 //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -495,17 +491,43 @@ namespace AtoVen.API.Controllers
                 var listofApprovalFlows = _context.ApprovalFlows.Where(a => a.CompanyID == updateCompany.Id).ToList();
                 int i = 1;
 
-                //var role = await roleManager.FindByIdAsync(model.Id);///
-                //_roleManager.FindByIdAsync
+                string jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+               ApplicationUser applicationUser = await _userManager.FindByIdAsync(jwtUserId);
 
-                //_userManager.GetUserIdAsync()
+                //check Logged in User Role
+                bool isVendorRole = false;
+                var Roles = await _userManager.GetRolesAsync(applicationUser);
+
+                foreach( string role in Roles)
+                {
+                    if (role == "Vendor")
+                    {
+                        isVendorRole = true;
+                        break;
+                    }
+                }
+
+                //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+                ////////////////////////////////////////////////////////////////////
+                //// ***************    Update Approval FLOW   ***************///////
+                ////////////////////////////////////////////////////////////////////
+                /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
                 foreach (ApprovalFlow approvalFlowItem in listofApprovalFlows)
                 {
                     ApprovalFlow updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlowItem.Id);
 
                     updateApprovalFlow.RecordDate = DateTime.Now;
-                    updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending; //Because this action is by Vendor
                     updateApprovalFlow.IsDuplicateEntry = areDuplicatesFound;
+
+                    if (isVendorRole)
+                    {
+                        updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending; //action is by Vendor
+                    }
+                    else
+                    {
+                        updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Approved;//action is by Approver
+                    }
+
 
                     _context.ApprovalFlows.Update(updateApprovalFlow);
 
@@ -535,7 +557,7 @@ namespace AtoVen.API.Controllers
             {
                 if (!CompanyExists(id))
                 {
-                    return NotFound();
+                    return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
                 }
                 else
                 {
@@ -543,7 +565,7 @@ namespace AtoVen.API.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
         }
 
 
@@ -1013,7 +1035,7 @@ namespace AtoVen.API.Controllers
 
             if (company == null)
             {
-                return NotFound();
+                return Ok(new { Status = "Failure", Message = "Company is Null!" });
             }
 
             using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
@@ -1027,7 +1049,7 @@ namespace AtoVen.API.Controllers
                 await AtoVenDbContextTransaction.CommitAsync();
             }
 
-            return NoContent();
+            return Ok(new { Status = "Success", Message = "Company Details Deleted!" });
         }
 
         private bool CompanyExists(int id)
