@@ -29,7 +29,7 @@ namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+    //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
     public class CompaniesController : ControllerBase
     {
         private readonly AtoVenDbContext _context;
@@ -37,7 +37,6 @@ namespace AtoVen.API.Controllers
         private readonly ILogger<CompaniesController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<ApplicationUser> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment hostingEnvironment;
 
@@ -48,12 +47,10 @@ namespace AtoVen.API.Controllers
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
                                 IWebHostEnvironment hostEnv,
-                                ILogger<CompaniesController> logger, 
-                                RoleManager<ApplicationUser> roleManager)
+                                ILogger<CompaniesController> logger)
         {
             _SchwarzContext = schwarzContext;
             _logger = logger;
-            _roleManager = roleManager;
             _context = context;
             hostingEnvironment = hostEnv;
             _userManager = userManager;
@@ -64,7 +61,7 @@ namespace AtoVen.API.Controllers
         // GET: api/Companies
         [HttpGet]
         [ActionName("GetCompanies")]
-        [Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
         public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanies()
         {
             List<CompanyDTO> ListCompanyDTOs = new();
@@ -175,7 +172,7 @@ namespace AtoVen.API.Controllers
         // GET: api/Companies/5
         [HttpGet("{id}")]
         [ActionName("GetCompanyById")]
-        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<ActionResult<CompanyDTO>> GetCompany(int id)
         {
             Company company = await _context.Companies.FindAsync(id);
@@ -287,7 +284,7 @@ namespace AtoVen.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [ActionName("UpdateCompany")]
-        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<IActionResult> PutCompany(int id, CompanyPutDTO companyPutDTO)
         {
 
@@ -575,7 +572,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("RegisterCompany")]
-        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
             if (_context.Users.Max(u => u.ApproverLevel) < 1)
