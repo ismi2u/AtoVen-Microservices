@@ -148,6 +148,7 @@ namespace AtoVen.API.Controllers
                     contactDTO.Designation = contact.Designation;
                     contactDTO.Department = contact.Department;
                     contactDTO.MobileNo = contact.MobileNo;
+                    contactDTO.PhoneNo = contact.PhoneNo;
                     contactDTO.FaxNo = contact.FaxNo;
                     contactDTO.Email = contact.Email;
                     contactDTO.Language = contact.Language;
@@ -259,6 +260,7 @@ namespace AtoVen.API.Controllers
                     contactDTO.Designation = contact.Designation;
                     contactDTO.Department = contact.Department;
                     contactDTO.MobileNo = contact.MobileNo;
+                    contactDTO.PhoneNo = contact.PhoneNo;
                     contactDTO.FaxNo = contact.FaxNo;
                     contactDTO.Email = contact.Email;
                     contactDTO.Language = contact.Language;
@@ -365,6 +367,7 @@ namespace AtoVen.API.Controllers
                 contactDTO.Designation = contact.Designation;
                 contactDTO.Department = contact.Department;
                 contactDTO.MobileNo = contact.MobileNo;
+                contactDTO.PhoneNo = contact.PhoneNo;
                 contactDTO.FaxNo = contact.FaxNo;
                 contactDTO.Email = contact.Email;
                 contactDTO.Language = contact.Language;
