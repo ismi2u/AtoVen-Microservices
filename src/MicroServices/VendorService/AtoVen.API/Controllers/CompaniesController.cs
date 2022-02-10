@@ -684,6 +684,7 @@ namespace AtoVen.API.Controllers
         [HttpPost]
         [ActionName("RegisterCompany")]
         //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        [AllowAnonymous]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
             if (_context.Users.Max(u => u.ApproverLevel) < 1)

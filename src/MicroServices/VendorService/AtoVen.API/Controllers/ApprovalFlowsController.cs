@@ -79,7 +79,26 @@ namespace AtoVen.API.Controllers
 
             var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email).ToListAsync();
 
+            ///
+            List<ApprovalFlow> FilteredApprovalFlow = new List<ApprovalFlow>();
+
+
+
             foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
+            {
+                int PreviousApprovalLevel = approvalFlow.ApproverLevel - 1;
+                if(PreviousApprovalLevel !=0)
+                {
+                    ApprovalFlow tempApprFlow = _context.ApprovalFlows.Where(a => a.CompanyID == approvalFlow.CompanyID && a.ApproverLevel == PreviousApprovalLevel).FirstOrDefault();
+                    if (tempApprFlow.ApprovalStatus == (int)ApprovalStatusType.Approved)
+                    {
+                        FilteredApprovalFlow.Add(approvalFlow);
+                    }
+                }
+            }
+
+
+            foreach (ApprovalFlow approvalFlow in FilteredApprovalFlow)
             {
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 

@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "MicroService
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HTMLEmailService", "HTMLEmailService", "{14250FEC-6794-463F-A4C8-11E1FC8B5E6E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTMLEmailService", "MicroServices\HTMLEmailService\HTMLEmailService\HTMLEmailService.csproj", "{07C117BF-1124-4BD0-9990-FC894043DD3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HTMLEmailService", "MicroServices\HTMLEmailService\HTMLEmailService\HTMLEmailService.csproj", "{07C117BF-1124-4BD0-9990-FC894043DD3C}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{707FE8E1-8E68-48D7-B90D-8816C939E364}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{707FE8E1-8E68-48D7-B90D-8816C939E364}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707FE8E1-8E68-48D7-B90D-8816C939E364}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707FE8E1-8E68-48D7-B90D-8816C939E364}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707FE8E1-8E68-48D7-B90D-8816C939E364}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

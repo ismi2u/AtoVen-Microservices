@@ -1,8 +1,38 @@
 version: '3.4'
 
+
 services:
+  sqlserverdata:
+    image: mcr.microsoft.com/mssql/server
+    container_name: atovendbserver
+    environment:
+      SA_PASSWORD: "Pa55word2019!123"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1400:1433"
+    volumes:
+      - atovendatavol:/var/opt/mssql
+    networks:
+      atovennetwork:
+
   atoven.api:
+    image: habeeb22did/atovenapi
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+    command: tail -f /dev/null
+    container_name: atovenapiserver
+    tty: true
     ports:
-      - "80"
+      - "8080:80"
+    depends_on:
+     - sqlserverdata
+    networks:
+      atovennetwork:
+
+
+volumes:
+    atovendatavol:
+    
+networks:
+    atovennetwork:
+        driver: bridge

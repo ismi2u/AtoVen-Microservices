@@ -17,6 +17,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//LocalSQLServerAndAPIRunningInContainer'
+//SQLServerRunningAsContainer
+
+//SchwarzLocalSQLServerAndAPIRunningInContainer
+//SchwarzSQLServerRunningAsContainer
+
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>

@@ -7,6 +7,9 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["MicroServices/VendorService/AtoVen.API/AtoVen.API.csproj", "MicroServices/VendorService/AtoVen.API/"]
+COPY ["MicroServices/DatabaseService/DataService/DataService.csproj", "MicroServices/DatabaseService/DataService/"]
+COPY ["MicroServices/EmailSender/EmailSendService.csproj", "MicroServices/EmailSender/"]
+COPY ["MicroServices/ValidationService/ValidationLibrary/ValidationLibrary.csproj", "MicroServices/ValidationService/ValidationLibrary/"]
 RUN dotnet restore "MicroServices/VendorService/AtoVen.API/AtoVen.API.csproj"
 COPY . .
 WORKDIR "/src/MicroServices/VendorService/AtoVen.API"
