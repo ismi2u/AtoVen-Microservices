@@ -168,6 +168,118 @@ namespace AtoVen.API.Controllers
 
         }
 
+
+        [HttpGet]
+        [ActionName("GetCompaniesApproved")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
+        public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompaniesApproved()
+        {
+            List<CompanyDTO> ListCompanyDTOs = new();
+
+            var ListCompanies = await _context.Companies.Where(c=> c.IsApproved== true).ToListAsync();
+
+            foreach (Company company in ListCompanies)
+            {
+                CompanyDTO companyDTO = new CompanyDTO();
+
+                companyDTO.Id = company.Id;
+                companyDTO.CompanyName = company.CompanyName;
+                companyDTO.CommercialRegistrationNo = company.CommercialRegistrationNo;
+                companyDTO.Language = company.Language;
+                companyDTO.Country = company.Country;
+                companyDTO.Region = company.Region;
+                companyDTO.District = company.District;
+                companyDTO.PostalCode = company.PostalCode;
+                companyDTO.City = company.City;
+                companyDTO.Street = company.Street;
+                companyDTO.HouseNo = company.HouseNo;
+                companyDTO.Building = company.Building;
+                companyDTO.Floor = company.Floor;
+                companyDTO.Room = company.Room;
+                companyDTO.POBox = company.POBox;
+                companyDTO.PhoneNo = company.PhoneNo;
+                companyDTO.FaxNumber = company.FaxNumber;
+                companyDTO.Email = company.Email;
+                companyDTO.MobileNo = company.MobileNo;
+                companyDTO.Website = company.Website;
+                companyDTO.VendorType = company.VendorType;
+                companyDTO.AccountGroup = company.AccountGroup;
+                companyDTO.VatNo = company.VatNo;
+                companyDTO.Notes = company.Notes;
+
+
+                companyDTO.IsVendorInitiated = company.IsVendorInitiated;
+                companyDTO.RecordDate = company.RecordDate;
+                companyDTO.IsApproved = company.IsApproved;
+                companyDTO.ApprovedDate = company.ApprovedDate ?? null;
+
+
+
+                List<BankDTO> ListBankDTOs = new();
+                var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
+
+                foreach (Bank bank in ListBanks)
+                {
+                    BankDTO bankDTO = new BankDTO();
+
+                    bankDTO.Id = bank.Id;
+                    bankDTO.CompanyID = bank.CompanyID;
+                    bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+                    bankDTO.Country = bank.Country;
+                    bankDTO.BankKey = bank.BankKey;
+                    bankDTO.BankName = bank.BankName;
+                    bankDTO.SwiftCode = bank.SwiftCode;
+                    bankDTO.BankAccount = bank.BankAccount;
+                    bankDTO.AccountHolderName = bank.AccountHolderName;
+                    bankDTO.IBAN = bank.IBAN;
+                    bankDTO.Currency = bank.Currency;
+
+                    ListBankDTOs.Add(bankDTO);
+                }
+
+
+                companyDTO.ListOfCompanyBanks = ListBankDTOs;
+
+
+
+                List<ContactDTO> ListContactDTOs = new();
+
+                var ListContacts = await _context.Contacts.ToListAsync();
+
+                foreach (Contact contact in ListContacts)
+                {
+                    ContactDTO contactDTO = new ContactDTO();
+
+                    contactDTO.Id = contact.Id;
+                    contactDTO.CompanyID = contact.CompanyID;
+                    contactDTO.CompanyName = _context.Companies.Find(contact.CompanyID).CompanyName;
+                    contactDTO.FirstName = contact.FirstName;
+                    contactDTO.LastName = contact.LastName;
+                    contactDTO.Address = contact.Address;
+                    contactDTO.Designation = contact.Designation;
+                    contactDTO.Department = contact.Department;
+                    contactDTO.MobileNo = contact.MobileNo;
+                    contactDTO.FaxNo = contact.FaxNo;
+                    contactDTO.Email = contact.Email;
+                    contactDTO.Language = contact.Language;
+                    contactDTO.Country = contact.Country;
+
+                    ListContactDTOs.Add(contactDTO);
+
+                }
+
+                companyDTO.ListOfCompanyContacts = ListContactDTOs;
+
+                ListCompanyDTOs.Add(companyDTO);
+            }
+
+            _logger.LogInformation("Company Added: " + DateTime.Now);
+
+            return Ok(ListCompanyDTOs);
+
+        }
+
+
         // GET: api/Companies/5
         [HttpGet("{id}")]
         [ActionName("GetCompanyById")]

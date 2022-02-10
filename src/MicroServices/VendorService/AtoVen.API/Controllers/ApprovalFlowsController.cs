@@ -13,12 +13,14 @@ using LinqKit;
 using DataService.Entities;
 using DataService.DataContext;
 using DataService.AccountControl.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AtoVen.API.Controllers
 {
     //[Route("api/[controller]")]
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
     public class ApprovalFlowsController : ControllerBase
     {
         private readonly AtoVenDbContext _context;

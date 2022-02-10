@@ -15,6 +15,7 @@ namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, AtoVenAdmin")]
     public class AdministrationController : ControllerBase
     {
         private readonly RoleManager<IdentityRole> _roleManager;

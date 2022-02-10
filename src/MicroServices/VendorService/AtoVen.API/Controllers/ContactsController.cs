@@ -8,11 +8,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DataService.Entities;
 using DataService.DataContext;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
     public class ContactsController : ControllerBase
     {
         private readonly AtoVenDbContext _context;

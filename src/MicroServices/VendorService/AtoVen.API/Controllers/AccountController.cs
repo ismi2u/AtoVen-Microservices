@@ -43,7 +43,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("Login")]
-        [AllowAnonymous]
+  
         public async Task<ActionResult<Company>> AccountLogin(LoginDTO login)
         {
             var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe, false);
@@ -91,7 +91,7 @@ namespace AtoVen.API.Controllers
         }
         [HttpPost]
         [ActionName("Logout")]
-        [AllowAnonymous]
+   
         public async Task<IActionResult> AccountLogout()
         {
             await _signInManager.SignOutAsync();
@@ -102,6 +102,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("ForgotPassword")]
+    
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDTO model)
         {
             //check if employee-id is already registered
@@ -145,6 +146,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("ResetPassword")]
+   
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO model)
         {
             if (ModelState.IsValid)
