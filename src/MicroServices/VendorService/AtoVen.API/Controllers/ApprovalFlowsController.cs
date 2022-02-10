@@ -77,7 +77,7 @@ namespace AtoVen.API.Controllers
         {
             List<ApprovalFlowDTO> ListApprovalFlowDTOs = new();
 
-            var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email).ToListAsync();
+            var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus==(int)ApprovalStatusType.Pending).ToListAsync();
 
             ///
             List<ApprovalFlow> FilteredApprovalFlow = new List<ApprovalFlow>();
@@ -94,6 +94,11 @@ namespace AtoVen.API.Controllers
                     {
                         FilteredApprovalFlow.Add(approvalFlow);
                     }
+                }
+                else
+                {
+                    FilteredApprovalFlow.Add(approvalFlow);
+
                 }
             }
 
@@ -124,8 +129,31 @@ namespace AtoVen.API.Controllers
 
             var ListApprovalFlows = await _context.ApprovalFlows.Where(a => a.ApproverEmail == email && a.ApprovalStatus == (int)ApprovalStatusType.Pending).ToListAsync();
 
+            ///
+            List<ApprovalFlow> FilteredApprovalFlow = new List<ApprovalFlow>();
+
+
             foreach (ApprovalFlow approvalFlow in ListApprovalFlows)
             {
+                int PreviousApprovalLevel = approvalFlow.ApproverLevel - 1;
+                if (PreviousApprovalLevel != 0)
+                {
+                    ApprovalFlow tempApprFlow = _context.ApprovalFlows.Where(a => a.CompanyID == approvalFlow.CompanyID && a.ApproverLevel == PreviousApprovalLevel).FirstOrDefault();
+                    if (tempApprFlow.ApprovalStatus == (int)ApprovalStatusType.Approved)
+                    {
+                        FilteredApprovalFlow.Add(approvalFlow);
+                    }
+                }
+                else
+                {
+                    FilteredApprovalFlow.Add(approvalFlow);
+
+                }
+            }
+
+
+            foreach (ApprovalFlow approvalFlow in FilteredApprovalFlow)
+            { 
                 ApprovalFlowDTO approvalFlowDTO = new ApprovalFlowDTO();
 
                 approvalFlowDTO.Id = approvalFlow.Id;
