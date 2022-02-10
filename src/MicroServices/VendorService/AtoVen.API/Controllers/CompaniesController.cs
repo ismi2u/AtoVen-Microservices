@@ -602,6 +602,18 @@ namespace AtoVen.API.Controllers
                 var listofApprovalFlows = _context.ApprovalFlows.Where(a => a.CompanyID == updateCompany.Id).ToList();
                 int i = 1;
 
+                //var cp = System.Web.HttpContext.Current.User;
+                //var claims = (ClaimsIdentity)ClaimsPrincipal.Current.Identity;
+
+                //var userrole = claims.FirstOrDefault(c => c.Type == "role");
+
+
+                //First get user claims    
+                var claims = ClaimsPrincipal.Current.Identities.First().Claims.ToList();
+
+                //Filter specific claim    
+               var userclaims = claims?.FirstOrDefault(x => x.Type.Equals("Role", StringComparison.OrdinalIgnoreCase))?.Value;
+
                 string jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                ApplicationUser applicationUser = await _userManager.FindByIdAsync(jwtUserId);
 
