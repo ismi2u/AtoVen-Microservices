@@ -173,7 +173,7 @@ namespace AtoVen.API.Controllers
         // PUT: api/ApprovalFlows/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApprovalFlow(int id, ApprovalFlowDTO approvalFlow)
+        public async Task<IActionResult> PutApprovalFlow(int id, ApprovalFlowPutDTO approvalFlow)
         {
 
            // ApprovalFlow updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlow.Id);

@@ -719,7 +719,7 @@ namespace AtoVen.API.Controllers
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.Append(Environment.NewLine);
                     emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
+                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                     intBankCount += 1;

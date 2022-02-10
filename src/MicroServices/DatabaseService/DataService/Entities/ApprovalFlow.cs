@@ -40,7 +40,14 @@ namespace DataService.Entities
 
     }
 
-  
+    public class ApprovalFlowPutDTO
+    {
+        public int Id { get; set; }
+        public int ApprovalStatus { get; set; }
+
+    }
+
+
     public enum ApprovalStatusType
     {
         Pending =1,

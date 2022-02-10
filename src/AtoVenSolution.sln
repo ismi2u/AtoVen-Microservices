@@ -19,7 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValidationLibrary", "MicroS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DatabaseService", "DatabaseService", "{6003882F-1D48-4216-A0BC-75BC3C02A1D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataService", "MicroServices\DatabaseService\DataService\DataService.csproj", "{0FFA655C-5718-45D6-AD18-A30C9D42FF76}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataService", "MicroServices\DatabaseService\DataService\DataService.csproj", "{0FFA655C-5718-45D6-AD18-A30C9D42FF76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HTMLEmailService", "HTMLEmailService", "{14250FEC-6794-463F-A4C8-11E1FC8B5E6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTMLEmailService", "MicroServices\HTMLEmailService\HTMLEmailService\HTMLEmailService.csproj", "{07C117BF-1124-4BD0-9990-FC894043DD3C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +47,10 @@ Global
 		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FFA655C-5718-45D6-AD18-A30C9D42FF76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07C117BF-1124-4BD0-9990-FC894043DD3C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -56,6 +64,8 @@ Global
 		{61BC1F95-5D2A-400C-8814-DA406E5D3098} = {22B118B2-04AD-42D5-AF89-BDC59BAFFB91}
 		{6003882F-1D48-4216-A0BC-75BC3C02A1D0} = {17A5DE4D-8FB6-4C38-8EAB-ABF3FB1A506C}
 		{0FFA655C-5718-45D6-AD18-A30C9D42FF76} = {6003882F-1D48-4216-A0BC-75BC3C02A1D0}
+		{14250FEC-6794-463F-A4C8-11E1FC8B5E6E} = {17A5DE4D-8FB6-4C38-8EAB-ABF3FB1A506C}
+		{07C117BF-1124-4BD0-9990-FC894043DD3C} = {14250FEC-6794-463F-A4C8-11E1FC8B5E6E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3872FEC4-E575-4D21-BA4E-89599AB4EDBD}
