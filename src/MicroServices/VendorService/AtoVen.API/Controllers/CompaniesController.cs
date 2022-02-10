@@ -29,6 +29,7 @@ namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
+    [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
     public class CompaniesController : ControllerBase
     {
         private readonly AtoVenDbContext _context;
@@ -36,6 +37,7 @@ namespace AtoVen.API.Controllers
         private readonly ILogger<CompaniesController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationUser> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment hostingEnvironment;
 
@@ -46,10 +48,12 @@ namespace AtoVen.API.Controllers
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
                                 IWebHostEnvironment hostEnv,
-                                ILogger<CompaniesController> logger)
+                                ILogger<CompaniesController> logger, 
+                                RoleManager<ApplicationUser> roleManager)
         {
             _SchwarzContext = schwarzContext;
             _logger = logger;
+            _roleManager = roleManager;
             _context = context;
             hostingEnvironment = hostEnv;
             _userManager = userManager;
@@ -60,6 +64,7 @@ namespace AtoVen.API.Controllers
         // GET: api/Companies
         [HttpGet]
         [ActionName("GetCompanies")]
+        [Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
         public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanies()
         {
             List<CompanyDTO> ListCompanyDTOs = new();
@@ -168,6 +173,7 @@ namespace AtoVen.API.Controllers
         // GET: api/Companies/5
         [HttpGet("{id}")]
         [ActionName("GetCompanyById")]
+        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<ActionResult<CompanyDTO>> GetCompany(int id)
         {
             Company company = await _context.Companies.FindAsync(id);
@@ -282,6 +288,7 @@ namespace AtoVen.API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [ActionName("UpdateCompany")]
+        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<IActionResult> PutCompany(int id, CompanyPutDTO companyPutDTO)
         {
 
@@ -293,7 +300,7 @@ namespace AtoVen.API.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(companyPutDTO).State = EntityState.Modified;
+            //_context.Entry(companyPutDTO).State = EntityState.Modified;
 
             try
             {
@@ -395,38 +402,43 @@ namespace AtoVen.API.Controllers
                     ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                     arrContactIds = new int[totalContactCount]; //Initialize the array with count
-                    foreach (ContactDTO contact in companyPutDTO.ListOfCompanyContacts)
+                    //remove all existing Contacts related to the company
+                    _context.Contacts.RemoveRange(_context.Contacts.Where(c => c.CompanyID == updateCompId));
+                    foreach (ContactPostDTO contact in companyPutDTO.ListOfCompanyContacts)
                     {
-                        Contact updateContact = await _context.Contacts.FindAsync(contact.Id);
+                        Contact newContact = new();
 
-                        updateContact.CompanyID = updateCompId; //Db generated Identity column value
-                        updateContact.Email = contact.Email;
-                        updateContact.FaxNo = contact.FaxNo;
-                        updateContact.Language = contact.Language;
-                        updateContact.PhoneNo = contact.PhoneNo;
-                        updateContact.MobileNo = contact.MobileNo;
-                        updateContact.Department = contact.Department;
-                        updateContact.FirstName = contact.FirstName;
-                        updateContact.Address = contact.Address;
-                        updateContact.LastName = contact.LastName;
-                        updateContact.Designation = contact.Designation;
-                        updateContact.Country = contact.Country;
+                        newContact.CompanyID = updateCompId; //Db generated Identity column value
+                        newContact.Email = contact.Email;
+                        newContact.FaxNo = contact.FaxNo;
+                        newContact.Language = contact.Language;
+                        newContact.PhoneNo = contact.PhoneNo;
+                        newContact.MobileNo = contact.MobileNo;
+                        newContact.Department = contact.Department;
+                        newContact.FirstName = contact.FirstName;
+                        newContact.Address = contact.Address;
+                        newContact.LastName = contact.LastName;
+                        newContact.Designation = contact.Designation;
+                        newContact.Country = contact.Country;
 
-                        _context.Contacts.Update(updateContact);
+                        _context.Contacts.Add(newContact);
                         await _context.SaveChangesAsync();
 
 
                         emailBodyBuilder.AppendLine("================================================================");
                         emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                        emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(updateContact));
-                        arrContactIds[intContactCount] = updateContact.Id; //Assign new Contact ID to array
+                        //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
+                        arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
                         intContactCount += 1;
                     }
 
 
                     arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
-                    foreach (BankDTO bank in companyPutDTO.ListOfCompanyBanks)
+                    //remove all existing Contacts related to the company
+                    _context.Banks.RemoveRange(_context.Banks.Where(c => c.CompanyID == updateCompId));
+
+                    foreach (BankPostDTO bank in companyPutDTO.ListOfCompanyBanks)
                     {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
                         ////////////////////////////////////////////////////////////////////
                         //// *************** IBAN Number Validation *****************///////
@@ -437,26 +449,26 @@ namespace AtoVen.API.Controllers
                             return Ok("Invalid IBAN Number: " + bank.IBAN);
                         }
 
-                        Bank updateBank = await _context.Banks.FindAsync(bank.Id);
+                        Bank newBank = new Bank();
 
-                        updateBank.CompanyID = updateCompId; //Db generated Identity column value
-                        updateBank.AccountHolderName = bank.AccountHolderName;
-                        updateBank.BankAccount = bank.BankAccount;
-                        updateBank.Country = bank.Country;
-                        updateBank.BankKey = bank.BankKey;
-                        updateBank.BankName = bank.BankName;
-                        updateBank.Currency = bank.Currency;
-                        updateBank.IBAN = bank.IBAN;
-                        updateBank.SwiftCode = bank.SwiftCode;
+                        newBank.CompanyID = updateCompId; //Db generated Identity column value
+                        newBank.AccountHolderName = bank.AccountHolderName;
+                        newBank.BankAccount = bank.BankAccount;
+                        newBank.Country = bank.Country;
+                        newBank.BankKey = bank.BankKey;
+                        newBank.BankName = bank.BankName;
+                        newBank.Currency = bank.Currency;
+                        newBank.IBAN = bank.IBAN;
+                        newBank.SwiftCode = bank.SwiftCode;
 
 
-                        _context.Banks.Update(updateBank);
+                        await _context.Banks.AddAsync(newBank);
                         await _context.SaveChangesAsync();
                         emailBodyBuilder.AppendLine("================================================================");
                         emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                        emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(updateBank));
+                        //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
-                        arrBankIds[intBankCount] = updateBank.Id; //Assign new bank ID to array
+                        arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                         intBankCount += 1;
                     }
 
@@ -482,12 +494,17 @@ namespace AtoVen.API.Controllers
 
                 var listofApprovalFlows = _context.ApprovalFlows.Where(a => a.CompanyID == updateCompany.Id).ToList();
                 int i = 1;
+
+                //var role = await roleManager.FindByIdAsync(model.Id);///
+                //_roleManager.FindByIdAsync
+
+                //_userManager.GetUserIdAsync()
                 foreach (ApprovalFlow approvalFlowItem in listofApprovalFlows)
                 {
                     ApprovalFlow updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlowItem.Id);
 
                     updateApprovalFlow.RecordDate = DateTime.Now;
-                    updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending;
+                    updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending; //Because this action is by Vendor
                     updateApprovalFlow.IsDuplicateEntry = areDuplicatesFound;
 
                     _context.ApprovalFlows.Update(updateApprovalFlow);
@@ -536,6 +553,7 @@ namespace AtoVen.API.Controllers
 
         [HttpPost]
         [ActionName("RegisterCompany")]
+        [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
             if (_context.Users.Max(u => u.ApproverLevel) < 1)
@@ -719,7 +737,7 @@ namespace AtoVen.API.Controllers
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.Append(Environment.NewLine);
                     emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
+                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                     intBankCount += 1;

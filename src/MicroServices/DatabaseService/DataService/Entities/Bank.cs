@@ -53,4 +53,18 @@ namespace DataService.Entities
         public string IBAN { get; set; }
         public string Currency { get; set; }
     }
+
+    public class BankPutDTO
+    {
+        public int Id { get; set; }
+        public int CompanyID { get; set; }
+        public string Country { get; set; }
+        public string BankKey { get; set; }
+        public string BankName { get; set; }
+        public string SwiftCode { get; set; }
+        public string BankAccount { get; set; }
+        public string AccountHolderName { get; set; }
+        public string IBAN { get; set; }
+        public string Currency { get; set; }
+    }
 }

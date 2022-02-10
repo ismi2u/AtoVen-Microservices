@@ -199,17 +199,21 @@ namespace AtoVen.API.Controllers
             Company newCompany;
             string newCompanyPassword = "";
 
-            _context.Entry(approvalFlow).State = EntityState.Modified;
+            //_context.Entry(approvalFlow).State = EntityState.Modified;
 
             try
             {
+
                 var updateApprovalFlow = await _context.ApprovalFlows.FindAsync(approvalFlow.Id);
                 updateApprovalFlow.ApprovalStatus = approvalFlow.ApprovalStatus;
 
-                // If approved check for the next approver
+                // If approved, Update Approval flow table and check for the next approver
                 if (approvalFlow.ApprovalStatus == (int)ApprovalStatusType.Approved)
                 {
-
+                    //update ApprovalFlow table data
+                    updateApprovalFlow.LevelApprovedDate = DateTime.Now;
+                    _context.ApprovalFlows.Update(updateApprovalFlow);
+                    await _context.SaveChangesAsync();
 
                     int compId = updateApprovalFlow.CompanyID;
                     int apprLevel = updateApprovalFlow.ApproverLevel;
@@ -218,7 +222,7 @@ namespace AtoVen.API.Controllers
                     List<Contact> contacts = await _context.Contacts.Where(c => c.CompanyID == compId).ToListAsync();
                     List<Bank> banks = await _context.Banks.Where(b => b.CompanyID == compId).ToListAsync();
 
-                    ApprovalFlow nextApproval = _context.ApprovalFlows.Where(a => a.CompanyID == compId && a.ApproverLevel == nxtApprLevel).FirstOrDefault();
+                    ApprovalFlow nextApproval = _context.ApprovalFlows.Where(a => a.CompanyID == compId && a.ApproverLevel == nxtApprLevel && a.ApprovalStatus==(int)ApprovalStatusType.Pending).FirstOrDefault();
 
 
                     if (nextApproval != null)
@@ -258,6 +262,7 @@ namespace AtoVen.API.Controllers
 
                             _context.Companies.Update(updateCompany);
                             await _context.SaveChangesAsync();
+                            await AtoVenDbContextTransaction.CommitAsync();
 
                         }
                         using (var schwarzDbContextTransaction = _schwarzContext.Database.BeginTransaction())
@@ -367,41 +372,47 @@ namespace AtoVen.API.Controllers
 
                             var user = await _userManager.FindByEmailAsync(NewUser.Email);
 
-                            IdentityResult RoleAddresult = await _userManager.AddToRoleAsync(NewUser, "User");
+                            IdentityResult RoleAddresult = await _userManager.AddToRoleAsync(NewUser, "Vendor");
 
                             await AtoVenDbContextTransaction.CommitAsync();
                         }
+
+                        // 4: Send Email with User-Id and Password to Vendor
+                        //If next approver is available Send email 
+                        emailBodyBuilder = new StringBuilder();
+
+                        emailBodyBuilder.AppendLine("Congratulations - You are now approved Vendor");
+                        emailBodyBuilder.AppendLine("==================================================");
+                        emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
+                        emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
+                        emailBodyBuilder.AppendLine("Company Location: " + company.City + ", " + company.Country);
+                        emailBodyBuilder.AppendLine("                                                             ");
+                        emailBodyBuilder.AppendLine("==================================================");
+                        emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
+                        emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
+                        emailBodyBuilder.AppendLine("==================================================");
+
+                        var VendorMailAddress = company.Email;
+                        string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
+                        string VendorContent = emailBodyBuilder.ToString();
+                        var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                        await _emailSender.SendEmailAsync(VendorMmessagemail);
+
+                        //Email Sent
                     }
 
 
-                    // 4: Send Email with User-Id and Password to Vendor
-                    //If next approver is available Send email 
-                    emailBodyBuilder = new StringBuilder();
 
-                    emailBodyBuilder.AppendLine("Congratulations - You are now approved Vendor");
-                    emailBodyBuilder.AppendLine("==================================================");
-                    emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
-                    emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
-                    emailBodyBuilder.AppendLine("Company Location: " + company.City + ", " + company.Country);
-                    emailBodyBuilder.AppendLine("                                                             ");
-                    emailBodyBuilder.AppendLine("==================================================");
-                    emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
-                    emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
-                    emailBodyBuilder.AppendLine("==================================================");
-
-                    var VendorMailAddress = company.Email;
-                    string VendorSubject = "New Vendor Registration" + company.CompanyName;
-                    string VendorContent = emailBodyBuilder.ToString();
-                    var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
-                    await _emailSender.SendEmailAsync(VendorMmessagemail);
-
-                    //Email Sent
                 }
 
 
-                // If Rejected Remove all the Details of the company
-                if (approvalFlow.ApprovalStatus == (int)ApprovalStatusType.Approved)
+                // If Rejected, Update the Approval Flow table and Remove all the Details of the company
+                if (approvalFlow.ApprovalStatus == (int)ApprovalStatusType.Rejected)
                 {
+                    //update ApprovalFlow table data - No "Approved-date" entered
+                    _context.ApprovalFlows.Update(updateApprovalFlow);
+                    await _context.SaveChangesAsync();
+
                     var company = await _context.Companies.FindAsync(updateApprovalFlow.CompanyID);
 
                     if (company != null)
@@ -417,6 +428,10 @@ namespace AtoVen.API.Controllers
                         }
                     }
                 }
+
+
+
+
             }
 
 
