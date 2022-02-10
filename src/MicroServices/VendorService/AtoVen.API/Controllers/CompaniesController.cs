@@ -561,7 +561,7 @@ namespace AtoVen.API.Controllers
                 }
             }
 
-            return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
+            return Ok(new { Status = "Success", Message = "New Vendor Request Initiated!" });
         }
 
 
@@ -593,7 +593,7 @@ namespace AtoVen.API.Controllers
             VATValidation vatvalidation = new VATValidation();
             if (vatvalidation.ValidateVAT(company.VatNo) != "Valid VAT Number")
             {
-                return Ok("Invalid VAT Number: " + company.VatNo);
+                return Ok(new { Status = "Failure", Message = "Invalid VAT Number: " + company.VatNo });
 
             }
 
@@ -616,7 +616,7 @@ namespace AtoVen.API.Controllers
 
             if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
             {
-                return Ok("Invalid Street Address");
+                return Ok(new { Status = "Failure", Message = "Invalid Street Address" });
             }
             //
             emailBodyBuilder.AppendLine("Street Address: Validated");
@@ -734,7 +734,7 @@ namespace AtoVen.API.Controllers
                     IBANValidation ibanvalidation = new IBANValidation();
                     if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
                     {
-                        return Ok("Invalid IBAN Number: " + bank.IBAN);
+                        return Ok(new { Status = "Failure", Message = "Invalid IBAN Number: " + bank.IBAN });
                     }
 
                     Bank newBank = new Bank() { };
@@ -849,8 +849,8 @@ namespace AtoVen.API.Controllers
             //    return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
             //}
 
+            return Ok(new { Status = "Success", Message = "New Vendor request Initiated!" });
 
-            return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
         }
 
 
