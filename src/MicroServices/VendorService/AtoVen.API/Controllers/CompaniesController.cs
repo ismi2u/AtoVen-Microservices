@@ -29,14 +29,13 @@ namespace AtoVen.API.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+    [Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
     public class CompaniesController : ControllerBase
     {
         private readonly AtoVenDbContext _context;
         private readonly SchwarzDbContext _SchwarzContext;
         private readonly ILogger<CompaniesController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment hostingEnvironment;
 
@@ -47,6 +46,7 @@ namespace AtoVen.API.Controllers
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
                                 IWebHostEnvironment hostEnv,
+                                RoleManager<IdentityRole> roleManager,
                                 ILogger<CompaniesController> logger)
         {
             _SchwarzContext = schwarzContext;
@@ -54,7 +54,6 @@ namespace AtoVen.API.Controllers
             _context = context;
             hostingEnvironment = hostEnv;
             _userManager = userManager;
-            _signInManager = signInManager;
             _emailSender = emailSender;
         }
 

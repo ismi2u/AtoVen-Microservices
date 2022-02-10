@@ -45,8 +45,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
 
 
-        ValidIssuer = "https://localhost:5004",
-        ValidAudience = "https://localhost:5004",
+        ValidIssuer = "https://localhost:5001",
+        ValidAudience = "https://localhost:5001",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MySecretKey12323232"))
     };
 });
