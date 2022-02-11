@@ -607,15 +607,23 @@ namespace AtoVen.API.Controllers
 
                 //var userrole = claims.FirstOrDefault(c => c.Type == "role");
 
+                //HttpContext.Current.User.Identity.Name
+                var user = User;
+                var userId = ((ClaimsIdentity)User.Identity).FindFirst("UserId");
+                var userName = ((ClaimsIdentity)User.Identity).FindFirst("UserName");
 
-                //First get user claims    
-                var claims = ClaimsPrincipal.Current.Identities.First().Claims.ToList();
+                var uName = User.Identity.Name;
 
-                //Filter specific claim    
-               var userclaims = claims?.FirstOrDefault(x => x.Type.Equals("Role", StringComparison.OrdinalIgnoreCase))?.Value;
+                ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
 
-                string jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-               ApplicationUser applicationUser = await _userManager.FindByIdAsync(jwtUserId);
+               // //First get user claims    
+               // var claims = ClaimsPrincipal.Current.Identities.First().Claims.ToList();
+
+               // //Filter specific claim    
+               //var userclaims = claims?.FirstOrDefault(x => x.Type.Equals("Role", StringComparison.OrdinalIgnoreCase))?.Value;
+
+               // string jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+               //ApplicationUser applicationUser = await _userManager.FindByIdAsync(jwtUserId);
 
                 //check Logged in User Role
                 bool isVendorRole = false;
