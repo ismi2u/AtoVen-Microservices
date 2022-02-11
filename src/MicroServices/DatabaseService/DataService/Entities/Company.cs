@@ -158,6 +158,8 @@ namespace DataService.Entities
 
         //public string DocumentIDs { get; set; }
 
+        public int ApprovalFlowID { get; set; }
+
         public bool? IsVendorInitiated { get; set; }
 
         public List<ContactPostDTO> ListOfCompanyContacts { get; set; }

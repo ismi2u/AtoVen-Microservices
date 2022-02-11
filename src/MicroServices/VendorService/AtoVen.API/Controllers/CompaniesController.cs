@@ -608,9 +608,9 @@ namespace AtoVen.API.Controllers
                 //var userrole = claims.FirstOrDefault(c => c.Type == "role");
 
                 //HttpContext.Current.User.Identity.Name
-                var user = User;
-                var userId = ((ClaimsIdentity)User.Identity).FindFirst("UserId");
-                var userName = ((ClaimsIdentity)User.Identity).FindFirst("UserName");
+                //var user = User;
+                //var userId = ((ClaimsIdentity)User.Identity).FindFirst("UserId");
+                //var userName = ((ClaimsIdentity)User.Identity).FindFirst("UserName");
 
                 var uName = User.Identity.Name;
 
@@ -656,7 +656,11 @@ namespace AtoVen.API.Controllers
                     }
                     else
                     {
-                        updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Approved;//action is by Approver
+                        if (approvalFlowItem.Id == companyPutDTO.ApprovalFlowID)
+                        {
+                            updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Approved;//action is by Approver
+                        }
+                       
                     }
 
 
