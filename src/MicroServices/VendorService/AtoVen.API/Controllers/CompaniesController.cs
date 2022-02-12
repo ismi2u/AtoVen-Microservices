@@ -133,7 +133,7 @@ namespace AtoVen.API.Controllers
 
                 List<ContactDTO> ListContactDTOs = new();
 
-                var ListContacts = await _context.Contacts.ToListAsync();
+                var ListContacts = _context.Contacts.Where(c => c.CompanyID == companyDTO.Id).ToList();
 
                 foreach (Contact contact in ListContacts)
                 {
@@ -245,7 +245,7 @@ namespace AtoVen.API.Controllers
 
                 List<ContactDTO> ListContactDTOs = new();
 
-                var ListContacts = await _context.Contacts.ToListAsync();
+                var ListContacts = _context.Contacts.Where(c => c.CompanyID == companyDTO.Id).ToList();
 
                 foreach (Contact contact in ListContacts)
                 {
@@ -352,7 +352,7 @@ namespace AtoVen.API.Controllers
 
 
             List<ContactDTO> ListContactDTOs = new();
-            var ListContacts = await _context.Contacts.ToListAsync();
+            var ListContacts = _context.Contacts.Where(b => b.CompanyID == companyDTO.Id).ToList();
 
             foreach (Contact contact in ListContacts)
             {
