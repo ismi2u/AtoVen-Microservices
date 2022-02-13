@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using EmailSendService;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using LinqKit;
@@ -14,7 +14,6 @@ using DataService.Entities;
 using DataService.DataContext;
 using DataService.AccountControl.Models;
 using Microsoft.AspNetCore.Authorization;
-using EmailService.EmailObjects;
 
 namespace AtoVen.API.Controllers
 {
@@ -26,19 +25,19 @@ namespace AtoVen.API.Controllers
     {
         private readonly AtoVenDbContext _context;
         private readonly SchwarzDbContext _schwarzContext;
-        private readonly IMailSender _mailSender;
+        private readonly IEmailSender _emailSender;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         public StringBuilder emailBodyBuilder = new StringBuilder();
 
         public ApprovalFlowsController(AtoVenDbContext context,
                                         SchwarzDbContext schwarzContext,
-                                        IMailSender emailSender,
+                                        IEmailSender emailSender,
                                         RoleManager<IdentityRole> roleManager,
                                         UserManager<ApplicationUser> userManager)
         {
             _context = context;
-            _mailSender = emailSender;
+            _emailSender = emailSender;
             _schwarzContext = schwarzContext;
             _roleManager = roleManager;
             _userManager = userManager;
@@ -287,12 +286,11 @@ namespace AtoVen.API.Controllers
                         emailBodyBuilder.AppendLine("Company Location:" + company.City + " " + company.Country);
                         emailBodyBuilder.AppendLine("New Vendor Registration");
 
-                        //002
-                        //var approverMailAddress = nextApproval.ApproverEmail;
-                        //string subject = "New Vendor Registration" + company.CompanyName;
-                        //string content = emailBodyBuilder.ToString();
-                        //var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-                        //await _mailSender.SendEmailAsync(messagemail);
+                        var approverMailAddress = nextApproval.ApproverEmail;
+                        string subject = "New Vendor Registration" + company.CompanyName;
+                        string content = emailBodyBuilder.ToString();
+                        var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+                        await _emailSender.SendEmailAsync(messagemail);
 
                     }
                     else
@@ -443,12 +441,11 @@ namespace AtoVen.API.Controllers
                         emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
                         emailBodyBuilder.AppendLine("==================================================");
 
-                        //003
-                        //var VendorMailAddress = company.Email;
-                        //string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
-                        //string VendorContent = emailBodyBuilder.ToString();
-                        //var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
-                        //await _mailSender.SendEmailAsync(VendorMmessagemail);
+                        var VendorMailAddress = company.Email;
+                        string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
+                        string VendorContent = emailBodyBuilder.ToString();
+                        var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                        await _emailSender.SendEmailAsync(VendorMmessagemail);
 
                         //Email Sent
                     }
@@ -559,7 +556,14 @@ namespace AtoVen.API.Controllers
             return new string(chars.ToArray());
         }
 
-       
+        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
+        {
+            var approverMailAddress = sendToEmailAddress;
+            string subject = emailSubject;
+            string content = bodyContent;
+            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+            await _emailSender.SendEmailAsync(messagemail);
+        }
 
     }
 

@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Hosting;
+
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text.Json;
+using EmailSendService;
 using ValidationLibrary;
 using DataService.Entities;
 using DataService.DataContext;
@@ -22,7 +24,6 @@ using DataService.AccountControl.Models;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.StaticFiles;
-using EmailService.EmailObjects;
 
 namespace AtoVen.API.Controllers
 {
@@ -35,12 +36,12 @@ namespace AtoVen.API.Controllers
         private readonly SchwarzDbContext _schwarzContext;
         private readonly ILogger<CompaniesController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IMailSender _mailSender;
+        private readonly IEmailSender _emailSender;
         private readonly IWebHostEnvironment hostingEnvironment;
 
         public StringBuilder emailBodyBuilder = new StringBuilder();
 
-        public CompaniesController(AtoVenDbContext context, IMailSender emailSender,
+        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
                                 UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
@@ -53,7 +54,7 @@ namespace AtoVen.API.Controllers
             _context = context;
             hostingEnvironment = hostEnv;
             _userManager = userManager;
-            _mailSender = emailSender;
+            _emailSender = emailSender;
         }
 
         // GET: api/Companies
@@ -62,7 +63,6 @@ namespace AtoVen.API.Controllers
         //[Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
         public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanies()
         {
-
             List<CompanyDTO> ListCompanyDTOs = new();
 
             var ListCompanies = await _context.Companies.ToListAsync();
@@ -687,12 +687,11 @@ namespace AtoVen.API.Controllers
                                 emailBodyBuilder.AppendLine("Company Location:" + company.City + " " + company.Country);
                                 emailBodyBuilder.AppendLine("New Vendor Registration");
 
-                                //004
-                                //var approverMailAddress = nextApproval.ApproverEmail;
-                                //string subject = "New Vendor Registration" + company.CompanyName;
-                                //string content = emailBodyBuilder.ToString();
-                                //var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-                                //await _mailSender.SendEmailAsync(messagemail);
+                                var approverMailAddress = nextApproval.ApproverEmail;
+                                string subject = "New Vendor Registration" + company.CompanyName;
+                                string content = emailBodyBuilder.ToString();
+                                var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+                                await _emailSender.SendEmailAsync(messagemail);
 
                             }
                             else
@@ -843,12 +842,12 @@ namespace AtoVen.API.Controllers
                                 emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
                                 emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
                                 emailBodyBuilder.AppendLine("==================================================");
-                                //005
-                                //var VendorMailAddress = company.Email;
-                                //string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
-                                //string VendorContent = emailBodyBuilder.ToString();
-                                //var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
-                                //await _mailSender.SendEmailAsync(VendorMmessagemail);
+
+                                var VendorMailAddress = company.Email;
+                                string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
+                                string VendorContent = emailBodyBuilder.ToString();
+                                var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                                await _emailSender.SendEmailAsync(VendorMmessagemail);
 
                             }
                            
@@ -868,10 +867,9 @@ namespace AtoVen.API.Controllers
                     ///
                     if (i == 1) //only first approver will receive email
                     {
-                        //008
-                        //await SendEmailInHtml(updateApprovalFlow.ApproverEmail,
-                        //                        "New Vendor " + updateCompany.CompanyName + " Approval request",
-                        //                        emailBodyBuilder.ToString());
+                        await SendEmailInHtml(updateApprovalFlow.ApproverEmail,
+                                                "New Vendor " + updateCompany.CompanyName + " Approval request",
+                                                emailBodyBuilder.ToString());
                     }
                     ////////////////////////////////////////////////////////////////////
                     /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -909,8 +907,6 @@ namespace AtoVen.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
-            //_mailSender.SendHTMLMail("ismailkhanf@gmail.com", "Khan");
-
             if (_context.Users.Max(u => u.ApproverLevel) < 1)
             {
                 return BadRequest();
@@ -1150,10 +1146,9 @@ namespace AtoVen.API.Controllers
                     ///
                     if (i == 1) //only first approver will receive email
                     {
-                        //009
-                        //await SendEmailInHtml(approver.Email,
-                        //                        "New Vendor " + newCompany.CompanyName + " Approval request",
-                        //                        emailBodyBuilder.ToString());
+                        await SendEmailInHtml(approver.Email,
+                                                "New Vendor " + newCompany.CompanyName + " Approval request",
+                                                emailBodyBuilder.ToString());
                     }
                     ////////////////////////////////////////////////////////////////////
                     /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -1399,99 +1394,16 @@ namespace AtoVen.API.Controllers
         /// <param name="emailSubject"></param>
         /// <param name="bodyContent"></param>
         /// <returns></returns>
-       
-
-        [HttpGet]
-        [ActionName("GetCompanyForVendor")]
-        public async Task<ActionResult<IEnumerable<CompanyVM>>> GetCompanyForVendor()
+        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
         {
-            var uName = User.Identity.Name;
-            ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
-
-            Company company = _context.Companies.Where(c => c.Email == applicationUser.Email).FirstOrDefault();
-
-            CompanyVM companyVM = new CompanyVM();
-
-            companyVM.Id = company.Id;
-            companyVM.CompanyName = company.CompanyName;
-            companyVM.CommercialRegistrationNo = company.CommercialRegistrationNo;
-            companyVM.Language = company.Language;
-            companyVM.Country = company.Country;
-            companyVM.Region = company.Region;
-            companyVM.District = company.District;
-            companyVM.PostalCode = company.PostalCode;
-            companyVM.City = company.City;
-            companyVM.Street = company.Street;
-            companyVM.HouseNo = company.HouseNo;
-            companyVM.Building = company.Building;
-            companyVM.Floor = company.Floor;
-            companyVM.Room = company.Room;
-            companyVM.POBox = company.POBox;
-            companyVM.PhoneNo = company.PhoneNo;
-            companyVM.FaxNumber = company.FaxNumber;
-            companyVM.Email = company.Email;
-            companyVM.MobileNo = company.MobileNo;
-            companyVM.Website = company.Website;
-            companyVM.VendorType = company.VendorType;
-            companyVM.AccountGroup = company.AccountGroup;
-            companyVM.VatNo = company.VatNo;
-            companyVM.Notes = company.Notes;
-
-
-          
-
-            List<BankVM> ListBankVMs = new();
-            var ListBanks = _context.Banks.Where(b => b.CompanyID == companyVM.Id).ToList();
-
-            foreach (Bank bank in ListBanks)
-            {
-                BankVM bankVM = new BankVM();
-
-                bankVM.Id = bank.Id;
-                bankVM.CompanyID = bank.CompanyID;
-                bankVM.Country = bank.Country;
-                bankVM.BankKey = bank.BankKey;
-                bankVM.BankName = bank.BankName;
-                bankVM.SwiftCode = bank.SwiftCode;
-                bankVM.BankAccount = bank.BankAccount;
-                bankVM.AccountHolderName = bank.AccountHolderName;
-                bankVM.IBAN = bank.IBAN;
-                bankVM.Currency = bank.Currency;
-
-                ListBankVMs.Add(bankVM);
-            }
-
-            companyVM.ListOfCompanyBanks = ListBankVMs;
-
-            List<ContactVM> ListContactVMs = new();
-            var ListContacts = _context.Contacts.Where(b => b.CompanyID == companyVM.Id).ToList();
-
-            foreach (Contact contact in ListContacts)
-            {
-                ContactVM contactVM = new ContactVM();
-
-                contactVM.Id = contact.Id;
-                contactVM.CompanyID = contact.CompanyID;
-                contactVM.FirstName = contact.FirstName;
-                contactVM.LastName = contact.LastName;
-                contactVM.Address = contact.Address;
-                contactVM.Designation = contact.Designation;
-                contactVM.Department = contact.Department;
-                contactVM.MobileNo = contact.MobileNo;
-                contactVM.PhoneNo = contact.PhoneNo;
-                contactVM.FaxNo = contact.FaxNo;
-                contactVM.Email = contact.Email;
-                contactVM.Language = contact.Language;
-                contactVM.Country = contact.Country;
-
-                ListContactVMs.Add(contactVM);
-
-            }
-
-            companyVM.ListOfCompanyContacts = ListContactVMs;
-
-            return Ok(companyVM);
-
+            var approverMailAddress = sendToEmailAddress;
+            string subject = emailSubject;
+            string content = bodyContent;
+            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+            await _emailSender.SendEmailAsync(messagemail);
         }
+
+
+
     }
 }
