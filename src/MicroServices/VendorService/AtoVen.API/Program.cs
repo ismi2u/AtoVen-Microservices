@@ -1,11 +1,14 @@
+using EmailService.EmailObjects;
 using DataService.AccountControl.Models;
 using DataService.DataContext;
-using EmailSendService;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,9 +71,26 @@ builder.Services.AddCors(options =>
               ));
 
 //email service
-var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
-builder.Services.AddSingleton(emailConfig);
-builder.Services.AddScoped<IEmailSender, EmailSender>();
+//var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+//builder.Services.AddSingleton(emailConfig);
+
+var from = builder.Configuration.GetSection("EmailConfiguration")["From"];
+var gmailsender = builder.Configuration.GetSection("EmailConfiguration")["UserName"];
+var password = builder.Configuration.GetSection("EmailConfiguration")["Password"];
+var port = builder.Configuration.GetSection("EmailConfiguration")["Port"];
+
+builder.Services
+    .AddFluentEmail(gmailsender, "Atominos Consulting")
+    .AddRazorRenderer()
+    .AddSmtpSender(new SmtpClient("smtp.gmail.com")
+    {
+        UseDefaultCredentials = false,
+        Port = 587,
+        Credentials = new NetworkCredential(gmailsender, password),
+        EnableSsl = true,
+    });
+
+builder.Services.AddScoped<IMailSender, MailSender>();
 
 var app = builder.Build();
 

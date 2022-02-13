@@ -1,33 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..\..</DockerfileContext>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Data\**" />
-    <Compile Remove="Entities\**" />
-    <Compile Remove="Repository\**" />
-    <Content Remove="Data\**" />
-    <Content Remove="Entities\**" />
-    <Content Remove="Repository\**" />
-    <EmbeddedResource Remove="Data\**" />
-    <EmbeddedResource Remove="Entities\**" />
-    <EmbeddedResource Remove="Repository\**" />
-    <EntityDeploy Remove="Data\**" />
-    <EntityDeploy Remove="Entities\**" />
-    <EntityDeploy Remove="Repository\**" />
-    <None Remove="Data\**" />
-    <None Remove="Entities\**" />
-    <None Remove="Repository\**" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileContext>..\..\..</DockerfileContext>
+		<PreserveCompilationContext>true</PreserveCompilationContext>
+	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="Entities\**" />
+		<Compile Remove="Repository\**" />
+		<Content Remove="Entities\**" />
+		<Content Remove="Repository\**" />
+		<EmbeddedResource Remove="Entities\**" />
+		<EmbeddedResource Remove="Repository\**" />
+		<EntityDeploy Remove="Entities\**" />
+		<EntityDeploy Remove="Repository\**" />
+		<None Remove="Entities\**" />
+		<None Remove="Repository\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FluentEmail.Razor" Version="3.0.0" />
+		<PackageReference Include="FluentEmail.Smtp" Version="3.0.0" />
 		<PackageReference Include="LinqKit" Version="1.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.1" />
@@ -44,13 +42,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\DatabaseService\DataService\DataService.csproj" />
-	  <ProjectReference Include="..\..\EmailSender\EmailSendService.csproj" />
-	  <ProjectReference Include="..\..\ValidationService\ValidationLibrary\ValidationLibrary.csproj" />
+		<ProjectReference Include="..\..\DatabaseService\DataService\DataService.csproj" />
+		<ProjectReference Include="..\..\EmailService\EmailService\EmailService.csproj" />
+		<ProjectReference Include="..\..\ValidationService\ValidationLibrary\ValidationLibrary.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="documents\" />
+		<Folder Include="documents\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="EmailTemplate\EmailTemplate.cshtml" />
 	</ItemGroup>
 
 </Project>
