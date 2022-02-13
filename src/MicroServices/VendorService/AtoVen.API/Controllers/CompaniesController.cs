@@ -1404,6 +1404,97 @@ namespace AtoVen.API.Controllers
         }
 
 
+        [HttpGet]
+        [ActionName("GetCompanyForVendor")]
+        public async Task<ActionResult<IEnumerable<CompanyVM>>> GetCompanyForVendor()
+        {
+            var uName = User.Identity.Name;
+            ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
 
+            Company company = _context.Companies.Where(c => c.Email == applicationUser.Email).FirstOrDefault();
+
+            CompanyVM companyVM = new CompanyVM();
+
+            companyVM.Id = company.Id;
+            companyVM.CompanyName = company.CompanyName;
+            companyVM.CommercialRegistrationNo = company.CommercialRegistrationNo;
+            companyVM.Language = company.Language;
+            companyVM.Country = company.Country;
+            companyVM.Region = company.Region;
+            companyVM.District = company.District;
+            companyVM.PostalCode = company.PostalCode;
+            companyVM.City = company.City;
+            companyVM.Street = company.Street;
+            companyVM.HouseNo = company.HouseNo;
+            companyVM.Building = company.Building;
+            companyVM.Floor = company.Floor;
+            companyVM.Room = company.Room;
+            companyVM.POBox = company.POBox;
+            companyVM.PhoneNo = company.PhoneNo;
+            companyVM.FaxNumber = company.FaxNumber;
+            companyVM.Email = company.Email;
+            companyVM.MobileNo = company.MobileNo;
+            companyVM.Website = company.Website;
+            companyVM.VendorType = company.VendorType;
+            companyVM.AccountGroup = company.AccountGroup;
+            companyVM.VatNo = company.VatNo;
+            companyVM.Notes = company.Notes;
+
+
+          
+
+            List<BankVM> ListBankVMs = new();
+            var ListBanks = _context.Banks.Where(b => b.CompanyID == companyVM.Id).ToList();
+
+            foreach (Bank bank in ListBanks)
+            {
+                BankVM bankVM = new BankVM();
+
+                bankVM.Id = bank.Id;
+                bankVM.CompanyID = bank.CompanyID;
+                bankVM.Country = bank.Country;
+                bankVM.BankKey = bank.BankKey;
+                bankVM.BankName = bank.BankName;
+                bankVM.SwiftCode = bank.SwiftCode;
+                bankVM.BankAccount = bank.BankAccount;
+                bankVM.AccountHolderName = bank.AccountHolderName;
+                bankVM.IBAN = bank.IBAN;
+                bankVM.Currency = bank.Currency;
+
+                ListBankVMs.Add(bankVM);
+            }
+
+            companyVM.ListOfCompanyBanks = ListBankVMs;
+
+            List<ContactVM> ListContactVMs = new();
+            var ListContacts = _context.Contacts.Where(b => b.CompanyID == companyVM.Id).ToList();
+
+            foreach (Contact contact in ListContacts)
+            {
+                ContactVM contactVM = new ContactVM();
+
+                contactVM.Id = contact.Id;
+                contactVM.CompanyID = contact.CompanyID;
+                contactVM.FirstName = contact.FirstName;
+                contactVM.LastName = contact.LastName;
+                contactVM.Address = contact.Address;
+                contactVM.Designation = contact.Designation;
+                contactVM.Department = contact.Department;
+                contactVM.MobileNo = contact.MobileNo;
+                contactVM.PhoneNo = contact.PhoneNo;
+                contactVM.FaxNo = contact.FaxNo;
+                contactVM.Email = contact.Email;
+                contactVM.Language = contact.Language;
+                contactVM.Country = contact.Country;
+
+                ListContactVMs.Add(contactVM);
+
+            }
+
+            companyVM.ListOfCompanyContacts = ListContactVMs;
+
+            return Ok(companyVM);
+
+        }
     }
 }

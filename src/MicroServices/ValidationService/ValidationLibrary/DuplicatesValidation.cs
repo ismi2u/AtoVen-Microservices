@@ -134,7 +134,7 @@ namespace DataService.DataContext
 
             ListOfCompanies = ListOfCompanies.Distinct().ToList();
 
-            ListOfCompanies.Remove(company);
+            //ListOfCompanies.Remove(company);
 
             return ListOfCompanies;
         }
