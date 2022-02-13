@@ -26,9 +26,9 @@ builder.Services.AddSwaggerGen();
 //ContainerNetworkSchwarzMSSQLServer
 
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SQLServerRunningAsContainer")));
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudSchwarzSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SchwarzSQLServerRunningAsContainer")));
 
 
 //builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
