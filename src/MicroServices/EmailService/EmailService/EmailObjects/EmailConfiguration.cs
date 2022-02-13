@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EmailSendService
+namespace EmailService.EmailObjects
 {
     public class EmailConfiguration
     {
@@ -15,4 +15,3 @@ namespace EmailSendService
 
     }
 }
-

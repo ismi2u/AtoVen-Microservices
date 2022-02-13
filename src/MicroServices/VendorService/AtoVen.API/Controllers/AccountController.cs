@@ -13,11 +13,11 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text.Json;
-using EmailSendService;
 using DataService;
 using DataService.AccountControl.Models;
 using DataService.DataContext;
 using DataService.Entities;
+using EmailService.EmailObjects;
 
 namespace AtoVen.API.Controllers
 {
@@ -29,15 +29,15 @@ namespace AtoVen.API.Controllers
         private readonly AtoVenDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IMailSender _mailSender;
 
-        public AccountController(AtoVenDbContext context, IEmailSender emailSender,
+        public AccountController(AtoVenDbContext context, IMailSender emailSender,
                                 UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = emailSender;
+            _mailSender = emailSender;
         }
 
 
@@ -130,9 +130,10 @@ namespace AtoVen.API.Controllers
                                         "https://atoven.com/change-password?token=" + token + "&email=" + model.email;
 
                     //"<a href=\"https://atoven.com/change-password?token=" + token + "&email=" + model.email + "\">";
-                    var messagemail = new Message(new string[] { receiverEmail }, subject, content);
+                    //006
+                    //var messagemail = new Message(new string[] { receiverEmail }, subject, content);
 
-                    await _emailSender.SendEmailAsync(messagemail);
+                    //await _mailSender.SendEmailAsync(messagemail);
 
                 }
 
@@ -163,10 +164,11 @@ namespace AtoVen.API.Controllers
                         var receiverEmail = model.email;
                         string subject = "Password Changed";
                         string content = "Your new Password is:" + model.Password;
-                        var messagemail = new Message(new string[] { receiverEmail }, subject, content);
+                        //001
+                        //var messagemail = new Message(new string[] { receiverEmail }, subject, content);
 
-                        await _emailSender.SendEmailAsync(messagemail);
-                        return Ok(new { Status = "Success", Message = "Your Password has been reset!" });
+                        //await _mailSender.SendEmailAsync(messagemail);
+                        //return Ok(new { Status = "Success", Message = "Your Password has been reset!" });
                     }
 
                     List<object> errResp = new();

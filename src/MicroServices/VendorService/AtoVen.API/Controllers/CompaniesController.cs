@@ -10,13 +10,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Hosting;
-
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text.Json;
-using EmailSendService;
 using ValidationLibrary;
 using DataService.Entities;
 using DataService.DataContext;
@@ -24,6 +22,7 @@ using DataService.AccountControl.Models;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.StaticFiles;
+using EmailService.EmailObjects;
 
 namespace AtoVen.API.Controllers
 {
@@ -36,12 +35,12 @@ namespace AtoVen.API.Controllers
         private readonly SchwarzDbContext _schwarzContext;
         private readonly ILogger<CompaniesController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly IMailSender _mailSender;
         private readonly IWebHostEnvironment hostingEnvironment;
 
         public StringBuilder emailBodyBuilder = new StringBuilder();
 
-        public CompaniesController(AtoVenDbContext context, IEmailSender emailSender,
+        public CompaniesController(AtoVenDbContext context, IMailSender emailSender,
                                 UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager,
                                 SchwarzDbContext schwarzContext,
@@ -54,7 +53,7 @@ namespace AtoVen.API.Controllers
             _context = context;
             hostingEnvironment = hostEnv;
             _userManager = userManager;
-            _emailSender = emailSender;
+            _mailSender = emailSender;
         }
 
         // GET: api/Companies
@@ -63,6 +62,7 @@ namespace AtoVen.API.Controllers
         //[Authorize(Roles = "Admin, AtoVenAdmin, Approver")]
         public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanies()
         {
+
             List<CompanyDTO> ListCompanyDTOs = new();
 
             var ListCompanies = await _context.Companies.ToListAsync();
@@ -687,11 +687,12 @@ namespace AtoVen.API.Controllers
                                 emailBodyBuilder.AppendLine("Company Location:" + company.City + " " + company.Country);
                                 emailBodyBuilder.AppendLine("New Vendor Registration");
 
-                                var approverMailAddress = nextApproval.ApproverEmail;
-                                string subject = "New Vendor Registration" + company.CompanyName;
-                                string content = emailBodyBuilder.ToString();
-                                var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-                                await _emailSender.SendEmailAsync(messagemail);
+                                //004
+                                //var approverMailAddress = nextApproval.ApproverEmail;
+                                //string subject = "New Vendor Registration" + company.CompanyName;
+                                //string content = emailBodyBuilder.ToString();
+                                //var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
+                                //await _mailSender.SendEmailAsync(messagemail);
 
                             }
                             else
@@ -842,12 +843,12 @@ namespace AtoVen.API.Controllers
                                 emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
                                 emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
                                 emailBodyBuilder.AppendLine("==================================================");
-
-                                var VendorMailAddress = company.Email;
-                                string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
-                                string VendorContent = emailBodyBuilder.ToString();
-                                var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
-                                await _emailSender.SendEmailAsync(VendorMmessagemail);
+                                //005
+                                //var VendorMailAddress = company.Email;
+                                //string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
+                                //string VendorContent = emailBodyBuilder.ToString();
+                                //var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                                //await _mailSender.SendEmailAsync(VendorMmessagemail);
 
                             }
                            
@@ -867,9 +868,10 @@ namespace AtoVen.API.Controllers
                     ///
                     if (i == 1) //only first approver will receive email
                     {
-                        await SendEmailInHtml(updateApprovalFlow.ApproverEmail,
-                                                "New Vendor " + updateCompany.CompanyName + " Approval request",
-                                                emailBodyBuilder.ToString());
+                        //008
+                        //await SendEmailInHtml(updateApprovalFlow.ApproverEmail,
+                        //                        "New Vendor " + updateCompany.CompanyName + " Approval request",
+                        //                        emailBodyBuilder.ToString());
                     }
                     ////////////////////////////////////////////////////////////////////
                     /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -907,6 +909,8 @@ namespace AtoVen.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<Company>> PostCompany(CompanyPostDTO company)
         {
+            //_mailSender.SendHTMLMail("ismailkhanf@gmail.com", "Khan");
+
             if (_context.Users.Max(u => u.ApproverLevel) < 1)
             {
                 return BadRequest();
@@ -1146,9 +1150,10 @@ namespace AtoVen.API.Controllers
                     ///
                     if (i == 1) //only first approver will receive email
                     {
-                        await SendEmailInHtml(approver.Email,
-                                                "New Vendor " + newCompany.CompanyName + " Approval request",
-                                                emailBodyBuilder.ToString());
+                        //009
+                        //await SendEmailInHtml(approver.Email,
+                        //                        "New Vendor " + newCompany.CompanyName + " Approval request",
+                        //                        emailBodyBuilder.ToString());
                     }
                     ////////////////////////////////////////////////////////////////////
                     /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -1394,15 +1399,7 @@ namespace AtoVen.API.Controllers
         /// <param name="emailSubject"></param>
         /// <param name="bodyContent"></param>
         /// <returns></returns>
-        private async Task SendEmailInHtml(string sendToEmailAddress, string emailSubject, string bodyContent)
-        {
-            var approverMailAddress = sendToEmailAddress;
-            string subject = emailSubject;
-            string content = bodyContent;
-            var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
-            await _emailSender.SendEmailAsync(messagemail);
-        }
-
+       
 
 
     }
