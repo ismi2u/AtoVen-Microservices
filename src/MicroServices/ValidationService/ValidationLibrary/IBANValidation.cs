@@ -9,8 +9,8 @@ namespace ValidationLibrary
 {
     public class IBANValidation
     {
-        private readonly string IBANAPIValidatorKey = "a1cd8ac82a2940d9bb3f9fa20d84261ddd6cd538";
-
+        private readonly string IBANAPIValidatorKey = "22327eb8bb9bfa422de5b0a5900da3de6625ee4e";
+        //next IBAN valid key "a6c6bbd034c7e4a262c09de7eb1b1c0c4a5ebf16"
         public string ValidateIBAN(string IbanNumber)
         {
             //https://api.ibanapi.com/v1/validate/EE471000001020145685?api_key=API_KEY

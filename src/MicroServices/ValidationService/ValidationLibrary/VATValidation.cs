@@ -9,11 +9,13 @@ namespace ValidationLibrary
 {
     public class VATValidation
     {
-        private readonly string VATAPIValidatorKey = "579db579789b253ddbc7708f84990f18";
+        private readonly string VATAPIValidatorKey = "66e8818f574e5799ec35b510c5446492";
+        //next vat validation key = "3280e3ea504c24b142fd3676cdf7a066"
         public string ValidateVAT(string VATNumber)
         {
-            //https://api.ibanapi.com/v1/validate/EE471000001020145685?api_key=API_KEY
-            //'sample = GB429214460'
+            //http://www.apilayer.net/api/validate?access_key
+            //'sample = GB429214460' - invalid
+            //LU26375245 - valid
             string APIUrl = "http://www.apilayer.net/api/validate?access_key=" + VATAPIValidatorKey + "&vat_number=" + VATNumber;
             HttpClient client = new HttpClient();
             HttpResponseMessage result = client.PostAsync(APIUrl, null).Result;
