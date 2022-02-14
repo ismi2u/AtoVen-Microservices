@@ -745,7 +745,7 @@ namespace AtoVen.API.Controllers
                 //// ***************    Update Approval FLOW   ***************///////
                 ////////////////////////////////////////////////////////////////////
                 /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-                
+               
                 int i = 1;
 
                 foreach (ApprovalFlow approvalFlowItem in listofApprovalFlows)
@@ -782,7 +782,7 @@ namespace AtoVen.API.Controllers
                             updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Approved;//action is by Approver
                             updateApprovalFlow.LevelApprovedDate = DateTime.Now;
                             _context.ApprovalFlows.Update(updateApprovalFlow);
-
+                            await _context.SaveChangesAsync();
 
                             int compId = updateApprovalFlow.CompanyID;
                             int apprLevel = updateApprovalFlow.ApproverLevel;
@@ -957,8 +957,7 @@ namespace AtoVen.API.Controllers
                                             arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
                                             intBankCount += 1;
                                         }
-                                        await _schwarzContext.SaveChangesAsync();
-                                        await schwarzDbContextTransaction.CommitAsync();
+                                        //await schwarzDbContextTransaction.CommitAsync();
                                     }
                                     else
                                     {
@@ -998,7 +997,7 @@ namespace AtoVen.API.Controllers
                                         newCompany.ApprovedDate = company.ApprovedDate;
 
                                         _schwarzContext.Companies.Add(newCompany);
-                                        await _schwarzContext.SaveChangesAsync();
+                                        //await _schwarzContext.SaveChangesAsync();
 
                                         //Get the DB Generated Identity Column Value after save.
                                         //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
