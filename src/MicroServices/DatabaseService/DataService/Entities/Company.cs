@@ -29,7 +29,7 @@ namespace DataService.Entities
         public string Building { get; set; }
         public string Floor { get; set; }
         public string Room { get; set; }
-        public string POBox { get; set; }
+        public string? POBox { get; set; }
         public string PhoneNo { get; set; }
         public string FaxNumber { get; set; }
         public string Email { get; set; }
@@ -69,7 +69,7 @@ namespace DataService.Entities
         public string Building { get; set; }
         public string Floor { get; set; }
         public string Room { get; set; }
-        public string POBox { get; set; }
+        public string? POBox { get; set; }
         public string PhoneNo { get; set; }
         public string FaxNumber { get; set; }
         public string Email { get; set; }
@@ -109,7 +109,7 @@ namespace DataService.Entities
         public string Building { get; set; }
         public string Floor { get; set; }
         public string Room { get; set; }
-        public string POBox { get; set; }
+        public string? POBox { get; set; }
         public string PhoneNo { get; set; }
         public string FaxNumber { get; set; }
         public string Email { get; set; }
@@ -146,7 +146,7 @@ namespace DataService.Entities
         public string Building { get; set; }
         public string Floor { get; set; }
         public string Room { get; set; }
-        public string POBox { get; set; }
+        public string? POBox { get; set; }
         public string PhoneNo { get; set; }
         public string FaxNumber { get; set; }
         public string MobileNo { get; set; }
@@ -184,7 +184,7 @@ namespace DataService.Entities
         public string Building { get; set; }
         public string Floor { get; set; }
         public string Room { get; set; }
-        public string POBox { get; set; }
+        public string? POBox { get; set; }
         public string PhoneNo { get; set; }
         public string FaxNumber { get; set; }
         public string Email { get; set; }
