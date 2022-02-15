@@ -162,9 +162,9 @@ namespace DataService.Entities
 
         public bool? IsVendorInitiated { get; set; }
 
-        public List<ContactPostDTO> ListOfCompanyContacts { get; set; }
+        public List<ContactPutDTO> ListOfCompanyContacts { get; set; }
 
-        public List<BankPostDTO> ListOfCompanyBanks { get; set; }
+        public List<BankPutDTO> ListOfCompanyBanks { get; set; }
     }
 
 

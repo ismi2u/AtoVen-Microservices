@@ -33,5 +33,14 @@ namespace AtoVen.API.Controllers
             AddressValidation addressvalidation = new AddressValidation();
             return addressvalidation.ValidateStreetAddress(address);
         }
+
+
+        [HttpPost]
+        [ActionName("EmailValidator")]
+        public async Task<ActionResult<string>> EmailValidator(string emailAddress)
+        {
+            EmailValidation emailValidation = new EmailValidation();
+            return emailValidation.ValidateEmail(emailAddress);
+        }
     }
 }

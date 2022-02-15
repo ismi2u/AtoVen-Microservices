@@ -24,6 +24,7 @@ using DataService.AccountControl.Models;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.AspNetCore.StaticFiles;
+using System.Transactions;
 
 namespace AtoVen.API.Controllers
 {
@@ -177,7 +178,7 @@ namespace AtoVen.API.Controllers
         {
             List<CompanyDTO> ListCompanyDTOs = new();
 
-            var ListCompanies = await _context.Companies.Where(c=> c.IsApproved== true).ToListAsync();
+            var ListCompanies = await _context.Companies.Where(c => c.IsApproved == true).ToListAsync();
 
             foreach (Company company in ListCompanies)
             {
@@ -495,9 +496,9 @@ namespace AtoVen.API.Controllers
             return ListCompanyDTOs;
         }
 
-    // PUT: api/Companies/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
+        // PUT: api/Companies/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
         [ActionName("UpdateCompany")]
         //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
         public async Task<IActionResult> PutCompany(int id, CompanyPutDTO companyPutDTO)
@@ -511,14 +512,13 @@ namespace AtoVen.API.Controllers
                 return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
             }
 
-            //_context.Entry(companyPutDTO).State = EntityState.Modified;
+            ////////////////// UPDATE EXISTING COMPANY ///////////////////////
+            ////////////////////////////////////////////////////////////////////
+            //// ***************   VAT Validation   *********************///////
+            ////////////////////////////////////////////////////////////////////
 
             try
             {
-                ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
-                ////////////////////////////////////////////////////////////////////
-                //// ***************   VAT Validation   *********************///////
-                ////////////////////////////////////////////////////////////////////
 
                 VATValidation vatvalidation = new VATValidation();
                 if (vatvalidation.ValidateVAT(companyPutDTO.VatNo) != "Valid VAT Number")
@@ -533,36 +533,35 @@ namespace AtoVen.API.Controllers
                 ////////////////////////////////////////////////////////////////////
                 //// *************** Address Validation *********************///////
                 ////////////////////////////////////////////////////////////////////
-                AddressValidation addValidation = new AddressValidation();
-                AddressValidationInputs addressValidationInputs = new AddressValidationInputs();
-                addressValidationInputs.HouseNo = companyPutDTO.HouseNo;
-                addressValidationInputs.Street = companyPutDTO.Street;
-                addressValidationInputs.City = companyPutDTO.City;
-                addressValidationInputs.Region = companyPutDTO.Region;
-                addressValidationInputs.Country = companyPutDTO.Country;
-                addressValidationInputs.Language = companyPutDTO.Language;
-                addressValidationInputs.PostalCode = companyPutDTO.PostalCode;
+                //AddressValidation addValidation = new AddressValidation();
+                //AddressValidationInputs addressValidationInputs = new AddressValidationInputs();
+                //addressValidationInputs.HouseNo = companyPutDTO.HouseNo;
+                //addressValidationInputs.Street = companyPutDTO.Street;
+                //addressValidationInputs.City = companyPutDTO.City;
+                //addressValidationInputs.Region = companyPutDTO.Region;
+                //addressValidationInputs.Country = companyPutDTO.Country;
+                //addressValidationInputs.Language = companyPutDTO.Language;
+                //addressValidationInputs.PostalCode = companyPutDTO.PostalCode;
 
-
-                if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
-                {
-                    return Ok(new { Status = "Failure", Message = "Invalid Street Address"});
-                }
+                //if (addValidation.ValidateStreetAddress(addressValidationInputs) != "")
+                //{
+                //    return Ok(new { Status = "Failure", Message = "Invalid Street Address" });
+                //}
                 //
-                emailBodyBuilder.AppendLine("Street Address: Validated");
+                //emailBodyBuilder.AppendLine("Street Address: Validated");
 
 
                 int updateCompId = 0;
-                int[] arrBankIds;
-                int[] arrContactIds;
+                //int[] arrBankIds;
+                //int[] arrContactIds;
 
-                int totalBankCount = companyPutDTO.ListOfCompanyBanks.Count;
-                int totalContactCount = companyPutDTO.ListOfCompanyContacts.Count;
+                //int totalBankCount = companyPutDTO.ListOfCompanyBanks.Count;
+                //int totalContactCount = companyPutDTO.ListOfCompanyContacts.Count;
 
-                int intBankCount = 0;
-                int intContactCount = 0;
+                //int intBankCount = 0;
+                //int intContactCount = 0;
                 Company updateCompany;
-
+                string newCompanyPassword = "";
 
 
                 using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
@@ -613,11 +612,10 @@ namespace AtoVen.API.Controllers
                     updateCompId = updateCompany.Id;
                     ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                    arrContactIds = new int[totalContactCount]; //Initialize the array with count
                     //remove all existing Contacts related to the company
                     _context.Contacts.RemoveRange(_context.Contacts.Where(c => c.CompanyID == updateCompId));
                     //await _context.SaveChangesAsync();
-                    foreach (ContactPostDTO contact in companyPutDTO.ListOfCompanyContacts)
+                    foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
                     {
                         Contact newContact = new();
 
@@ -639,19 +637,15 @@ namespace AtoVen.API.Controllers
 
 
                         emailBodyBuilder.AppendLine("================================================================");
-                        emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                        emailBodyBuilder.AppendLine("Vendor Contact Details: ");
                         //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
-                        arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
-                        intContactCount += 1;
+
                     }
-
-
-                    arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
                     //remove all existing Contacts related to the company
                     _context.Banks.RemoveRange(_context.Banks.Where(c => c.CompanyID == updateCompId));
                     //await _context.SaveChangesAsync();
-                    foreach (BankPostDTO bank in companyPutDTO.ListOfCompanyBanks)
+                    foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
                     {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
                         ////////////////////////////////////////////////////////////////////
                         //// *************** IBAN Number Validation *****************///////
@@ -676,18 +670,16 @@ namespace AtoVen.API.Controllers
 
 
                         await _context.Banks.AddAsync(newBank);
-                        
+
                         emailBodyBuilder.AppendLine("================================================================");
-                        emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
+                        emailBodyBuilder.AppendLine("Vendor Bank Details: ");
                         //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
-                        arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
-                        intBankCount += 1;
                     }
                     await _context.SaveChangesAsync();
                     await AtoVenDbContextTransaction.CommitAsync();
                 }
-               
+
 
 
                 //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -702,36 +694,15 @@ namespace AtoVen.API.Controllers
                 emailBodyBuilder.AppendLine("///////////////////////////////////////////");
 
                 var listofApprovalFlows = _context.ApprovalFlows.Where(a => a.CompanyID == updateCompany.Id).ToList();
-          
-
-                //var cp = System.Web.HttpContext.Current.User;
-                //var claims = (ClaimsIdentity)ClaimsPrincipal.Current.Identity;
-
-                //var userrole = claims.FirstOrDefault(c => c.Type == "role");
-
-                //HttpContext.Current.User.Identity.Name
-                //var user = User;
-                //var userId = ((ClaimsIdentity)User.Identity).FindFirst("UserId");
-                //var userName = ((ClaimsIdentity)User.Identity).FindFirst("UserName");
-
-                var uName = User.Identity.Name;
-
-                ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
-
-               // //First get user claims    
-               // var claims = ClaimsPrincipal.Current.Identities.First().Claims.ToList();
-
-               // //Filter specific claim    
-               //var userclaims = claims?.FirstOrDefault(x => x.Type.Equals("Role", StringComparison.OrdinalIgnoreCase))?.Value;
-
-               // string jwtUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-               //ApplicationUser applicationUser = await _userManager.FindByIdAsync(jwtUserId);
 
                 //check Logged in User Role
+                var uName = User.Identity.Name;
+                ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
+
                 bool isVendorRole = false;
                 var Roles = await _userManager.GetRolesAsync(applicationUser);
 
-                foreach( string role in Roles)
+                foreach (string role in Roles)
                 {
                     if (role == "Vendor")
                     {
@@ -745,7 +716,7 @@ namespace AtoVen.API.Controllers
                 //// ***************    Update Approval FLOW   ***************///////
                 ////////////////////////////////////////////////////////////////////
                 /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-               
+
                 int i = 1;
 
                 foreach (ApprovalFlow approvalFlowItem in listofApprovalFlows)
@@ -755,7 +726,7 @@ namespace AtoVen.API.Controllers
                     updateApprovalFlow.RecordDate = DateTime.Now;
                     updateApprovalFlow.IsDuplicateEntry = areDuplicatesFound;
 
-                    if (isVendorRole)
+                    if (isVendorRole) //vendor is updating the record
                     {
                         updateApprovalFlow.ApprovalStatus = (int)ApprovalStatusType.Pending; //action is by Vendor
                         updateApprovalFlow.LevelApprovedDate = null;
@@ -775,7 +746,7 @@ namespace AtoVen.API.Controllers
 
                         i += 1;
                     }
-                    else
+                    else //APPROVER IS updating the record
                     {
                         if (approvalFlowItem.Id == companyPutDTO.ApprovalFlowID)
                         {
@@ -786,7 +757,7 @@ namespace AtoVen.API.Controllers
 
                             int compId = updateApprovalFlow.CompanyID;
                             int apprLevel = updateApprovalFlow.ApproverLevel;
-                
+
                             int nxtApprLevel = apprLevel + 1;
                             Company company = await _context.Companies.FindAsync(compId);
                             List<Contact> contacts = await _context.Contacts.Where(c => c.CompanyID == compId).ToListAsync();
@@ -822,11 +793,12 @@ namespace AtoVen.API.Controllers
                                 // 1. change the status as approved in Local DB
                                 // 2. create and Save records to SchwarzDB
                                 // 3. Send UserID and Password to Vendor
-
+                                //using (TransactionScope scope = new TransactionScope())
+                                //{
                                 using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
                                 {
                                     //assign values
-                                     updateCompany = await _context.Companies.FindAsync(compId);
+                                    updateCompany = await _context.Companies.FindAsync(compId);
 
                                     updateCompany.IsApproved = true;
                                     updateCompany.ApprovedDate = DateTime.Now;
@@ -839,64 +811,63 @@ namespace AtoVen.API.Controllers
                                 using (var schwarzDbContextTransaction = _schwarzContext.Database.BeginTransaction())
                                 {
 
-                                   Company schwarzCompany = await _schwarzContext.Companies.FindAsync(company.Id);
+                                    Company schwarzCompany = await _schwarzContext.Companies.FindAsync(company.Id);
                                     //if Id already exists then update the database and not dont add New
 
-                                   if (schwarzCompany != null)
+                                    if (schwarzCompany != null)
                                     {
-                                        //UPDATE into the Companies Table
-                                        updateCompany.AccountGroup = companyPutDTO.AccountGroup;
-                                        updateCompany.Building = companyPutDTO.Building;
-                                        updateCompany.City = companyPutDTO.City;
-                                        updateCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
-                                        updateCompany.CompanyName = companyPutDTO.CompanyName;
-                                        updateCompany.Country = companyPutDTO.Country;
-                                        updateCompany.District = companyPutDTO.District;
-                                        updateCompany.FaxNumber = companyPutDTO.FaxNumber;
-                                        updateCompany.Floor = companyPutDTO.Floor;
-                                        updateCompany.HouseNo = companyPutDTO.HouseNo;
-                                        updateCompany.Language = companyPutDTO.Language;
-                                        updateCompany.MobileNo = companyPutDTO.MobileNo;
-                                        updateCompany.Notes = companyPutDTO.Notes;
-                                        updateCompany.PhoneNo = companyPutDTO.PhoneNo;
-                                        updateCompany.POBox = companyPutDTO.POBox;
-                                        updateCompany.PostalCode = companyPutDTO.PostalCode;
-                                        updateCompany.Region = companyPutDTO.Region;
-                                        updateCompany.Room = companyPutDTO.Room;
-                                        updateCompany.Street = companyPutDTO.Street;
-                                        updateCompany.VatNo = companyPutDTO.VatNo;
-                                        updateCompany.VendorType = companyPutDTO.VendorType;
-                                        updateCompany.Website = companyPutDTO.Website;
 
-                                        updateCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
-                                        updateCompany.RecordDate = DateTime.Now;
-                                        updateCompany.IsApproved = false;
-                                        updateCompany.ApprovedDate = null;
-
-                                        _schwarzContext.Companies.Update(updateCompany);
-                                        await _schwarzContext.SaveChangesAsync();
-
-                                        emailBodyBuilder.AppendLine("==================================================================================================");
-                                        emailBodyBuilder.AppendLine("Vendor Company Details: " + updateCompany.CompanyName);
-                                        emailBodyBuilder.AppendLine("                        " + updateCompany.City + ", " + updateCompany.Country + ", " + updateCompany.PostalCode);
-                                        emailBodyBuilder.AppendLine("                        " + updateCompany.MobileNo + ", " + updateCompany.PhoneNo);
-                                        emailBodyBuilder.AppendLine("Registration No: " + updateCompany.CommercialRegistrationNo);
-                                        emailBodyBuilder.AppendLine("==================================================================================================");
-
-                                        //Get the DB Generated Identity Column Value after save.
-                                        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                                        updateCompId = updateCompany.Id;
-                                        ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-                                        arrContactIds = new int[totalContactCount]; //Initialize the array with count
-                                                                                    //remove all existing Contacts related to the company
-                                        _schwarzContext.Contacts.RemoveRange(_schwarzContext.Contacts.Where(c => c.CompanyID == updateCompId));
+                                        //Remove the existing Data for the {Id} in Schwarz Table
+                                        _schwarzContext.Companies.Remove(schwarzCompany);
+                                        _schwarzContext.Banks.RemoveRange(_schwarzContext.Banks.Where(c => c.CompanyID == company.Id));
+                                        _schwarzContext.Contacts.RemoveRange(_schwarzContext.Contacts.Where(c => c.CompanyID == company.Id));
+                                    }
                                         
-                                        foreach (ContactPostDTO contact in companyPutDTO.ListOfCompanyContacts)
+                                        newCompany.Id = companyPutDTO.Id;
+                                        newCompany.AccountGroup = companyPutDTO.AccountGroup;
+                                        newCompany.Building = companyPutDTO.Building;
+                                        newCompany.City = companyPutDTO.City;
+                                        newCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
+                                        newCompany.CompanyName = companyPutDTO.CompanyName;
+                                        newCompany.Country = companyPutDTO.Country;
+                                        newCompany.District = companyPutDTO.District;
+                                        newCompany.FaxNumber = companyPutDTO.FaxNumber;
+                                        newCompany.Floor = companyPutDTO.Floor;
+                                        newCompany.HouseNo = companyPutDTO.HouseNo;
+                                        newCompany.Language = companyPutDTO.Language;
+                                        newCompany.MobileNo = companyPutDTO.MobileNo;
+                                        newCompany.Notes = companyPutDTO.Notes;
+                                        newCompany.PhoneNo = companyPutDTO.PhoneNo;
+                                        newCompany.POBox = companyPutDTO.POBox;
+                                        newCompany.PostalCode = companyPutDTO.PostalCode;
+                                        newCompany.Region = companyPutDTO.Region;
+                                        newCompany.Room = companyPutDTO.Room;
+                                        newCompany.Street = companyPutDTO.Street;
+                                        newCompany.VatNo = companyPutDTO.VatNo;
+                                        newCompany.VendorType = companyPutDTO.VendorType;
+                                        newCompany.Website = companyPutDTO.Website;
+
+                                        newCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
+                                        newCompany.RecordDate = DateTime.Now;
+                                        newCompany.IsApproved = false;
+                                        newCompany.ApprovedDate = company.ApprovedDate;
+
+                                        _schwarzContext.Companies.Add(newCompany);
+                                        //await _schwarzContext.SaveChangesAsync();
+
+                                        emailBodyBuilder.AppendLine("==================================================================================================");
+                                        emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
+                                        emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
+                                        emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
+                                        emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
+                                        emailBodyBuilder.AppendLine("==================================================================================================");
+
+
+                                        foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
                                         {
                                             Contact newContact = new();
-
-                                            newContact.CompanyID = updateCompId; //Db generated Identity column value
+                                            newContact.Id = contact.Id;
+                                            newContact.CompanyID = newCompany.Id; //Db generated Identity column value
                                             newContact.Email = contact.Email;
                                             newContact.FaxNo = contact.FaxNo;
                                             newContact.Language = contact.Language;
@@ -913,31 +884,14 @@ namespace AtoVen.API.Controllers
 
 
                                             emailBodyBuilder.AppendLine("================================================================");
-                                            emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
-                                            //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
-                                            arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
-                                            intContactCount += 1;
+                                            emailBodyBuilder.AppendLine("Vendor Contact Details: ");
+
                                         }
-
-
-                                        arrBankIds = new int[totalBankCount]; // Initialize the array with count
-
-                                        //remove all existing Contacts related to the company
-                                        _schwarzContext.Banks.RemoveRange(_schwarzContext.Banks.Where(c => c.CompanyID == updateCompId));
                                         //await _schwarzContext.SaveChangesAsync();
-                                        foreach (BankPostDTO bank in companyPutDTO.ListOfCompanyBanks)
-                                        {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
-                                            ////////////////////////////////////////////////////////////////////
-                                            //// *************** IBAN Number Validation *****************///////
-                                            ////////////////////////////////////////////////////////////////////
-                                            IBANValidation ibanvalidation = new IBANValidation();
-                                            if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
-                                            {
-                                                return Ok("Invalid IBAN Number: " + bank.IBAN);
-                                            }
-
+                                        foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
+                                        {   
                                             Bank newBank = new Bank();
-
+                                            newBank.Id = bank.Id;
                                             newBank.CompanyID = updateCompId; //Db generated Identity column value
                                             newBank.AccountHolderName = bank.AccountHolderName;
                                             newBank.BankAccount = bank.BankAccount;
@@ -951,112 +905,20 @@ namespace AtoVen.API.Controllers
 
                                             await _schwarzContext.Banks.AddAsync(newBank);
                                             emailBodyBuilder.AppendLine("================================================================");
-                                            emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                                            //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
-
-                                            arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
-                                            intBankCount += 1;
+                                            emailBodyBuilder.AppendLine("Vendor Bank Details: ");
                                         }
-                                        //await schwarzDbContextTransaction.CommitAsync();
-                                    }
-                                    else
-                                    {
-                                        //Insert into the Companies Table
+                                    await schwarzDbContextTransaction.CommitAsync();
 
-                                        //Create and Save Records to SchwarzDB
-
-
-                                        newCompany.Id = company.Id;
-                                        newCompany.AccountGroup = company.AccountGroup;
-                                        newCompany.Building = company.Building;
-                                        newCompany.City = company.City;
-                                        newCompany.CommercialRegistrationNo = company.CommercialRegistrationNo;
-                                        newCompany.CompanyName = company.CompanyName;
-                                        newCompany.Country = company.Country;
-                                        newCompany.District = company.District;
-                                        newCompany.Email = company.Email;
-                                        newCompany.FaxNumber = company.FaxNumber;
-                                        newCompany.Floor = company.Floor;
-                                        newCompany.HouseNo = company.HouseNo;
-                                        newCompany.Language = company.Language;
-                                        newCompany.MobileNo = company.MobileNo;
-                                        newCompany.Notes = company.Notes;
-                                        newCompany.PhoneNo = company.PhoneNo;
-                                        newCompany.POBox = company.POBox;
-                                        newCompany.PostalCode = company.PostalCode;
-                                        newCompany.Region = company.Region;
-                                        newCompany.Room = company.Room;
-                                        newCompany.Street = company.Street;
-                                        newCompany.VatNo = company.VatNo;
-                                        newCompany.VendorType = company.VendorType;
-                                        newCompany.Website = company.Website;
-
-                                        newCompany.IsVendorInitiated = company.IsVendorInitiated;
-                                        newCompany.RecordDate = company.RecordDate;
-                                        newCompany.IsApproved = true;
-                                        newCompany.ApprovedDate = company.ApprovedDate;
-
-                                        _schwarzContext.Companies.Add(newCompany);
-                                        //await _schwarzContext.SaveChangesAsync();
-
-                                        //Get the DB Generated Identity Column Value after save.
-                                        //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                                        int newCompId = newCompany.Id;
-                                        ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-                                        foreach (Contact contact in contacts)
-                                        {
-                                            Contact newContact = new Contact() { };
-
-                                            newContact.CompanyID = newCompId; //Db generated Identity column value
-                                            newContact.Email = contact.Email;
-                                            newContact.FaxNo = contact.FaxNo;
-                                            newContact.Language = contact.Language;
-                                            newContact.PhoneNo = contact.PhoneNo;
-                                            newContact.MobileNo = contact.MobileNo;
-                                            newContact.Department = contact.Department;
-                                            newContact.FirstName = contact.FirstName;
-                                            newContact.Address = contact.Address;
-                                            newContact.LastName = contact.LastName;
-                                            newContact.Designation = contact.Designation;
-                                            newContact.Country = contact.Country;
-
-                                            _schwarzContext.Contacts.Add(newContact);
-                                            //await _schwarzContext.SaveChangesAsync();
-
-                                        }
-
-
-                                        foreach (Bank bank in banks)
-                                        {
-                                            Bank newBank = new Bank() { };
-
-                                            newBank.CompanyID = newCompId; //Db generated Identity column value
-                                            newBank.AccountHolderName = bank.AccountHolderName;
-                                            newBank.BankAccount = bank.BankAccount;
-                                            newBank.Country = bank.Country;
-                                            newBank.BankKey = bank.BankKey;
-                                            newBank.BankName = bank.BankName;
-                                            newBank.Currency = bank.Currency;
-                                            newBank.IBAN = bank.IBAN;
-                                            newBank.SwiftCode = bank.SwiftCode;
-
-                                            _schwarzContext.Banks.Add(newBank);
-                                            
-                                            //
-                                        }
-                                        await _schwarzContext.SaveChangesAsync();
-                                        await schwarzDbContextTransaction.CommitAsync();
-                                    }
                                 }
 
 
+
                                 //3 : Create user ID and password and send the mail 
-                                string newCompanyPassword = GenerateRandomPassword();
+                                newCompanyPassword = GenerateRandomPassword();
                                 var NewUser = new ApplicationUser
                                 {
-                                    UserName = newCompany.Email,
-                                    Email = newCompany.Email,
+                                    UserName = company.Email,
+                                    Email = company.Email,
                                     ApproverLevel = 0,
                                     PasswordHash = newCompanyPassword
 
@@ -1073,6 +935,9 @@ namespace AtoVen.API.Controllers
 
                                     await AtoVenDbContextTransaction.CommitAsync();
                                 }
+
+                                //    scope.Complete();
+                                //}
 
                                 // 4: Send Email with User-Id and Password to Vendor
                                 //If next approver is available Send email 
@@ -1095,20 +960,22 @@ namespace AtoVen.API.Controllers
                                 var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
                                 await _emailSender.SendEmailAsync(VendorMmessagemail);
 
-                            }
-                           
-                                //Email Sent
+                                _context.ApprovalFlows.Update(updateApprovalFlow);
+                                //await _context.SaveChangesAsync();
                             }
 
+                            //Email Sent
                         }
 
+                    }
 
-                        _context.ApprovalFlows.Update(updateApprovalFlow);
+
+                    //_context.ApprovalFlows.Update(updateApprovalFlow);
 
                     //email was here
                 }
 
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
             }
 
 
@@ -1142,9 +1009,9 @@ namespace AtoVen.API.Controllers
         {
             if (_context.Users.Max(u => u.ApproverLevel) < 1)
             {
-                return Ok(new { Status = "Failure", Message = "No Approvers Found!"});
+                return Ok(new { Status = "Failure", Message = "No Approvers Found!" });
             }
-            if (_context.Companies.Where(c=>c.Email== company.Email).Any())
+            if (_context.Companies.Where(c => c.Email == company.Email).Any())
             {
                 return Ok(new { Status = "Failure", Message = "Company Email ID must be unique!" });
             }
@@ -1194,12 +1061,6 @@ namespace AtoVen.API.Controllers
 
 
             int newCompId = 0;
-            int[] arrBankIds;
-            int[] arrContactIds;
-
-            int totalBankCount = company.ListOfCompanyBanks.Count;
-            int totalContactCount = company.ListOfCompanyContacts.Count;
-
             int intBankCount = 0;
             int intContactCount = 0;
             Company newCompany;
@@ -1261,7 +1122,6 @@ namespace AtoVen.API.Controllers
                 newCompId = newCompany.Id;
                 ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                arrContactIds = new int[totalContactCount]; //Initialize the array with count
                 foreach (ContactPostDTO contact in company.ListOfCompanyContacts)
                 {
                     Contact newContact = new Contact() { };
@@ -1285,16 +1145,10 @@ namespace AtoVen.API.Controllers
 
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.Append(Environment.NewLine);
-                    emailBodyBuilder.AppendLine("Vendor Contact-" + intContactCount + 1 + " Details: ");
+                    emailBodyBuilder.AppendLine("Vendor Contact Details: ");
                     emailBodyBuilder.Append(Environment.NewLine);
-                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
-                    arrContactIds[intContactCount] = newContact.Id; //Assign new Contact ID to array
-                    intContactCount += 1;
                 }
 
-
-
-                arrBankIds = new int[totalBankCount]; // Initialize the array with count
 
                 foreach (BankPostDTO bank in company.ListOfCompanyBanks)
                 {
@@ -1324,27 +1178,11 @@ namespace AtoVen.API.Controllers
                     await _context.SaveChangesAsync();
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.Append(Environment.NewLine);
-                    emailBodyBuilder.AppendLine("Vendor Bank-" + intBankCount + 1 + " Details: ");
-                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
-
-                    arrBankIds[intBankCount] = newBank.Id; //Assign new bank ID to array
-                    intBankCount += 1;
+                    emailBodyBuilder.AppendLine("Vendor Bank Details: ");
                 }
 
                 await AtoVenDbContextTransaction.CommitAsync();
             }
-
-
-            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-            ////////////////////////////////////////////////////////////////////
-            //// ***************    Add Approval FLOW   *****************///////
-            ////////////////////////////////////////////////////////////////////
-            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-
-
-            //find out the no of levels of approvals max = 2
-
-            int maxApprovalLevel = _context.Users.Max(u => u.ApproverLevel);
 
 
 
@@ -1357,6 +1195,16 @@ namespace AtoVen.API.Controllers
             DuplicatesValidation duplicate = new DuplicatesValidation(_context, _schwarzContext);
             bool areDuplicatesFound = await duplicate.IsDuplicate(newCompany);
 
+
+
+            //<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+            ////////////////////////////////////////////////////////////////////
+            //// ***************    Add Approval FLOW   *****************///////
+            ////////////////////////////////////////////////////////////////////
+            /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
+
+            //find out the no of levels of approvals max = 2
+            int maxApprovalLevel = _context.Users.Max(u => u.ApproverLevel);
 
             for (int i = 1; i <= maxApprovalLevel; i++)
             {
@@ -1383,9 +1231,10 @@ namespace AtoVen.API.Controllers
                     ///
                     if (i == 1) //only first approver will receive email
                     {
-                        await SendEmailInHtml(approver.Email,
-                                                "New Vendor " + newCompany.CompanyName + " Approval request",
-                                                emailBodyBuilder.ToString());
+                        await SendEmailInHtml(
+                            approver.Email,
+                            "New Vendor " + newCompany.CompanyName + " Approval request",
+                            emailBodyBuilder.ToString());
                     }
                     ////////////////////////////////////////////////////////////////////
                     /////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
@@ -1395,35 +1244,6 @@ namespace AtoVen.API.Controllers
 
             }
 
-            ////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-            //////////////////////////////////////////////////////////////////////
-            ////// *************** Register a userId for the Vendor *******///////
-            //////////////////////////////////////////////////////////////////////
-            ///////<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>//
-
-
-            //string rndPassword = GenerateRandomPassword(null);
-            //var user = new ApplicationUser
-            //{
-            //    UserName = newCompany.Email,
-            //    Email = newCompany.Email,
-            //    NormalizedUserName = newCompany.CompanyName,
-            //    ApproverLevel = 0,
-            //    PasswordHash = rndPassword
-            //};
-
-            //var result = await _userManager.CreateAsync(user);
-
-            //if (result.Succeeded)
-            //{
-            //    return CreatedAtAction("GetCompanyById", new { id = newCompId }, company);
-            //}
-
-            //Send Email to Vendor Company 
-
-
-            ////////////////////////////////////////
-            ///
 
             await SendEmailInHtml(newCompany.Email,
                                               "Your request submitted for Vendor Registration !",
@@ -1431,125 +1251,13 @@ namespace AtoVen.API.Controllers
 
             ////////////////////////////////////////
             ///
-            
+
 
 
             return Ok(new { Status = "Success", Message = "New Vendor request Initiated!" });
 
         }
 
-
-        //////////[HttpPost]
-        //////////[ActionName("PostDocuments")]
-        //////////public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
-        //////////{
-        //////////    //StringBuilder StrBuilderUploadedDocuments = new();
-
-        //////////    List<FileDocumentDTO> fileDocumentDTOs = new();
-
-        //////////    foreach (IFormFile document in Documents)
-        //////////    {
-        //////////        //Store the file to the contentrootpath/images =>
-        //////////        //for docker it is /app/Images configured with volume mount in docker-compose
-
-        //////////        string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-        //////////        string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
-        //////////        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-
-        //////////        try
-        //////////        {
-        //////////            using var stream = new FileStream(filePath, FileMode.Create);
-        //////////            await document.CopyToAsync(stream);
-        //////////            stream.Flush();
-
-
-        //////////            // Save it to the acutal FileDocuments table
-        //////////            FileDocument fileDocument = new();
-        //////////            fileDocument.ActualFileName = document.FileName;
-        //////////            fileDocument.UniqueFileName = uniqueFileName;
-        //////////            _context.FileDocuments.Add(fileDocument);
-        //////////            await _context.SaveChangesAsync();
-        //////////            //
-
-        //////////            // Populating the List of Document Id for FrontEnd consumption
-        //////////            FileDocumentDTO fileDocumentDTO = new();
-        //////////            fileDocumentDTO.Id = fileDocument.Id;
-        //////////            fileDocumentDTO.ActualFileName = document.FileName;
-        //////////            fileDocumentDTOs.Add(fileDocumentDTO);
-
-        //////////            //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
-        //////////            //
-        //////////        }
-        //////////        catch (Exception ex)
-        //////////        {
-        //////////            return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
-
-        //////////        }
-
-
-
-
-        //////////    }
-
-        //////////    return Ok(fileDocumentDTOs);
-        //////////}
-
-        //////////[HttpGet("{id}")]
-        //////////[ActionName("GetDocumentsByCompanyId")]
-        ////////////<List<FileContentResult>
-        //////////public async Task<ActionResult> GetDocumentsByCompanyId(int id)
-        //////////{
-        //////////    List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
-        //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-
-        //////////    List<string> docUrls = new();
-
-        //////////    var provider = new FileExtensionContentTypeProvider();
-        //////////    await Task.Run(() =>
-        //////////    {
-        //////////        foreach (int docid in documentIds)
-        //////////        {
-        //////////            var fd = _context.FileDocuments.Find(docid);
-        //////////            string uniqueFileName = fd.UniqueFileName;
-        //////////            string actualFileName = fd.ActualFileName;
-
-        //////////            string filePath = Path.Combine(documentsFolder, uniqueFileName);
-
-        //////////            string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
-        //////////            docUrls.Add(docUrl);
-
-
-        //////////        }
-        //////////    });
-        //////////    return Ok(docUrls);
-        //////////}
-
-
-        //////////[HttpGet("{id}")]
-        //////////[ActionName("GetDocumentByDocId")]
-        //////////public async Task<ActionResult> GetDocumentByDocId(int id)
-        //////////{
-        //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-        //////////    //var content = new MultipartContent();
-
-        //////////    var provider = new FileExtensionContentTypeProvider();
-
-        //////////    var fd = _context.FileDocuments.Find(id);
-        //////////    string uniqueFileName = fd.UniqueFileName;
-        //////////    //string actualFileName = fd.ActualFileName;
-
-        //////////    string filePath = Path.Combine(documentsFolder, uniqueFileName);
-        //////////    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-        //////////    if (!provider.TryGetContentType(filePath, out var contentType))
-        //////////    {
-        //////////        contentType = "application/octet-stream";
-        //////////    }
-
-        //////////    //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
-
-        //////////    return File(bytes, contentType, Path.GetFileName(filePath));
-        //////////}
 
 
         /// <summary>
@@ -1607,31 +1315,6 @@ namespace AtoVen.API.Controllers
         }
 
 
-        // DELETE: api/Companies/5
-        [HttpDelete("{id}")]
-        [ActionName("DeleteCompany")]
-        public async Task<IActionResult> DeleteCompany(int id)
-        {
-            var company = await _context.Companies.FindAsync(id);
-
-            if (company == null)
-            {
-                return Ok(new { Status = "Failure", Message = "Company is Null!" });
-            }
-
-            using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
-            {
-
-                _context.Companies.Remove(company);
-                _context.Contacts.RemoveRange(_context.Contacts.Where(c => c.CompanyID == company.Id));
-                _context.Banks.RemoveRange(_context.Banks.Where(b => b.CompanyID == company.Id));
-                await _context.SaveChangesAsync();
-
-                await AtoVenDbContextTransaction.CommitAsync();
-            }
-
-            return Ok(new { Status = "Success", Message = "Company Details Deleted!" });
-        }
 
         private bool CompanyExists(int id)
         {
@@ -1751,5 +1434,117 @@ namespace AtoVen.API.Controllers
 
     }
 
+
+    //////////[HttpPost]
+    //////////[ActionName("PostDocuments")]
+    //////////public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
+    //////////{
+    //////////    //StringBuilder StrBuilderUploadedDocuments = new();
+
+    //////////    List<FileDocumentDTO> fileDocumentDTOs = new();
+
+    //////////    foreach (IFormFile document in Documents)
+    //////////    {
+    //////////        //Store the file to the contentrootpath/images =>
+    //////////        //for docker it is /app/Images configured with volume mount in docker-compose
+
+    //////////        string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+    //////////        string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
+    //////////        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+
+    //////////        try
+    //////////        {
+    //////////            using var stream = new FileStream(filePath, FileMode.Create);
+    //////////            await document.CopyToAsync(stream);
+    //////////            stream.Flush();
+
+
+    //////////            // Save it to the acutal FileDocuments table
+    //////////            FileDocument fileDocument = new();
+    //////////            fileDocument.ActualFileName = document.FileName;
+    //////////            fileDocument.UniqueFileName = uniqueFileName;
+    //////////            _context.FileDocuments.Add(fileDocument);
+    //////////            await _context.SaveChangesAsync();
+    //////////            //
+
+    //////////            // Populating the List of Document Id for FrontEnd consumption
+    //////////            FileDocumentDTO fileDocumentDTO = new();
+    //////////            fileDocumentDTO.Id = fileDocument.Id;
+    //////////            fileDocumentDTO.ActualFileName = document.FileName;
+    //////////            fileDocumentDTOs.Add(fileDocumentDTO);
+
+    //////////            //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
+    //////////            //
+    //////////        }
+    //////////        catch (Exception ex)
+    //////////        {
+    //////////            return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
+
+    //////////        }
+
+
+
+
+    //////////    }
+
+    //////////    return Ok(fileDocumentDTOs);
+    //////////}
+
+    //////////[HttpGet("{id}")]
+    //////////[ActionName("GetDocumentsByCompanyId")]
+    ////////////<List<FileContentResult>
+    //////////public async Task<ActionResult> GetDocumentsByCompanyId(int id)
+    //////////{
+    //////////    List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
+    //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+
+    //////////    List<string> docUrls = new();
+
+    //////////    var provider = new FileExtensionContentTypeProvider();
+    //////////    await Task.Run(() =>
+    //////////    {
+    //////////        foreach (int docid in documentIds)
+    //////////        {
+    //////////            var fd = _context.FileDocuments.Find(docid);
+    //////////            string uniqueFileName = fd.UniqueFileName;
+    //////////            string actualFileName = fd.ActualFileName;
+
+    //////////            string filePath = Path.Combine(documentsFolder, uniqueFileName);
+
+    //////////            string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
+    //////////            docUrls.Add(docUrl);
+
+
+    //////////        }
+    //////////    });
+    //////////    return Ok(docUrls);
+    //////////}
+
+
+    //////////[HttpGet("{id}")]
+    //////////[ActionName("GetDocumentByDocId")]
+    //////////public async Task<ActionResult> GetDocumentByDocId(int id)
+    //////////{
+    //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+    //////////    //var content = new MultipartContent();
+
+    //////////    var provider = new FileExtensionContentTypeProvider();
+
+    //////////    var fd = _context.FileDocuments.Find(id);
+    //////////    string uniqueFileName = fd.UniqueFileName;
+    //////////    //string actualFileName = fd.ActualFileName;
+
+    //////////    string filePath = Path.Combine(documentsFolder, uniqueFileName);
+    //////////    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+    //////////    if (!provider.TryGetContentType(filePath, out var contentType))
+    //////////    {
+    //////////        contentType = "application/octet-stream";
+    //////////    }
+
+    //////////    //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
+
+    //////////    return File(bytes, contentType, Path.GetFileName(filePath));
+    //////////}
 
 }
