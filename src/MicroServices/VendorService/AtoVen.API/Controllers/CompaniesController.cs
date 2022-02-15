@@ -787,7 +787,7 @@ namespace AtoVen.API.Controllers
                             }
                             else
                             {
-                                Company newCompany = new Company();
+                                
 
                                 //else => THIS IS FINAL APPROVER
                                 // 1. change the status as approved in Local DB
@@ -822,91 +822,93 @@ namespace AtoVen.API.Controllers
                                         _schwarzContext.Banks.RemoveRange(_schwarzContext.Banks.Where(c => c.CompanyID == company.Id));
                                         _schwarzContext.Contacts.RemoveRange(_schwarzContext.Contacts.Where(c => c.CompanyID == company.Id));
                                     }
-                                        
-                                        newCompany.Id = companyPutDTO.Id;
-                                        newCompany.AccountGroup = companyPutDTO.AccountGroup;
-                                        newCompany.Building = companyPutDTO.Building;
-                                        newCompany.City = companyPutDTO.City;
-                                        newCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
-                                        newCompany.CompanyName = companyPutDTO.CompanyName;
-                                        newCompany.Country = companyPutDTO.Country;
-                                        newCompany.District = companyPutDTO.District;
-                                        newCompany.FaxNumber = companyPutDTO.FaxNumber;
-                                        newCompany.Floor = companyPutDTO.Floor;
-                                        newCompany.HouseNo = companyPutDTO.HouseNo;
-                                        newCompany.Language = companyPutDTO.Language;
-                                        newCompany.MobileNo = companyPutDTO.MobileNo;
-                                        newCompany.Notes = companyPutDTO.Notes;
-                                        newCompany.PhoneNo = companyPutDTO.PhoneNo;
-                                        newCompany.POBox = companyPutDTO.POBox;
-                                        newCompany.PostalCode = companyPutDTO.PostalCode;
-                                        newCompany.Region = companyPutDTO.Region;
-                                        newCompany.Room = companyPutDTO.Room;
-                                        newCompany.Street = companyPutDTO.Street;
-                                        newCompany.VatNo = companyPutDTO.VatNo;
-                                        newCompany.VendorType = companyPutDTO.VendorType;
-                                        newCompany.Website = companyPutDTO.Website;
+                                    Company newCompany = new Company();
 
-                                        newCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
-                                        newCompany.RecordDate = DateTime.Now;
-                                        newCompany.IsApproved = false;
-                                        newCompany.ApprovedDate = company.ApprovedDate;
+                                    newCompany.AccountGroup = companyPutDTO.AccountGroup;
+                                    newCompany.Building = companyPutDTO.Building;
+                                    newCompany.City = companyPutDTO.City;
+                                    newCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
+                                    newCompany.CompanyName = companyPutDTO.CompanyName;
+                                    newCompany.Email = _context.Companies.Find(companyPutDTO.Id).Email; //get email from DB to prevent Email tampering
+                                    newCompany.Country = companyPutDTO.Country;
+                                    newCompany.District = companyPutDTO.District;
+                                    newCompany.FaxNumber = companyPutDTO.FaxNumber;
+                                    newCompany.Floor = companyPutDTO.Floor;
+                                    newCompany.HouseNo = companyPutDTO.HouseNo;
+                                    newCompany.Language = companyPutDTO.Language;
+                                    newCompany.MobileNo = companyPutDTO.MobileNo;
+                                    newCompany.Notes = companyPutDTO.Notes;
+                                    newCompany.PhoneNo = companyPutDTO.PhoneNo;
+                                    newCompany.POBox = companyPutDTO.POBox;
+                                    newCompany.PostalCode = companyPutDTO.PostalCode;
+                                    newCompany.Region = companyPutDTO.Region;
+                                    newCompany.Room = companyPutDTO.Room;
+                                    newCompany.Street = companyPutDTO.Street;
+                                    newCompany.VatNo = companyPutDTO.VatNo;
+                                    newCompany.VendorType = companyPutDTO.VendorType;
+                                    newCompany.Website = companyPutDTO.Website;
 
-                                        _schwarzContext.Companies.Add(newCompany);
-                                        //await _schwarzContext.SaveChangesAsync();
+                                    newCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
+                                    newCompany.RecordDate = DateTime.Now;
+                                    newCompany.IsApproved = false;
+                                    newCompany.ApprovedDate = company.ApprovedDate;
 
-                                        emailBodyBuilder.AppendLine("==================================================================================================");
-                                        emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
-                                        emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
-                                        emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
-                                        emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
-                                        emailBodyBuilder.AppendLine("==================================================================================================");
+                                    _schwarzContext.Companies.Add(newCompany);
+                                    await _schwarzContext.SaveChangesAsync();
 
-
-                                        foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
-                                        {
-                                            Contact newContact = new();
-                                            newContact.Id = contact.Id;
-                                            newContact.CompanyID = newCompany.Id; //Db generated Identity column value
-                                            newContact.Email = contact.Email;
-                                            newContact.FaxNo = contact.FaxNo;
-                                            newContact.Language = contact.Language;
-                                            newContact.PhoneNo = contact.PhoneNo;
-                                            newContact.MobileNo = contact.MobileNo;
-                                            newContact.Department = contact.Department;
-                                            newContact.FirstName = contact.FirstName;
-                                            newContact.Address = contact.Address;
-                                            newContact.LastName = contact.LastName;
-                                            newContact.Designation = contact.Designation;
-                                            newContact.Country = contact.Country;
-
-                                            _schwarzContext.Contacts.Add(newContact);
+                                    emailBodyBuilder.AppendLine("==================================================================================================");
+                                    emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
+                                    emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
+                                    emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
+                                    emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
+                                    emailBodyBuilder.AppendLine("==================================================================================================");
 
 
-                                            emailBodyBuilder.AppendLine("================================================================");
-                                            emailBodyBuilder.AppendLine("Vendor Contact Details: ");
+                                    foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
+                                    {
+                                        Contact newContact = new();
+                                        newContact.CompanyID = newCompany.Id; //Db generated Identity column value
+                                        newContact.Email = contact.Email;
+                                        newContact.FaxNo = contact.FaxNo;
+                                        newContact.Language = contact.Language;
+                                        newContact.PhoneNo = contact.PhoneNo;
+                                        newContact.MobileNo = contact.MobileNo;
+                                        newContact.Department = contact.Department;
+                                        newContact.FirstName = contact.FirstName;
+                                        newContact.Address = contact.Address;
+                                        newContact.LastName = contact.LastName;
+                                        newContact.Designation = contact.Designation;
+                                        newContact.Country = contact.Country;
 
-                                        }
-                                        //await _schwarzContext.SaveChangesAsync();
-                                        foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
-                                        {   
-                                            Bank newBank = new Bank();
-                                            newBank.Id = bank.Id;
-                                            newBank.CompanyID = updateCompId; //Db generated Identity column value
-                                            newBank.AccountHolderName = bank.AccountHolderName;
-                                            newBank.BankAccount = bank.BankAccount;
-                                            newBank.Country = bank.Country;
-                                            newBank.BankKey = bank.BankKey;
-                                            newBank.BankName = bank.BankName;
-                                            newBank.Currency = bank.Currency;
-                                            newBank.IBAN = bank.IBAN;
-                                            newBank.SwiftCode = bank.SwiftCode;
+                                       await _schwarzContext.Contacts.AddAsync(newContact);
+                                        await _schwarzContext.SaveChangesAsync();
+
+                                        emailBodyBuilder.AppendLine("================================================================");
+                                        emailBodyBuilder.AppendLine("Vendor Contact Details: ");
+
+                                    }
+
+                                    foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
+                                    {
+                                        Bank newBank = new Bank();
+
+                                        newBank.CompanyID = newCompany.Id; //Db generated Identity column value
+                                        newBank.AccountHolderName = bank.AccountHolderName;
+                                        newBank.BankAccount = bank.BankAccount;
+                                        newBank.Country = bank.Country;
+                                        newBank.BankKey = bank.BankKey;
+                                        newBank.BankName = bank.BankName;
+                                        newBank.Currency = bank.Currency;
+                                        newBank.IBAN = bank.IBAN;
+                                        newBank.SwiftCode = bank.SwiftCode;
 
 
-                                            await _schwarzContext.Banks.AddAsync(newBank);
-                                            emailBodyBuilder.AppendLine("================================================================");
-                                            emailBodyBuilder.AppendLine("Vendor Bank Details: ");
-                                        }
+                                        await _schwarzContext.Banks.AddAsync(newBank);
+                                        await _schwarzContext.SaveChangesAsync();
+                                        emailBodyBuilder.AppendLine("================================================================");
+                                        emailBodyBuilder.AppendLine("Vendor Bank Details: ");
+                                    }
+
                                     await schwarzDbContextTransaction.CommitAsync();
 
                                 }

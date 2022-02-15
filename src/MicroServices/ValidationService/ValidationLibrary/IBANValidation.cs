@@ -13,8 +13,11 @@ namespace ValidationLibrary
         //next IBAN valid key "a6c6bbd034c7e4a262c09de7eb1b1c0c4a5ebf16"
         public string ValidateIBAN(string IbanNumber)
         {
-            //https://api.ibanapi.com/v1/validate/EE471000001020145685?api_key=API_KEY
+            //https://api.ibanapi.com/v1/validate/EE471000001020145685?api_key=a6c6bbd034c7e4a262c09de7eb1b1c0c4a5ebf16
             //Sample IBAN number = DE56501201000000484637, DE89370400440532013000
+
+
+            //Free API string APIUrl = "https://openiban.com/validate/EE471000001020145685?getBIC=true&validateBankCode=true" ;
             string APIUrl = "https://openiban.com/validate/" + IbanNumber + "?getBIC=true&validateBankCode=true" ;
 
             HttpClient client = new HttpClient();
@@ -23,17 +26,17 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<Rootobject>(resultContent).valid;
 
-            //if (resultMessage)
-            //{
+            if (resultMessage)
+            {
 
-            //    return "Valid IBAN Number";
-            //}
-            //else
-            //{
-            //    return "Invalid IBAN Number";
-            //}
+                return "Valid IBAN Number";
+            }
+            else
+            {
+                return "Invalid IBAN Number";
+            }
 
-            return "Valid IBAN Number";
+            //return "Valid IBAN Number";
         }
     }
 
