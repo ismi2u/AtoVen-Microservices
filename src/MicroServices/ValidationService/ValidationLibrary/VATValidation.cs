@@ -10,7 +10,9 @@ namespace ValidationLibrary
     public class VATValidation
     {
         private readonly string VATAPIValidatorKey = "6cc96f7c59d5c0fd8c255c31b743ddbf";
+        //old key "6cc96f7c59d5c0fd8c255c31b743ddbf"
 
+        //new a303b67bf1082521c85fd1de100e4a1e
         public string ValidateVAT(string VATNumber)
         {
             //http://www.apilayer.net/api/validate?access_key

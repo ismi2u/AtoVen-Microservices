@@ -14,7 +14,9 @@ namespace ValidationLibrary
 
         //http://apilayer.net/api/check?access_key=64a55d465c764754533313377e5e6167&email=ikingkong@rediffmail.com&smpt=1
         private readonly string EmailAPIValidatorKey = "64a55d465c764754533313377e5e6167";
-        //next email valid key "not created"
+        //old email api = "64a55d465c764754533313377e5e6167";
+        //new email api 92eff73fe0c30f32136505f0813845b2
+
         public string ValidateEmail(string emailAddress)
         {
             //Sample email  = test@gmail.com
@@ -28,17 +30,17 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<EmailRootobject>(resultContent).smtp_check;
 
-            //if (resultMessage)
-            //{
+            if (resultMessage)
+            {
 
-            //    return "Valid Email Address";
-            //}
-            //else
-            //{
-            //    return "Invalid Email Address";
-            //}
+                return "Valid Email Address";
+            }
+            else
+            {
+                return "Invalid Email Address";
+            }
 
-            return "Valid Email Address";
+            //return "Valid Email Address";
         }
 
 
