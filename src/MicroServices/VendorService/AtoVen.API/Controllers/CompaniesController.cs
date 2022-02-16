@@ -1343,97 +1343,103 @@ namespace AtoVen.API.Controllers
 
         [HttpGet]
         [ActionName("GetCompanyForVendor")]
-        public async Task<ActionResult<IEnumerable<CompanyVM>>> GetCompanyForVendor()
+        public async Task<ActionResult<IEnumerable<CompanyDTO>>> GetCompanyForVendor()
         {
             var uName = User.Identity.Name;
             ApplicationUser applicationUser = await _userManager.FindByNameAsync(uName);
 
             Company company = _context.Companies.Where(c => c.Email == applicationUser.Email).FirstOrDefault();
 
-            CompanyVM companyVM = new CompanyVM();
 
-            companyVM.Id = company.Id;
-            companyVM.CompanyName = company.CompanyName;
-            companyVM.CommercialRegistrationNo = company.CommercialRegistrationNo;
-            companyVM.Language = company.Language;
-            companyVM.Country = company.Country;
-            companyVM.Region = company.Region;
-            companyVM.District = company.District;
-            companyVM.PostalCode = company.PostalCode;
-            companyVM.City = company.City;
-            companyVM.Street = company.Street;
-            companyVM.HouseNo = company.HouseNo;
-            companyVM.Building = company.Building;
-            companyVM.Floor = company.Floor;
-            companyVM.Room = company.Room;
-            companyVM.POBox = company.POBox;
-            companyVM.PhoneNo = company.PhoneNo;
-            companyVM.FaxNumber = company.FaxNumber;
-            companyVM.Email = company.Email;
-            companyVM.MobileNo = company.MobileNo;
-            companyVM.Website = company.Website;
-            companyVM.VendorType = company.VendorType;
-            companyVM.AccountGroup = company.AccountGroup;
-            companyVM.VatNo = company.VatNo;
-            companyVM.Notes = company.Notes;
+            CompanyDTO companyDTO = new CompanyDTO();
+
+            companyDTO.Id = company.Id;
+            companyDTO.CompanyName = company.CompanyName;
+            companyDTO.CommercialRegistrationNo = company.CommercialRegistrationNo;
+            companyDTO.Language = company.Language;
+            companyDTO.Country = company.Country;
+            companyDTO.Region = company.Region;
+            companyDTO.District = company.District;
+            companyDTO.PostalCode = company.PostalCode;
+            companyDTO.City = company.City;
+            companyDTO.Street = company.Street;
+            companyDTO.HouseNo = company.HouseNo;
+            companyDTO.Building = company.Building;
+            companyDTO.Floor = company.Floor;
+            companyDTO.Room = company.Room;
+            companyDTO.POBox = company.POBox;
+            companyDTO.PhoneNo = company.PhoneNo;
+            companyDTO.FaxNumber = company.FaxNumber;
+            companyDTO.Email = company.Email;
+            companyDTO.MobileNo = company.MobileNo;
+            companyDTO.Website = company.Website;
+            companyDTO.VendorType = company.VendorType;
+            companyDTO.AccountGroup = company.AccountGroup;
+            companyDTO.VatNo = company.VatNo;
+            companyDTO.Notes = company.Notes;
 
 
+            companyDTO.IsVendorInitiated = company.IsVendorInitiated;
+            companyDTO.RecordDate = company.RecordDate;
+            companyDTO.IsApproved = company.IsApproved;
+            companyDTO.ApprovedDate = company.ApprovedDate ?? null;
 
-
-            List<BankVM> ListBankVMs = new();
-            var ListBanks = _context.Banks.Where(b => b.CompanyID == companyVM.Id).ToList();
+            List<BankDTO> ListBankDTOs = new();
+            var ListBanks = _context.Banks.Where(b => b.CompanyID == companyDTO.Id).ToList();
 
             foreach (Bank bank in ListBanks)
             {
-                BankVM bankVM = new BankVM();
+                BankDTO bankDTO = new BankDTO();
 
-                bankVM.Id = bank.Id;
-                bankVM.CompanyID = bank.CompanyID;
-                bankVM.Country = bank.Country;
-                bankVM.BankKey = bank.BankKey;
-                bankVM.BankName = bank.BankName;
-                bankVM.SwiftCode = bank.SwiftCode;
-                bankVM.BankAccount = bank.BankAccount;
-                bankVM.AccountHolderName = bank.AccountHolderName;
-                bankVM.IBAN = bank.IBAN;
-                bankVM.Currency = bank.Currency;
+                bankDTO.Id = bank.Id;
+                bankDTO.CompanyID = bank.CompanyID;
+                bankDTO.CompanyName = _context.Companies.Find(bank.CompanyID).CompanyName;
+                bankDTO.Country = bank.Country;
+                bankDTO.BankKey = bank.BankKey;
+                bankDTO.BankName = bank.BankName;
+                bankDTO.SwiftCode = bank.SwiftCode;
+                bankDTO.BankAccount = bank.BankAccount;
+                bankDTO.AccountHolderName = bank.AccountHolderName;
+                bankDTO.IBAN = bank.IBAN;
+                bankDTO.Currency = bank.Currency;
 
-                ListBankVMs.Add(bankVM);
+                ListBankDTOs.Add(bankDTO);
+
+
             }
 
-            companyVM.ListOfCompanyBanks = ListBankVMs;
 
-            List<ContactVM> ListContactVMs = new();
-            var ListContacts = _context.Contacts.Where(b => b.CompanyID == companyVM.Id).ToList();
+            companyDTO.ListOfCompanyBanks = ListBankDTOs;
+
+
+            List<ContactDTO> ListContactDTOs = new();
+            var ListContacts = _context.Contacts.Where(b => b.CompanyID == companyDTO.Id).ToList();
 
             foreach (Contact contact in ListContacts)
             {
-                ContactVM contactVM = new ContactVM();
+                ContactDTO contactDTO = new ContactDTO();
 
-                contactVM.Id = contact.Id;
-                contactVM.CompanyID = contact.CompanyID;
-                contactVM.FirstName = contact.FirstName;
-                contactVM.LastName = contact.LastName;
-                contactVM.Address = contact.Address;
-                contactVM.Designation = contact.Designation;
-                contactVM.Department = contact.Department;
-                contactVM.MobileNo = contact.MobileNo;
-                contactVM.PhoneNo = contact.PhoneNo;
-                contactVM.FaxNo = contact.FaxNo;
-                contactVM.Email = contact.Email;
-                contactVM.Language = contact.Language;
-                contactVM.Country = contact.Country;
+                contactDTO.Id = contact.Id;
+                contactDTO.CompanyID = contact.CompanyID;
+                contactDTO.CompanyName = _context.Companies.Find(contact.CompanyID).CompanyName;
+                contactDTO.FirstName = contact.FirstName;
+                contactDTO.LastName = contact.LastName;
+                contactDTO.Address = contact.Address;
+                contactDTO.Designation = contact.Designation;
+                contactDTO.Department = contact.Department;
+                contactDTO.MobileNo = contact.MobileNo;
+                contactDTO.PhoneNo = contact.PhoneNo;
+                contactDTO.FaxNo = contact.FaxNo;
+                contactDTO.Email = contact.Email;
+                contactDTO.Language = contact.Language;
+                contactDTO.Country = contact.Country;
 
-                ListContactVMs.Add(contactVM);
+                ListContactDTOs.Add(contactDTO);
 
             }
 
-            companyVM.ListOfCompanyContacts = ListContactVMs;
-
-            return Ok(companyVM);
-
+            return Ok(companyDTO);
         }
-
     }
 
 

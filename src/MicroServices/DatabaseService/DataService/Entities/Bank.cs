@@ -16,13 +16,37 @@ namespace DataService.Entities
         public int Id { get; set; }
         public virtual Company Company { get; set; }
         public int CompanyID { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string Country { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string BankKey { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string BankName { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string SwiftCode { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string BankAccount { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string AccountHolderName { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string IBAN { get; set; }
+
+
+        [Column(TypeName = "varchar(100)")]
         public string Currency { get; set; }
     }
 
