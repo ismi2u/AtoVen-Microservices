@@ -127,101 +127,101 @@ namespace DataService.DataContext
                     await AtoVenDbContextTransaction.CommitAsync();
                 }
 
-                ///////////////////////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////////////////////
-                ///                                 Search from Schwarz Database                            ///
-                ///////////////////////////////////////////////////////////////////////////////////////////////
-                ///////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                /////                                 Search from Schwarz Database                            ///
+                /////////////////////////////////////////////////////////////////////////////////////////////////
+                /////////////////////////////////////////////////////////////////////////////////////////////////
 
-                using (var SchwarzDbContextTransaction = _context.Database.BeginTransaction())
-                {
+                //using (var SchwarzDbContextTransaction = _context.Database.BeginTransaction())
+                //{
 
-                    ///////////////////////////////////////
-                    ///  IBAN number Duplicate Search  ////
-                    ///////////////////////////////////////
+                //    ///////////////////////////////////////
+                //    ///  IBAN number Duplicate Search  ////
+                //    ///////////////////////////////////////
 
-                    listofBanks = _schwarzContext.Banks.Where(b => b.CompanyID == company.Id).ToList();
-
-
-                    foreach (Bank bank in listofBanks)
-                    {
-                        List<int> compIDs = _schwarzContext.Banks.Where(b => b.IBAN == bank.IBAN).Select(s => s.CompanyID).ToList();
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => compIDs.Contains(c.Id)).ToList());
-                    }
-
-                    ///////////////////////////////////////
-                    /// VAT number Duplicate Search ////
-                    ///////////////////////////////////////
-
-                    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.VatNo.Contains(company.VatNo)).ToList());
-
-                    /// Break Word Search
-                    foreach (string word in words)
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(word)).ToList());
-                    }
-
-                    foreach (string word in words)
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(word)).ToList());
-                    }
-                    //-- First 5 letters search count
-                    if (company.CompanyName.Length < 5)
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(company.CompanyName)).ToList());
-                    }
-                    else
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(company.CompanyName.Substring(0, 5))).ToList());
-                    }
+                //    listofBanks = _schwarzContext.Banks.Where(b => b.CompanyID == company.Id).ToList();
 
 
+                //    foreach (Bank bank in listofBanks)
+                //    {
+                //        List<int> compIDs = _schwarzContext.Banks.Where(b => b.IBAN == bank.IBAN).Select(s => s.CompanyID).ToList();
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => compIDs.Contains(c.Id)).ToList());
+                //    }
 
+                //    ///////////////////////////////////////
+                //    /// VAT number Duplicate Search ////
+                //    ///////////////////////////////////////
 
-                    ///////////////////////////////////////
-                    /// Mobile number Duplicate Search ////
-                    ///////////////////////////////////////
+                //    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.VatNo.Contains(company.VatNo)).ToList());
 
-                    if (company.MobileNo != null)
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.Contains(company.MobileNo)).ToList());
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.StartsWith(company.MobileNo.Substring(0, 5))).ToList());
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length - 5))).ToList());
-                    }
+                //    /// Break Word Search
+                //    foreach (string word in words)
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(word)).ToList());
+                //    }
 
-                    ///////////////////////////////////////
-                    /// Phone number Duplicate Search ////
-                    ///////////////////////////////////////
-                    if (company.PhoneNo != null)
-                    {
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.Contains(company.PhoneNo)).ToList());
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.StartsWith(company.PhoneNo.Substring(0, 5))).ToList());
-                        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length - 5))).ToList());
-                    }
-                    ///////////////////////////////////////
-                    ///     Website Duplicate Search   ////
-                    ///////////////////////////////////////
-
-                    //ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
-
-                    ///////////////////////////////////////
-                    ///     Email Duplicate Search   ////
-                    ///////////////////////////////////////
-
-                    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Email.Contains(company.Email)).ToList());
-
-                    ///////////////////////////////////////
-                    /// Registration No Duplicate Search //
-                    ///////////////////////////////////////
-
-                    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CommercialRegistrationNo.Contains(company.CommercialRegistrationNo)).ToList());
-
-                    ListOfCompanies = ListOfCompanies.Distinct().ToList();
+                //    foreach (string word in words)
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(word)).ToList());
+                //    }
+                //    //-- First 5 letters search count
+                //    if (company.CompanyName.Length < 5)
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(company.CompanyName)).ToList());
+                //    }
+                //    else
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CompanyName.Contains(company.CompanyName.Substring(0, 5))).ToList());
+                //    }
 
 
 
-                    await SchwarzDbContextTransaction.CommitAsync();
-                }
+
+                //    ///////////////////////////////////////
+                //    /// Mobile number Duplicate Search ////
+                //    ///////////////////////////////////////
+
+                //    if (company.MobileNo != null)
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.Contains(company.MobileNo)).ToList());
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.StartsWith(company.MobileNo.Substring(0, 5))).ToList());
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.MobileNo.EndsWith(company.MobileNo.Substring(company.MobileNo.Length - 5))).ToList());
+                //    }
+
+                //    ///////////////////////////////////////
+                //    /// Phone number Duplicate Search ////
+                //    ///////////////////////////////////////
+                //    if (company.PhoneNo != null)
+                //    {
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.Contains(company.PhoneNo)).ToList());
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.StartsWith(company.PhoneNo.Substring(0, 5))).ToList());
+                //        ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.PhoneNo.EndsWith(company.PhoneNo.Substring(company.PhoneNo.Length - 5))).ToList());
+                //    }
+                //    ///////////////////////////////////////
+                //    ///     Website Duplicate Search   ////
+                //    ///////////////////////////////////////
+
+                //    //ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Website.Contains(new Uri(company.Website).Host)).ToList());
+
+                //    ///////////////////////////////////////
+                //    ///     Email Duplicate Search   ////
+                //    ///////////////////////////////////////
+
+                //    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.Email.Contains(company.Email)).ToList());
+
+                //    ///////////////////////////////////////
+                //    /// Registration No Duplicate Search //
+                //    ///////////////////////////////////////
+
+                //    ListOfCompanies.AddRange(_schwarzContext.Companies.Where(c => c.CommercialRegistrationNo.Contains(company.CommercialRegistrationNo)).ToList());
+
+                //    ListOfCompanies = ListOfCompanies.Distinct().ToList();
+
+
+
+                //    await SchwarzDbContextTransaction.CommitAsync();
+                //}
             //    scope.Complete();
             //}
             
