@@ -66,7 +66,7 @@ namespace AtoVen.API.Controllers
 
                 ListApprovalFlowDTOs.Add(approvalFlowDTO);
             }
-            return ListApprovalFlowDTOs;
+            return Ok(ListApprovalFlowDTOs);
         }
 
 
@@ -117,7 +117,7 @@ namespace AtoVen.API.Controllers
 
                 ListApprovalFlowDTOs.Add(approvalFlowDTO);
             }
-            return ListApprovalFlowDTOs;
+            return Ok(ListApprovalFlowDTOs);
         }
 
 
@@ -166,7 +166,7 @@ namespace AtoVen.API.Controllers
 
                 ListApprovalFlowDTOs.Add(approvalFlowDTO);
             }
-            return ListApprovalFlowDTOs;
+            return Ok(ListApprovalFlowDTOs);
         }
 
         [HttpGet]
@@ -191,7 +191,7 @@ namespace AtoVen.API.Controllers
 
                 ListApprovalFlowDTOs.Add(approvalFlowDTO);
             }
-            return ListApprovalFlowDTOs;
+            return Ok(ListApprovalFlowDTOs);
         }
 
  
@@ -216,7 +216,7 @@ namespace AtoVen.API.Controllers
             approvalFlowDTO.ApprovalStatus = approvalFlow.ApprovalStatus;
             approvalFlowDTO.IsDuplicateEntry = approvalFlow.IsDuplicateEntry;
 
-            return approvalFlow;
+            return Ok(approvalFlow);
         }
 
         // PUT: api/ApprovalFlows/5

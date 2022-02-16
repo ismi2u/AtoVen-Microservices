@@ -613,8 +613,8 @@ namespace AtoVen.API.Controllers
 
                     updateCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
                     updateCompany.RecordDate = curDateTime;
-                    updateCompany.IsApproved = false; //currentCompanyDetail.IsApproved ? currentCompanyDetail.IsApproved : false;//
-                    updateCompany.ApprovedDate = null;//currentCompanyDetail.IsApproved ? currentCompanyDetail.ApprovedDate : null;
+                    updateCompany.IsApproved = currentCompanyDetail.IsApproved ? currentCompanyDetail.IsApproved : false;//
+                    updateCompany.ApprovedDate = currentCompanyDetail.IsApproved ? currentCompanyDetail.ApprovedDate : null;
 
                     _context.Companies.Update(updateCompany);
                     //await _context.SaveChangesAsync();
@@ -672,7 +672,7 @@ namespace AtoVen.API.Controllers
                         IBANValidation ibanvalidation = new IBANValidation();
                         if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
                         {
-                            return Ok("Invalid IBAN Number: " + bank.IBAN);
+                            return Ok(new { Status = "Failure", Message = "Invalid IBAN Number: " + bank.IBAN });
                         }
 
                         Bank newBank = new Bank();
@@ -695,7 +695,7 @@ namespace AtoVen.API.Controllers
                         //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     }
-                    await _context.SaveChangesAsync();
+                    //await _context.SaveChangesAsync();
                     await AtoVenDbContextTransaction.CommitAsync();
                 }
 
@@ -904,114 +904,112 @@ namespace AtoVen.API.Controllers
 
                                         if (isCompanyAlreadyApproved)
                                         {// update the exisitng company record in Schwarz database 
-                                            using (var SchwarzDbContextTransaction = _schwarzContext.Database.BeginTransaction())
+
+                                            //assign values
+                                            updateCompany = await _schwarzContext.Companies.FindAsync(companyPutDTO.Id);
+
+                                            updateCompany.AccountGroup = companyPutDTO.AccountGroup;
+                                            updateCompany.Building = companyPutDTO.Building;
+                                            updateCompany.City = companyPutDTO.City;
+                                            updateCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
+                                            updateCompany.CompanyName = companyPutDTO.CompanyName;
+                                            updateCompany.Country = companyPutDTO.Country;
+                                            updateCompany.District = companyPutDTO.District;
+                                            updateCompany.FaxNumber = companyPutDTO.FaxNumber;
+                                            updateCompany.Floor = companyPutDTO.Floor;
+                                            updateCompany.HouseNo = companyPutDTO.HouseNo;
+                                            updateCompany.Language = companyPutDTO.Language;
+                                            updateCompany.MobileNo = companyPutDTO.MobileNo;
+                                            updateCompany.Notes = companyPutDTO.Notes;
+                                            updateCompany.PhoneNo = companyPutDTO.PhoneNo;
+                                            updateCompany.POBox = companyPutDTO.POBox;
+                                            updateCompany.PostalCode = companyPutDTO.PostalCode;
+                                            updateCompany.Region = companyPutDTO.Region;
+                                            updateCompany.Room = companyPutDTO.Room;
+                                            updateCompany.Street = companyPutDTO.Street;
+                                            updateCompany.VatNo = companyPutDTO.VatNo;
+                                            updateCompany.VendorType = companyPutDTO.VendorType;
+                                            updateCompany.Website = companyPutDTO.Website;
+
+                                            updateCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
+                                            updateCompany.RecordDate = curDateTime;
+                                            updateCompany.IsApproved = true; //currentCompanyDetail.IsApproved ? currentCompanyDetail.IsApproved : false;//
+                                            updateCompany.ApprovedDate = curDateTime;//currentCompanyDetail.IsApproved ? currentCompanyDetail.ApprovedDate : null;
+
+                                            _schwarzContext.Companies.Update(updateCompany);
+                                            await _schwarzContext.SaveChangesAsync();
+
+                                            //Get the DB Generated Identity Column Value after save.
+                                            //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                            updateCompId = updateCompany.Id;
+                                            ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+                                            //remove all existing Contacts related to the company
+                                            _schwarzContext.Contacts.RemoveRange(_schwarzContext.Contacts.Where(c => c.CompanyID == updateCompId));
+                                            //await _schwarzContext.SaveChangesAsync();
+                                            foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
                                             {
-                                                //assign values
-                                                updateCompany = await _schwarzContext.Companies.FindAsync(companyPutDTO.Id);
+                                                Contact newContact = new();
 
-                                                updateCompany.AccountGroup = companyPutDTO.AccountGroup;
-                                                updateCompany.Building = companyPutDTO.Building;
-                                                updateCompany.City = companyPutDTO.City;
-                                                updateCompany.CommercialRegistrationNo = companyPutDTO.CommercialRegistrationNo;
-                                                updateCompany.CompanyName = companyPutDTO.CompanyName;
-                                                updateCompany.Country = companyPutDTO.Country;
-                                                updateCompany.District = companyPutDTO.District;
-                                                updateCompany.FaxNumber = companyPutDTO.FaxNumber;
-                                                updateCompany.Floor = companyPutDTO.Floor;
-                                                updateCompany.HouseNo = companyPutDTO.HouseNo;
-                                                updateCompany.Language = companyPutDTO.Language;
-                                                updateCompany.MobileNo = companyPutDTO.MobileNo;
-                                                updateCompany.Notes = companyPutDTO.Notes;
-                                                updateCompany.PhoneNo = companyPutDTO.PhoneNo;
-                                                updateCompany.POBox = companyPutDTO.POBox;
-                                                updateCompany.PostalCode = companyPutDTO.PostalCode;
-                                                updateCompany.Region = companyPutDTO.Region;
-                                                updateCompany.Room = companyPutDTO.Room;
-                                                updateCompany.Street = companyPutDTO.Street;
-                                                updateCompany.VatNo = companyPutDTO.VatNo;
-                                                updateCompany.VendorType = companyPutDTO.VendorType;
-                                                updateCompany.Website = companyPutDTO.Website;
+                                                newContact.CompanyID = updateCompId; //Db generated Identity column value
+                                                newContact.Email = contact.Email;
+                                                newContact.FaxNo = contact.FaxNo;
+                                                newContact.Language = contact.Language;
+                                                newContact.PhoneNo = contact.PhoneNo;
+                                                newContact.MobileNo = contact.MobileNo;
+                                                newContact.Department = contact.Department;
+                                                newContact.FirstName = contact.FirstName;
+                                                newContact.Address = contact.Address;
+                                                newContact.LastName = contact.LastName;
+                                                newContact.Designation = contact.Designation;
+                                                newContact.Country = contact.Country;
 
-                                                updateCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
-                                                updateCompany.RecordDate = curDateTime;
-                                                updateCompany.IsApproved = false; //currentCompanyDetail.IsApproved ? currentCompanyDetail.IsApproved : false;//
-                                                updateCompany.ApprovedDate = curDateTime;//currentCompanyDetail.IsApproved ? currentCompanyDetail.ApprovedDate : null;
-
-                                                _schwarzContext.Companies.Update(updateCompany);
-                                                await _schwarzContext.SaveChangesAsync();
-
-                                              //Get the DB Generated Identity Column Value after save.
-                                                //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                                                updateCompId = updateCompany.Id;
-                                                ///>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-                                                //remove all existing Contacts related to the company
-                                                _schwarzContext.Contacts.RemoveRange(_context.Contacts.Where(c => c.CompanyID == updateCompId));
-                                                //await _schwarzContext.SaveChangesAsync();
-                                                foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
-                                                {
-                                                    Contact newContact = new();
-
-                                                    newContact.CompanyID = updateCompId; //Db generated Identity column value
-                                                    newContact.Email = contact.Email;
-                                                    newContact.FaxNo = contact.FaxNo;
-                                                    newContact.Language = contact.Language;
-                                                    newContact.PhoneNo = contact.PhoneNo;
-                                                    newContact.MobileNo = contact.MobileNo;
-                                                    newContact.Department = contact.Department;
-                                                    newContact.FirstName = contact.FirstName;
-                                                    newContact.Address = contact.Address;
-                                                    newContact.LastName = contact.LastName;
-                                                    newContact.Designation = contact.Designation;
-                                                    newContact.Country = contact.Country;
-
-                                                    _schwarzContext.Contacts.Add(newContact);
-                                                    //await _context.SaveChangesAsync();
-
-
-                                                    emailBodyBuilder.AppendLine("================================================================");
-                                                    emailBodyBuilder.AppendLine("Vendor Contact Details: ");
-                                                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
-
-                                                }
-
-                                                //remove all existing Contacts related to the company
-                                                _context.Banks.RemoveRange(_context.Banks.Where(c => c.CompanyID == updateCompId));
+                                                _schwarzContext.Contacts.Add(newContact);
                                                 //await _context.SaveChangesAsync();
-                                                foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
-                                                {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
-                                                    ////////////////////////////////////////////////////////////////////
-                                                    //// *************** IBAN Number Validation *****************///////
-                                                    ////////////////////////////////////////////////////////////////////
-                                                    IBANValidation ibanvalidation = new IBANValidation();
-                                                    if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
-                                                    {
-                                                        return Ok("Invalid IBAN Number: " + bank.IBAN);
-                                                    }
-
-                                                    Bank newBank = new Bank();
-
-                                                    newBank.CompanyID = updateCompId; //Db generated Identity column value
-                                                    newBank.AccountHolderName = bank.AccountHolderName;
-                                                    newBank.BankAccount = bank.BankAccount;
-                                                    newBank.Country = bank.Country;
-                                                    newBank.BankKey = bank.BankKey;
-                                                    newBank.BankName = bank.BankName;
-                                                    newBank.Currency = bank.Currency;
-                                                    newBank.IBAN = bank.IBAN;
-                                                    newBank.SwiftCode = bank.SwiftCode;
 
 
-                                                    await _schwarzContext.Banks.AddAsync(newBank);
+                                                emailBodyBuilder.AppendLine("================================================================");
+                                                emailBodyBuilder.AppendLine("Vendor Contact Details: ");
+                                                //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
 
-                                                    emailBodyBuilder.AppendLine("================================================================");
-                                                    emailBodyBuilder.AppendLine("Vendor Bank Details: ");
-                                                    //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
-
-                                                }
-                                                await _schwarzContext.SaveChangesAsync();
-                                                await SchwarzDbContextTransaction.CommitAsync();
                                             }
+
+                                            //remove all existing Contacts related to the company
+                                            _context.Banks.RemoveRange(_context.Banks.Where(c => c.CompanyID == updateCompId));
+                                            //await _context.SaveChangesAsync();
+                                            foreach (BankPutDTO bank in companyPutDTO.ListOfCompanyBanks)
+                                            {   ////////////////// UPDATE TO EXISTING RECORD ///////////////////////
+                                                ////////////////////////////////////////////////////////////////////
+                                                //// *************** IBAN Number Validation *****************///////
+                                                ////////////////////////////////////////////////////////////////////
+                                                IBANValidation ibanvalidation = new IBANValidation();
+                                                if (ibanvalidation.ValidateIBAN(bank.IBAN) != "Valid IBAN Number")
+                                                {
+                                                    return Ok(new { Status = "Failure", Message = "Invalid IBAN Number: " + bank.IBAN });
+                                                }
+
+                                                Bank newBank = new Bank();
+
+                                                newBank.CompanyID = updateCompId; //Db generated Identity column value
+                                                newBank.AccountHolderName = bank.AccountHolderName;
+                                                newBank.BankAccount = bank.BankAccount;
+                                                newBank.Country = bank.Country;
+                                                newBank.BankKey = bank.BankKey;
+                                                newBank.BankName = bank.BankName;
+                                                newBank.Currency = bank.Currency;
+                                                newBank.IBAN = bank.IBAN;
+                                                newBank.SwiftCode = bank.SwiftCode;
+
+
+                                                await _schwarzContext.Banks.AddAsync(newBank);
+
+                                                emailBodyBuilder.AppendLine("================================================================");
+                                                emailBodyBuilder.AppendLine("Vendor Bank Details: ");
+                                                //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
+
+                                            }
+                                            await _schwarzContext.SaveChangesAsync();
+
 
 
                                         }
@@ -1054,9 +1052,9 @@ namespace AtoVen.API.Controllers
                                         newCompany.Website = companyPutDTO.Website;
 
                                         newCompany.IsVendorInitiated = companyPutDTO.IsVendorInitiated ?? false;
-                                        newCompany.RecordDate = curDateTime;
-                                        newCompany.IsApproved = false;
-                                        newCompany.ApprovedDate = company.ApprovedDate;
+                                        newCompany.RecordDate = company.RecordDate;
+                                        newCompany.IsApproved = true;
+                                        newCompany.ApprovedDate = curDateTime;
 
                                         _schwarzContext.Companies.Add(newCompany);
                                         await _schwarzContext.SaveChangesAsync();
@@ -1118,54 +1116,74 @@ namespace AtoVen.API.Controllers
 
                                     }
 
-
-
-                                    //3 : Create user ID and password and send the mail 
-                                    newCompanyPassword = GenerateRandomPassword();
-                                    var NewUser = new ApplicationUser
+                                    if (!isCompanyAlreadyApproved)
                                     {
-                                        UserName = company.Email,
-                                        Email = company.Email,
-                                        ApproverLevel = 0,
-                                        PasswordHash = newCompanyPassword
+                                        //3 : Create user ID and password and send the mail 
+                                        newCompanyPassword = GenerateRandomPassword();
+                                        var NewUser = new ApplicationUser
+                                        {
+                                            UserName = company.Email,
+                                            Email = company.Email,
+                                            ApproverLevel = 0,
+                                            PasswordHash = newCompanyPassword
 
-                                    };
+                                        };
 
-                                    using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
+                                        using (var AtoVenDbContextTransaction = _context.Database.BeginTransaction())
+                                        {
+
+                                            IdentityResult UserAddResult = await _userManager.CreateAsync(NewUser, newCompanyPassword);
+
+                                            var user = await _userManager.FindByEmailAsync(NewUser.Email);
+
+                                            IdentityResult RoleAddresult = await _userManager.AddToRoleAsync(NewUser, "Vendor");
+
+                                            await AtoVenDbContextTransaction.CommitAsync();
+                                        }
+
+                                        //    scope.Complete();
+                                        //}
+
+                                        // 4: Send Email with User-Id and Password to Vendor
+                                        //If next approver is available Send email 
+                                        emailBodyBuilder = new StringBuilder();
+
+                                        emailBodyBuilder.AppendLine("Congratulations - You are now approved Vendor");
+                                        emailBodyBuilder.AppendLine("==================================================");
+                                        emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
+                                        emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
+                                        emailBodyBuilder.AppendLine("Company Location: " + company.City + ", " + company.Country);
+                                        emailBodyBuilder.AppendLine("                                                             ");
+                                        emailBodyBuilder.AppendLine("==================================================");
+                                        emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
+                                        emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
+                                        emailBodyBuilder.AppendLine("==================================================");
+
+                                        var VendorMailAddress = company.Email;
+                                        string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
+                                        string VendorContent = emailBodyBuilder.ToString();
+                                        var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                                        await _emailSender.SendEmailAsync(VendorMmessagemail);
+                                    }
+                                    else
                                     {
+                                        //already has user Id so dont sent user-id and password
+                                        emailBodyBuilder.AppendLine("FYI...Your Company Details in our Database has been Updated after scrutity");
+                                        emailBodyBuilder.AppendLine("==================================================");
+                                        emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
+                                        emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
+                                        emailBodyBuilder.AppendLine("Company Location: " + company.City + ", " + company.Country);
+                                        emailBodyBuilder.AppendLine("Your User-Id and Password remains the same.");
+                                        emailBodyBuilder.AppendLine("==================================================");
 
-                                        IdentityResult UserAddResult = await _userManager.CreateAsync(NewUser, newCompanyPassword);
-
-                                        var user = await _userManager.FindByEmailAsync(NewUser.Email);
-
-                                        IdentityResult RoleAddresult = await _userManager.AddToRoleAsync(NewUser, "Vendor");
-
-                                        await AtoVenDbContextTransaction.CommitAsync();
+                                        var VendorMailAddress = company.Email;
+                                        string VendorSubject = ".Your Company" + company.CompanyName +" Details in our Database has been Updated";
+                                        string VendorContent = emailBodyBuilder.ToString();
+                                        var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
+                                        await _emailSender.SendEmailAsync(VendorMmessagemail);
                                     }
 
-                                    //    scope.Complete();
-                                    //}
-
-                                    // 4: Send Email with User-Id and Password to Vendor
-                                    //If next approver is available Send email 
-                                    emailBodyBuilder = new StringBuilder();
-
-                                    emailBodyBuilder.AppendLine("Congratulations - You are now approved Vendor");
-                                    emailBodyBuilder.AppendLine("==================================================");
-                                    emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
-                                    emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
-                                    emailBodyBuilder.AppendLine("Company Location: " + company.City + ", " + company.Country);
-                                    emailBodyBuilder.AppendLine("                                                             ");
-                                    emailBodyBuilder.AppendLine("==================================================");
-                                    emailBodyBuilder.AppendLine("Your User Id: " + company.Email);
-                                    emailBodyBuilder.AppendLine("Your Password: " + newCompanyPassword);
-                                    emailBodyBuilder.AppendLine("==================================================");
-
-                                    var VendorMailAddress = company.Email;
-                                    string VendorSubject = "Congratulations Your " + company.CompanyName + " is now a registered Vendor!";
-                                    string VendorContent = emailBodyBuilder.ToString();
-                                    var VendorMmessagemail = new Message(new string[] { VendorMailAddress }, VendorSubject, VendorContent);
-                                    await _emailSender.SendEmailAsync(VendorMmessagemail);
+                                    
 
                                     _context.ApprovalFlows.Update(updateApprovalFlow);
                                     //await _context.SaveChangesAsync();

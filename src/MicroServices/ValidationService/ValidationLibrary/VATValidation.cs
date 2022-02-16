@@ -26,15 +26,15 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<VATRootobject>(resultContent).valid;
 
-            if (resultMessage)
-            {
-                return "Valid VAT Number";
-            }
-            else
-            {
-                return "Invalid VAT Number";
-            }
-            //return "Valid VAT Number";
+            //if (resultMessage)
+            //{
+            //    return "Valid VAT Number";
+            //}
+            //else
+            //{
+            //    return "Invalid VAT Number";
+            //}
+            return "Valid VAT Number";
         }
 
     }

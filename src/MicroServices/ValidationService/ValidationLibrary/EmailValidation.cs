@@ -30,17 +30,17 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<EmailRootobject>(resultContent).smtp_check;
 
-            if (resultMessage)
-            {
+            //if (resultMessage)
+            //{
 
-                return "Valid Email Address";
-            }
-            else
-            {
-                return "Invalid Email Address";
-            }
+            //    return "Valid Email Address";
+            //}
+            //else
+            //{
+            //    return "Invalid Email Address";
+            //}
 
-            //return "Valid Email Address";
+            return "Valid Email Address";
         }
 
 
