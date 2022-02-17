@@ -9,10 +9,10 @@ namespace ValidationLibrary
 {
     public class VATValidation
     {
-        private readonly string VATAPIValidatorKey = "6cc96f7c59d5c0fd8c255c31b743ddbf";
-        //old key "6cc96f7c59d5c0fd8c255c31b743ddbf"
+        private readonly string VATAPIValidatorKey = "b11f2b45b9e18f20146e731f3abdf2be";
+        //old key "b11f2b45b9e18f20146e731f3abdf2be"
 
-        //new a303b67bf1082521c85fd1de100e4a1e
+        //new xx
         public string ValidateVAT(string VATNumber)
         {
             //http://www.apilayer.net/api/validate?access_key
@@ -26,15 +26,15 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<VATRootobject>(resultContent).valid;
 
-            //if (resultMessage)
-            //{
-            //    return "Valid VAT Number";
-            //}
-            //else
-            //{
-            //    return "Invalid VAT Number";
-            //}
-            return "Valid VAT Number";
+            if (resultMessage)
+            {
+                return "Valid VAT Number";
+            }
+            else
+            {
+                return "Invalid VAT Number";
+            }
+            //return "Valid VAT Number";
         }
 
     }

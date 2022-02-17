@@ -26,17 +26,17 @@ namespace ValidationLibrary
 
             bool resultMessage = JsonConvert.DeserializeObject<Rootobject>(resultContent).valid;
 
-            //if (resultMessage)
-            //{
+            if (resultMessage)
+            {
 
-            //    return "Valid IBAN Number";
-            //}
-            //else
-            //{
-            //    return "Invalid IBAN Number";
-            //}
+                return "Valid IBAN Number";
+            }
+            else
+            {
+                return "Invalid IBAN Number";
+            }
 
-            return "Valid IBAN Number";
+            //return "Valid IBAN Number";
         }
     }
 

@@ -13,9 +13,9 @@ namespace ValidationLibrary
     {
 
         //http://apilayer.net/api/check?access_key=64a55d465c764754533313377e5e6167&email=ikingkong@rediffmail.com&smpt=1
-        private readonly string EmailAPIValidatorKey = "64a55d465c764754533313377e5e6167";
-        //old email api = "64a55d465c764754533313377e5e6167";
-        //new email api 92eff73fe0c30f32136505f0813845b2
+        private readonly string EmailAPIValidatorKey = "c21a365bace492ee934bc01a385c3f6f";
+        //old email api = "c21a365bace492ee934bc01a385c3f6f";
+        //new email api xxx
 
         public string ValidateEmail(string emailAddress)
         {
@@ -25,22 +25,22 @@ namespace ValidationLibrary
 
 
             HttpClient client = new HttpClient();
-            HttpResponseMessage result = client.PostAsync(APIUrl, null).Result;
+            HttpResponseMessage result = client.GetAsync(APIUrl).Result;
             string resultContent = result.Content.ReadAsStringAsync().Result;
 
             bool resultMessage = JsonConvert.DeserializeObject<EmailRootobject>(resultContent).smtp_check;
 
-            //if (resultMessage)
-            //{
+            if (resultMessage)
+            {
 
-            //    return "Valid Email Address";
-            //}
-            //else
-            //{
-            //    return "Invalid Email Address";
-            //}
+                return "Valid Email Address";
+            }
+            else
+            {
+                return "Invalid Email Address";
+            }
 
-            return "Valid Email Address";
+            //return "Valid Email Address";
         }
 
 
