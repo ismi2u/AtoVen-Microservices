@@ -50,7 +50,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="documents\" />
+	  <None Update="docdata\test.docx">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="docdata\test.txt">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

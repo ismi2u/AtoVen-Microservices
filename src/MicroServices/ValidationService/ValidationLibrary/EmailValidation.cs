@@ -13,7 +13,7 @@ namespace ValidationLibrary
     {
 
         //http://apilayer.net/api/check?access_key=64a55d465c764754533313377e5e6167&email=ikingkong@rediffmail.com&smpt=1
-        private readonly string EmailAPIValidatorKey = "c21a365bace492ee934bc01a385c3f6f";
+        private readonly string EmailAPIValidatorKey = "d6436290d808e7b1760ad6dba761e5bd";
         //old email api = "c21a365bace492ee934bc01a385c3f6f";
         //new email api xxx
 

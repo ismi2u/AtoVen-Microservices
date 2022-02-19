@@ -9,7 +9,7 @@ namespace ValidationLibrary
 {
     public class VATValidation
     {
-        private readonly string VATAPIValidatorKey = "b11f2b45b9e18f20146e731f3abdf2be";
+        private readonly string VATAPIValidatorKey = "488fad4dc8c94652a36dbb1dba4bdd83";
         //old key "b11f2b45b9e18f20146e731f3abdf2be"
 
         //new xx

@@ -506,9 +506,9 @@ namespace AtoVen.API.Controllers
 
             DateTime curDateTime = DateTime.Now;
 
-            emailBodyBuilder.AppendLine("===========================================================");
-            emailBodyBuilder.AppendLine("Update Existing Vendor " + companyPutDTO.CompanyName + " Approval request");
-            emailBodyBuilder.AppendLine("===========================================================");
+            emailBodyBuilder.AppendLine("===========================================================<br/>");
+            emailBodyBuilder.AppendLine("Update Existing Vendor " + companyPutDTO.CompanyName + " Approval request<br/>");
+            emailBodyBuilder.AppendLine("===========================================================<br/>");
             if (id != companyPutDTO.Id)
             {
                 return Ok(new { Status = "Failure", Message = "Company Id Invalid!" });
@@ -620,11 +620,15 @@ namespace AtoVen.API.Controllers
                     //await _context.SaveChangesAsync();
 
                     emailBodyBuilder.AppendLine("==================================================================================================");
+                    emailBodyBuilder.AppendLine("<br/><br/>");
+
                     emailBodyBuilder.AppendLine("Vendor Company Details: " + updateCompany.CompanyName);
                     emailBodyBuilder.AppendLine("                        " + updateCompany.City + ", " + updateCompany.Country + ", " + updateCompany.PostalCode);
                     emailBodyBuilder.AppendLine("                        " + updateCompany.MobileNo + ", " + updateCompany.PhoneNo);
                     emailBodyBuilder.AppendLine("Registration No: " + updateCompany.CommercialRegistrationNo);
-                    emailBodyBuilder.AppendLine("==================================================================================================");
+
+                    emailBodyBuilder.AppendLine("<br/><br/>");
+                    emailBodyBuilder.AppendLine("==================================================================================================<br/>");
 
                     //Get the DB Generated Identity Column Value after save.
                     //<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -656,8 +660,15 @@ namespace AtoVen.API.Controllers
 
 
                         emailBodyBuilder.AppendLine("================================================================");
-                        emailBodyBuilder.AppendLine("Vendor Contact Details: ");
-                        //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newContact));
+                        emailBodyBuilder.AppendLine("<br/><br/>");
+                        emailBodyBuilder.AppendLine("Vendor Contact Details: <br/>");
+                        emailBodyBuilder.AppendLine("---------------------------");
+                        emailBodyBuilder.AppendLine("Email Address: " + newContact.Email + "<br/>");
+                        emailBodyBuilder.AppendLine("Fax Number: " + newContact.FaxNo + "<br/>");
+                        emailBodyBuilder.AppendLine("Phone Number: " + newContact.PhoneNo + "<br/>");
+                        emailBodyBuilder.AppendLine("Mobile Number: " + newContact.MobileNo + "<br/>");
+                        emailBodyBuilder.AppendLine("================================================================");
+                        emailBodyBuilder.AppendLine("<br/><br/>");
 
                     }
 
@@ -689,10 +700,6 @@ namespace AtoVen.API.Controllers
 
 
                         await _context.Banks.AddAsync(newBank);
-
-                        emailBodyBuilder.AppendLine("================================================================");
-                        emailBodyBuilder.AppendLine("Vendor Bank Details: ");
-                        //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                     }
                     //await _context.SaveChangesAsync();
@@ -864,15 +871,21 @@ namespace AtoVen.API.Controllers
                                 //If next approver is available Send email 
                                 emailBodyBuilder = new StringBuilder();
 
-                                emailBodyBuilder.AppendLine("New Vendor Registration");
-                                emailBodyBuilder.AppendLine("===========================");
-                                emailBodyBuilder.AppendLine("Company Name: " + company.CompanyName);
-                                emailBodyBuilder.AppendLine("Company Registration No:" + company.CommercialRegistrationNo);
-                                emailBodyBuilder.AppendLine("Company Location:" + company.City + " " + company.Country);
-                                emailBodyBuilder.AppendLine("New Vendor Registration");
+
+                                emailBodyBuilder.AppendLine("==================================================================================================");
+                                emailBodyBuilder.AppendLine("<br/><br/>");
+                                emailBodyBuilder.AppendLine("Vendor Company Details: " + company.CompanyName);
+                                emailBodyBuilder.AppendLine("                        " + company.City + ", " + company.Country + ", " + company.PostalCode);
+                                emailBodyBuilder.AppendLine("                        " + company.MobileNo + ", " + company.PhoneNo);
+                                emailBodyBuilder.AppendLine("<br/>");
+                                emailBodyBuilder.AppendLine("Registration No: " + company.CommercialRegistrationNo);
+                                emailBodyBuilder.AppendLine("<br/><br/>");
+                                emailBodyBuilder.AppendLine("==================================================================================================");
+                                emailBodyBuilder.AppendLine("<br/>");
+
 
                                 var approverMailAddress = nextApproval.ApproverEmail;
-                                string subject = "New Vendor Registration" + company.CompanyName;
+                                string subject = "Vendor Details Update for Approval" + company.CompanyName;
                                 string content = emailBodyBuilder.ToString();
                                 var messagemail = new Message(new string[] { approverMailAddress }, subject, content);
                                 await _emailSender.SendEmailAsync(messagemail);
@@ -988,7 +1001,15 @@ namespace AtoVen.API.Controllers
 
 
                                                 emailBodyBuilder.AppendLine("================================================================");
-                                                emailBodyBuilder.AppendLine("Vendor Contact Details: ");
+                                                emailBodyBuilder.AppendLine("<br/><br/>");
+                                                emailBodyBuilder.AppendLine("Vendor Contact Details: <br/>");
+                                                emailBodyBuilder.AppendLine("---------------------------");
+                                                emailBodyBuilder.AppendLine("Email Address: " + newContact.Email + "<br/>");
+                                                emailBodyBuilder.AppendLine("Fax Number: " + newContact.FaxNo + "<br/>");
+                                                emailBodyBuilder.AppendLine("Phone Number: " + newContact.PhoneNo + "<br/>");
+                                                emailBodyBuilder.AppendLine("Mobile Number: " + newContact.MobileNo + "<br/>");
+                                                emailBodyBuilder.AppendLine("================================================================");
+                                                emailBodyBuilder.AppendLine("<br/><br/>");
 
                                             }
 
@@ -1021,9 +1042,6 @@ namespace AtoVen.API.Controllers
 
                                                 await _schwarzContext.Banks.AddAsync(newBank);
 
-                                                emailBodyBuilder.AppendLine("================================================================");
-                                                emailBodyBuilder.AppendLine("Vendor Bank Details: ");
-                                                //emailBodyBuilder.AppendLine(JsonConvert.SerializeObject(newBank));
 
                                             }
                                             await _schwarzContext.SaveChangesAsync();
@@ -1080,12 +1098,17 @@ namespace AtoVen.API.Controllers
                                         _schwarzContext.Companies.Add(newCompany);
                                         await _schwarzContext.SaveChangesAsync();
 
+
                                         emailBodyBuilder.AppendLine("==================================================================================================");
+                                        emailBodyBuilder.AppendLine("<br/><br/>");
                                         emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
                                         emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
                                         emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
+                                        emailBodyBuilder.AppendLine("<br/>");
                                         emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
+                                        emailBodyBuilder.AppendLine("<br/><br/>");
                                         emailBodyBuilder.AppendLine("==================================================================================================");
+                                        emailBodyBuilder.AppendLine("<br/>");
 
 
                                         foreach (ContactPutDTO contact in companyPutDTO.ListOfCompanyContacts)
@@ -1268,11 +1291,12 @@ namespace AtoVen.API.Controllers
             }
 
             emailBodyBuilder.AppendLine("===========================================================");
-            emailBodyBuilder.Append(Environment.NewLine);
-            emailBodyBuilder.AppendLine("New Vendor " + company.CompanyName + " Approval request");
-            emailBodyBuilder.Append(Environment.NewLine);
+            emailBodyBuilder.AppendLine("<br/><br/>");
+            emailBodyBuilder.AppendLine("New Vendor <b>" + company.CompanyName + "<b> Approval request");
+            emailBodyBuilder.AppendLine("<br/><br/>");
             emailBodyBuilder.AppendLine("===========================================================");
-            emailBodyBuilder.Append(Environment.NewLine);
+            emailBodyBuilder.AppendLine("<br/>");
+
 
             ////////////////////////////////////////////////////////////////////
             //// ***************   VAT Validation   *********************///////
@@ -1284,9 +1308,9 @@ namespace AtoVen.API.Controllers
                 return Ok(new { Status = "Failure", Message = "Invalid VAT Number: " + company.VatNo });
 
             }
-
-            emailBodyBuilder.AppendLine("VAT Number: Validated");
-            emailBodyBuilder.Append(Environment.NewLine);
+            
+            emailBodyBuilder.AppendLine("VAT Number: <b>Validated</b>");
+            emailBodyBuilder.AppendLine("<br/>");
 
             ////////////////////////////////////////////////////////////////////
             //// *************** Address Validation *********************///////
@@ -1307,8 +1331,8 @@ namespace AtoVen.API.Controllers
                 return Ok(new { Status = "Failure", Message = "Invalid Street Address" });
             }
             //
-            emailBodyBuilder.AppendLine("Street Address: Validated");
-            emailBodyBuilder.Append(Environment.NewLine);
+            emailBodyBuilder.AppendLine("Street Address: <b>Validated</b>");
+            emailBodyBuilder.AppendLine("<br/>");
 
 
             int newCompId = 0;
@@ -1356,15 +1380,15 @@ namespace AtoVen.API.Controllers
                 await _context.SaveChangesAsync();
 
                 emailBodyBuilder.AppendLine("==================================================================================================");
-                emailBodyBuilder.Append(Environment.NewLine);
+                emailBodyBuilder.AppendLine("<br/><br/>");
                 emailBodyBuilder.AppendLine("Vendor Company Details: " + newCompany.CompanyName);
                 emailBodyBuilder.AppendLine("                        " + newCompany.City + ", " + newCompany.Country + ", " + newCompany.PostalCode);
                 emailBodyBuilder.AppendLine("                        " + newCompany.MobileNo + ", " + newCompany.PhoneNo);
-                emailBodyBuilder.Append(Environment.NewLine);
+                emailBodyBuilder.AppendLine("<br/>");
                 emailBodyBuilder.AppendLine("Registration No: " + newCompany.CommercialRegistrationNo);
-                emailBodyBuilder.Append(Environment.NewLine);
+                emailBodyBuilder.AppendLine("<br/><br/>");
                 emailBodyBuilder.AppendLine("==================================================================================================");
-                emailBodyBuilder.Append(Environment.NewLine);
+                emailBodyBuilder.AppendLine("<br/>");
 
 
 
@@ -1395,9 +1419,15 @@ namespace AtoVen.API.Controllers
 
 
                     emailBodyBuilder.AppendLine("================================================================");
-                    emailBodyBuilder.Append(Environment.NewLine);
-                    emailBodyBuilder.AppendLine("Vendor Contact Details: ");
-                    emailBodyBuilder.Append(Environment.NewLine);
+                    emailBodyBuilder.AppendLine("<br/><br/>");
+                    emailBodyBuilder.AppendLine("Vendor Contact Details: <br/>");
+                    emailBodyBuilder.AppendLine("---------------------------");
+                    emailBodyBuilder.AppendLine("Email Address: " + contact.Email + "<br/>");
+                    emailBodyBuilder.AppendLine("Fax Number: " + contact.FaxNo + "<br/>");
+                    emailBodyBuilder.AppendLine("Phone Number: " + contact.PhoneNo + "<br/>");
+                    emailBodyBuilder.AppendLine("Mobile Number: " + contact.MobileNo + "<br/>");
+                    emailBodyBuilder.AppendLine("================================================================");
+                    emailBodyBuilder.AppendLine("<br/><br/>");
                 }
 
 
@@ -1411,6 +1441,10 @@ namespace AtoVen.API.Controllers
                     {
                         return Ok(new { Status = "Failure", Message = "Invalid IBAN Number: " + bank.IBAN });
                     }
+
+
+                    emailBodyBuilder.AppendLine("IBAN Number: <b>Validated</b>");
+                    emailBodyBuilder.AppendLine("<br/>");
 
                     Bank newBank = new Bank() { };
 
@@ -1427,9 +1461,9 @@ namespace AtoVen.API.Controllers
 
                     _context.Banks.Add(newBank);
                     await _context.SaveChangesAsync();
+                    emailBodyBuilder.AppendLine("<br/><br/>");
                     emailBodyBuilder.AppendLine("================================================================");
-                    emailBodyBuilder.Append(Environment.NewLine);
-                    emailBodyBuilder.AppendLine("Vendor Bank Details: ");
+                    emailBodyBuilder.AppendLine("<br/>");
                 }
 
                 await AtoVenDbContextTransaction.CommitAsync();
@@ -1497,8 +1531,8 @@ namespace AtoVen.API.Controllers
 
 
             await SendEmailInHtml(newCompany.Email,
-                                              "Your request submitted for Vendor Registration !",
-                                              "Your request for " + newCompany.CompanyName + " Vendor Registration is now Initiated!");
+                                              "Your request submitted for Vendor Registration!",
+                                              "Your request for " + newCompany.CompanyName + " Vendor Registration is now Initiated!" + emailBodyBuilder.ToString());
 
             ////////////////////////////////////////
             ///

@@ -26,9 +26,9 @@ builder.Services.AddSwaggerGen();
 //ContainerNetworkSchwarzMSSQLServer
 
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ContainerNetworkAtoVenMSSQLServer")));
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudSchwarzSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ContainerNetworkSchwarzMSSQLServer")));
 
 
 //builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
@@ -84,11 +84,11 @@ if (app.Environment.IsDevelopment())
 }
 app.UseAuthentication(); //add before MVC
 app.UseAuthorization();
-//app.UseStaticFiles(new StaticFileOptions
-//{
-//    FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, @"documents")),
-//    RequestPath = "/app/documents"
-//});
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, @"docdata")),
+    RequestPath = "/app/docdata"
+});
 
 app.MapControllers();
 app.UseCors("myCorsPolicy");
