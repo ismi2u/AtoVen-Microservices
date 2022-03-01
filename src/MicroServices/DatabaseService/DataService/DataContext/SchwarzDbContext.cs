@@ -22,7 +22,12 @@ namespace DataService.DataContext
         public DbSet<Bank> Banks { get; set; }
         public DbSet<Company> Companies { get; set; }
         public DbSet<Contact> Contacts { get; set; }
-      
+
+        public DbSet<ApprovalFlow> ApprovalFlows { get; set; }
+        public DbSet<ApprovalLevel> ApprovalLevels { get; set; }
+
+        public DbSet<DocumentDetail> DocumentDetails { get; set; }
+
 
     }
 }

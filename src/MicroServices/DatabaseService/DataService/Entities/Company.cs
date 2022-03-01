@@ -106,7 +106,8 @@ namespace DataService.Entities
 
         [Column(TypeName = "varchar(100)")]
         public string VatNo { get; set; }
-        //public string DocumentIDs { get; set; }
+
+        public string DocumentIDs { get; set; }
 
 
         public bool? IsVendorInitiated { get; set; }
@@ -157,6 +158,10 @@ namespace DataService.Entities
         public List<ContactDTO> ListOfCompanyContacts { get; set; }
 
         public List<BankDTO> ListOfCompanyBanks { get; set; }
+
+       
+
+
     }
 
 
@@ -187,13 +192,15 @@ namespace DataService.Entities
         public string Notes { get; set; }
         public string VatNo { get; set; }
 
-        //public string DocumentIDs { get; set; }
+        public string DocumentIDs { get; set; }
 
         public bool? IsVendorInitiated { get; set; }
 
         public List<ContactPostDTO> ListOfCompanyContacts { get; set; }
 
         public List<BankPostDTO> ListOfCompanyBanks { get; set; }
+
+        //public List<DocumentPostDTO> ListDocumentPosts{ get; set; }
     }
 
 
@@ -223,7 +230,7 @@ namespace DataService.Entities
         public string Notes { get; set; }
         public string VatNo { get; set; }
 
-        //public string DocumentIDs { get; set; }
+        public string DocumentIDs { get; set; }
 
         public int ApprovalFlowID { get; set; }
 

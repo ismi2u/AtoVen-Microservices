@@ -20,15 +20,17 @@ builder.Services.AddSwaggerGen();
 //LocalSQLServerAndAPIRunningInContainer'
 //SQLServerRunningAsContainer
 //ContainerNetworkAtoVenMSSQLServer
+//AzureCloudAtoVenSQLServer
 
 //SchwarzLocalSQLServerAndAPIRunningInContainer
 //SchwarzSQLServerRunningAsContainer
 //ContainerNetworkSchwarzMSSQLServer
+//AzureCloudSchwarzSQLServer
 
 builder.Services.AddDbContextPool<AtoVenDbContext>(options => 
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ContainerNetworkAtoVenMSSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudAtoVenSQLServer")) );
 builder.Services.AddDbContextPool<SchwarzDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ContainerNetworkSchwarzMSSQLServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("AzureCloudSchwarzSQLServer")));
 
 
 //builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();

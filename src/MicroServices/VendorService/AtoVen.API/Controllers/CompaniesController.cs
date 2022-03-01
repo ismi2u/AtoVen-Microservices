@@ -1273,6 +1273,93 @@ namespace AtoVen.API.Controllers
 
 
 
+        [HttpPost]
+        [ActionName("UploadDocument")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        [AllowAnonymous]
+        public async Task<ActionResult<int>> UploadDocument( [FromForm] DocumentPostDTO documentPostDTO)
+        {
+
+            ////////////////////////////////////////////////////////////////////
+            //// *************** Upload Document Files ******************///////
+            ////////////////////////////////////////////////////////////////////
+            ///
+
+            int documentDetailID=0;
+
+            string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "docData");
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + documentPostDTO.FormFileDocument.FileName;
+
+            //string uniqueFileName = Guid.NewGuid().ToString() + "_" + fileName.FileName;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+
+            try
+            {
+                using var stream = new FileStream(filePath, FileMode.Create);
+                //await documentPostDTO.FormFileDocument.CopyToAsync(stream);
+                await documentPostDTO.FormFileDocument.CopyToAsync(stream);
+                stream.Flush();
+
+
+                // Save it to the acutal DocumentDetails table
+                DocumentDetail documentDetail = new();
+                documentDetail.GivenDocumentName = documentPostDTO.GivenDocumentName;
+                documentDetail.ActualFileName = documentPostDTO.FormFileDocument.FileName;
+                documentDetail.UniqueFileName = uniqueFileName;
+                documentDetail.DateOfIssue = documentPostDTO.DateOfIssue;
+                documentDetail.DateOfExpiry = documentPostDTO.DateOfExpiry;
+                documentDetail.CertificateNumber = documentPostDTO.CertificateNumber;
+
+                _context.DocumentDetails.Add(documentDetail);
+                await _context.SaveChangesAsync();
+                //
+                documentDetailID = documentDetail.Id;
+
+
+            }
+            catch (Exception ex)
+            {
+                return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
+
+            }
+
+            return Ok(documentDetailID);
+
+        }
+
+
+        [HttpPost]
+        [ActionName("RemoveDocument")]
+        //[Authorize(Roles = "Admin, AtoVenAdmin, Approver, Vendor")]
+        [AllowAnonymous]
+        public async Task<ActionResult<int>> RemoveDocument(int docDetailID)
+        {
+
+            ////////////////////////////////////////////////////////////////////
+            //// ***************   Remove Document     ******************///////
+            ////////////////////////////////////////////////////////////////////
+            ///
+
+            var documentDetail = _context.DocumentDetails.Find(docDetailID);
+           _context.DocumentDetails.RemoveRange(documentDetail);
+            await _context.SaveChangesAsync();
+
+            string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "docData");
+            string uniqueFileName = documentDetail.UniqueFileName;
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            FileInfo file = new FileInfo(filePath);
+            if (file.Exists)//check file exsit or not.
+            {
+                file.Delete();
+
+
+            }
+
+            return Ok(new { Status = "Success", Message = "Document Removed" });
+
+        }
 
 
         [HttpPost]
@@ -1308,7 +1395,7 @@ namespace AtoVen.API.Controllers
                 return Ok(new { Status = "Failure", Message = "Invalid VAT Number: " + company.VatNo });
 
             }
-            
+
             emailBodyBuilder.AppendLine("VAT Number: <b>Validated</b>");
             emailBodyBuilder.AppendLine("<br/>");
 
@@ -1465,6 +1552,11 @@ namespace AtoVen.API.Controllers
                     emailBodyBuilder.AppendLine("================================================================");
                     emailBodyBuilder.AppendLine("<br/>");
                 }
+
+
+
+
+
 
                 await AtoVenDbContextTransaction.CommitAsync();
             }
@@ -1723,119 +1815,81 @@ namespace AtoVen.API.Controllers
 
             return Ok(companyDTO);
         }
+
+
+        //[HttpPost]
+        //[ActionName("PostDocumentDetails")]
+        //public async Task<ActionResult<List<int>>> PostDocumentDetails([FromForm] List<DocumentDetailDTO> ListDocumentDetailsDTO)
+        //{
+
+
+        //    //Store the file to the contentrootpath/docData =>
+        //    //for docker it is /app/docData configured with volume mount in docker-compose
+
+
+
+
+        //    return Ok(documentId);
+        //}
+
+        [HttpGet("{id}")]
+        [ActionName("GetDocumentsByCompanyId")]
+        //<List<FileContentResult>
+        public async Task<ActionResult> GetDocumentsByCompanyId(int id)
+        {
+            List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
+            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+
+            List<string> docUrls = new();
+
+            var provider = new FileExtensionContentTypeProvider();
+            await Task.Run(() =>
+            {
+                foreach (int docid in documentIds)
+                {
+                    var fd = _context.DocumentDetails.Find(docid);
+                    string uniqueFileName = fd.UniqueFileName;
+                    string actualFileName = fd.ActualFileName;
+
+                    string filePath = Path.Combine(documentsFolder, uniqueFileName);
+
+                    string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
+                    docUrls.Add(docUrl);
+
+
+                }
+            });
+            return Ok(docUrls);
+        }
+
+
+        [HttpGet("{id}")]
+        [ActionName("GetDocumentByDocId")]
+        public async Task<ActionResult> GetDocumentByDocId(int id)
+        {
+            string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
+            //var content = new MultipartContent();
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            var fd = _context.DocumentDetails.Find(id);
+            string uniqueFileName = fd.UniqueFileName;
+            //string actualFileName = fd.ActualFileName;
+
+            string filePath = Path.Combine(documentsFolder, uniqueFileName);
+            var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
+
+            return File(bytes, contentType, Path.GetFileName(filePath));
+        }
     }
 
 
-    //////////[HttpPost]
-    //////////[ActionName("PostDocuments")]
-    //////////public async Task<ActionResult<List<FileDocumentDTO>>> PostFiles([FromForm] IFormFileCollection Documents)
-    //////////{
-    //////////    //StringBuilder StrBuilderUploadedDocuments = new();
 
-    //////////    List<FileDocumentDTO> fileDocumentDTOs = new();
-
-    //////////    foreach (IFormFile document in Documents)
-    //////////    {
-    //////////        //Store the file to the contentrootpath/images =>
-    //////////        //for docker it is /app/Images configured with volume mount in docker-compose
-
-    //////////        string uploadsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-    //////////        string uniqueFileName = Guid.NewGuid().ToString() + "_" + document.FileName;
-    //////////        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-
-    //////////        try
-    //////////        {
-    //////////            using var stream = new FileStream(filePath, FileMode.Create);
-    //////////            await document.CopyToAsync(stream);
-    //////////            stream.Flush();
-
-
-    //////////            // Save it to the acutal FileDocuments table
-    //////////            FileDocument fileDocument = new();
-    //////////            fileDocument.ActualFileName = document.FileName;
-    //////////            fileDocument.UniqueFileName = uniqueFileName;
-    //////////            _context.FileDocuments.Add(fileDocument);
-    //////////            await _context.SaveChangesAsync();
-    //////////            //
-
-    //////////            // Populating the List of Document Id for FrontEnd consumption
-    //////////            FileDocumentDTO fileDocumentDTO = new();
-    //////////            fileDocumentDTO.Id = fileDocument.Id;
-    //////////            fileDocumentDTO.ActualFileName = document.FileName;
-    //////////            fileDocumentDTOs.Add(fileDocumentDTO);
-
-    //////////            //StrBuilderUploadedDocuments.Append(uniqueFileName + "^");
-    //////////            //
-    //////////        }
-    //////////        catch (Exception ex)
-    //////////        {
-    //////////            return Conflict(new { Status = "Failure", Message = "File not uploaded.. Please retry!" + ex.ToString() });
-
-    //////////        }
-
-
-
-
-    //////////    }
-
-    //////////    return Ok(fileDocumentDTOs);
-    //////////}
-
-    //////////[HttpGet("{id}")]
-    //////////[ActionName("GetDocumentsByCompanyId")]
-    ////////////<List<FileContentResult>
-    //////////public async Task<ActionResult> GetDocumentsByCompanyId(int id)
-    //////////{
-    //////////    List<int> documentIds = _context.Companies.Find(id).DocumentIDs.Split(",").Select(Int32.Parse).ToList();
-    //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-
-    //////////    List<string> docUrls = new();
-
-    //////////    var provider = new FileExtensionContentTypeProvider();
-    //////////    await Task.Run(() =>
-    //////////    {
-    //////////        foreach (int docid in documentIds)
-    //////////        {
-    //////////            var fd = _context.FileDocuments.Find(docid);
-    //////////            string uniqueFileName = fd.UniqueFileName;
-    //////////            string actualFileName = fd.ActualFileName;
-
-    //////////            string filePath = Path.Combine(documentsFolder, uniqueFileName);
-
-    //////////            string docUrl = Directory.EnumerateFiles(documentsFolder).Select(f => filePath).FirstOrDefault().ToString();
-    //////////            docUrls.Add(docUrl);
-
-
-    //////////        }
-    //////////    });
-    //////////    return Ok(docUrls);
-    //////////}
-
-
-    //////////[HttpGet("{id}")]
-    //////////[ActionName("GetDocumentByDocId")]
-    //////////public async Task<ActionResult> GetDocumentByDocId(int id)
-    //////////{
-    //////////    string documentsFolder = Path.Combine(hostingEnvironment.ContentRootPath, "documents");
-    //////////    //var content = new MultipartContent();
-
-    //////////    var provider = new FileExtensionContentTypeProvider();
-
-    //////////    var fd = _context.FileDocuments.Find(id);
-    //////////    string uniqueFileName = fd.UniqueFileName;
-    //////////    //string actualFileName = fd.ActualFileName;
-
-    //////////    string filePath = Path.Combine(documentsFolder, uniqueFileName);
-    //////////    var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
-    //////////    if (!provider.TryGetContentType(filePath, out var contentType))
-    //////////    {
-    //////////        contentType = "application/octet-stream";
-    //////////    }
-
-    //////////    //FileContentResult thisfile = File(bytes, contentType, Path.GetFileName(filePath));
-
-    //////////    return File(bytes, contentType, Path.GetFileName(filePath));
-    //////////}
 
 }
